@@ -13,9 +13,25 @@
         android:theme="@style/Theme.ShareToGeo"
         tools:targetApi="31">
         <activity
+            android:name=".ShareActivity"
+            android:exported="true"
+            android:label="@string/title_activity_share"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter android:label="@string/filter_view_google_maps">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.google.com"
+                    android:pathPrefix="/maps/place/"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.ShareToGeo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
