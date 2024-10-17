@@ -57,7 +57,6 @@ class GeoUriTest {
         )
     }
 
-    /*
     @Test
     fun requestLocationHeader_302Response() {
         val mockUrl = Mockito.mock(URL::class.java)
@@ -68,24 +67,42 @@ class GeoUriTest {
         Mockito.`when`(mockConnection.getHeaderField("Location"))
             .thenReturn("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd")
         assertEquals(
-            requestLocationHeader("https://maps.app.goo.gl/foobar?g_st=ac"),
+            requestLocationHeader(mockUrl),
             "https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd"
         )
     }
 
     @Test
     fun requestLocationHeader_302ResponseMissingLocation() {
-        // TODO
+        val mockUrl = Mockito.mock(URL::class.java)
+        val mockConnection = Mockito.mock(HttpURLConnection::class.java)
+        Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
+        Mockito.`when`(mockConnection.getResponseCode())
+            .thenReturn(HttpURLConnection.HTTP_MOVED_TEMP)
+        assertEquals(requestLocationHeader(mockUrl), null)
     }
 
     @Test
     fun requestLocationHeader_200Response() {
-        // TODO
+        val mockUrl = Mockito.mock(URL::class.java)
+        val mockConnection = Mockito.mock(HttpURLConnection::class.java)
+        Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
+        Mockito.`when`(mockConnection.getResponseCode())
+            .thenReturn(HttpURLConnection.HTTP_OK)
+        Mockito.`when`(mockConnection.getHeaderField("Location"))
+            .thenReturn("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd")
+        assertEquals(requestLocationHeader(mockUrl), null)
     }
 
     @Test
     fun requestLocationHeader_500Response() {
-        // TODO
+        val mockUrl = Mockito.mock(URL::class.java)
+        val mockConnection = Mockito.mock(HttpURLConnection::class.java)
+        Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
+        Mockito.`when`(mockConnection.getResponseCode())
+            .thenReturn(HttpURLConnection.HTTP_INTERNAL_ERROR)
+        Mockito.`when`(mockConnection.getHeaderField("Location"))
+            .thenReturn("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd")
+        assertEquals(requestLocationHeader(mockUrl), null)
     }
-    */
 }

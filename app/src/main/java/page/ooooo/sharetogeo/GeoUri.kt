@@ -24,8 +24,7 @@ fun googleMapsUriToGeoUri(uriString: String): String? {
     return "geo:0,0?q=$q"
 }
 
-fun requestLocationHeader(urlString: String): String? {
-    val url = URL(urlString)
+fun requestLocationHeader(url: URL): String? {
     val connection = url.openConnection() as HttpURLConnection
     connection.requestMethod = "HEAD"
     try {
