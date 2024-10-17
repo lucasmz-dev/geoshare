@@ -1,5 +1,6 @@
 package page.ooooo.sharetogeo
 
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 
 import org.junit.Test
@@ -58,7 +59,7 @@ class GeoUriTest {
     }
 
     @Test
-    fun requestLocationHeader_302Response() {
+    fun requestLocationHeader_302Response() = runTest {
         val mockUrl = Mockito.mock(URL::class.java)
         val mockConnection = Mockito.mock(HttpURLConnection::class.java)
         Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
@@ -73,7 +74,7 @@ class GeoUriTest {
     }
 
     @Test
-    fun requestLocationHeader_302ResponseMissingLocation() {
+    fun requestLocationHeader_302ResponseMissingLocation() = runTest {
         val mockUrl = Mockito.mock(URL::class.java)
         val mockConnection = Mockito.mock(HttpURLConnection::class.java)
         Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
@@ -83,7 +84,7 @@ class GeoUriTest {
     }
 
     @Test
-    fun requestLocationHeader_200Response() {
+    fun requestLocationHeader_200Response() = runTest {
         val mockUrl = Mockito.mock(URL::class.java)
         val mockConnection = Mockito.mock(HttpURLConnection::class.java)
         Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
@@ -95,7 +96,7 @@ class GeoUriTest {
     }
 
     @Test
-    fun requestLocationHeader_500Response() {
+    fun requestLocationHeader_500Response() = runTest {
         val mockUrl = Mockito.mock(URL::class.java)
         val mockConnection = Mockito.mock(HttpURLConnection::class.java)
         Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)

@@ -31,9 +31,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(modifier: Modifier = Modifier) {
     Column(modifier) {
-        Text("Welcome")
-        Text("Use the Google Maps app or a web browser to share a link with Share to Geo.")
-        Text("Then Share to Geo will convert the link to geo: and share it with an app of your choice.")
+        Text("Share a Google Maps link with this app.")
+        // TODO Image
+        Text("Then you can open the link with another app.")
+        // TODO Image
     }
 }
 

@@ -1,5 +1,7 @@
 package page.ooooo.sharetogeo
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -24,18 +26,18 @@ fun googleMapsUriToGeoUri(uriString: String): String? {
     return "geo:0,0?q=$q"
 }
 
-fun requestLocationHeader(url: URL): String? {
-    val connection = url.openConnection() as HttpURLConnection
-    connection.requestMethod = "HEAD"
-    try {
-        connection.connect()
-        return if (connection.responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-            connection.getHeaderField("Location")
-        } else {
-            null
+suspend fun requestLocationHeader(url: URL): String? =
+    withContext(Dispatchers.IO) {
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "HEAD"
+        connection.instanceFollowRedirects = false  // TODO Test
+        try {
+            connection.connect()
+            if (connection.responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+                return@withContext connection.getHeaderField("Location")
+            }
+        } finally {
+            connection.disconnect()
         }
-    } finally {
-        connection.disconnect()
+        return@withContext null
     }
-    return null
-}
