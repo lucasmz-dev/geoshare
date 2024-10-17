@@ -26,7 +26,7 @@
 
                 <data
                     android:host="www.google.com"
-                    android:pathPrefix="/maps/place/"
+                    android:pathPrefix="/maps/"
                     android:scheme="https" />
             </intent-filter>
         </activity>

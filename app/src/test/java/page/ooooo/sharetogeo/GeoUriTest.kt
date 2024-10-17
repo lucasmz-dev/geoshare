@@ -51,6 +51,14 @@ class GeoUriTest {
     }
 
     @Test
+    fun googleMapsUriToGeoUri_noPlace() {
+        assertEquals(
+            googleMapsUriToGeoUri("https://www.google.com/maps/@52.5067296,13.2599309,6z"),
+            "geo:52.5067296,13.2599309?z=6"
+        )
+    }
+
+    @Test
     fun googleMapsUriToGeoUri_query() {
         assertEquals(
             googleMapsUriToGeoUri("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd"),
