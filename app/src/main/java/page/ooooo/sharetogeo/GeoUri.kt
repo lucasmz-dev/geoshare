@@ -29,6 +29,9 @@ fun googleMapsUriToGeoUri(uriString: String): String? {
     return null // TODO Test
 }
 
+fun isGoogleMapsShortUri(uriString: String): Boolean =
+    Regex("^https://maps.app.goo.gl/.+").matches(uriString) // TODO Test
+
 suspend fun requestLocationHeader(url: URL): String? =
     withContext(Dispatchers.IO) {
         val connection = url.openConnection() as HttpURLConnection
