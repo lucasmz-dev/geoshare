@@ -39,11 +39,6 @@ open class ShareActivity : ComponentActivity() {
         }
     }
 
-    private fun showToast(context: Context, message: String) {
-        val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
-        toast.show()
-    }
-
     private suspend fun getGeoUri(uriString: String): String? {
         if (isGoogleMapsShortUri(uriString)) {
             val location = requestLocationHeader(URL(uriString))
@@ -53,5 +48,10 @@ open class ShareActivity : ComponentActivity() {
             return null
         }
         return googleMapsUriToGeoUri(uriString)
+    }
+
+    private fun showToast(context: Context, message: String) {
+        val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+        toast.show()
     }
 }

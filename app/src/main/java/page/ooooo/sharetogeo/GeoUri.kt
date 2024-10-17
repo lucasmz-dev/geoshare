@@ -9,6 +9,9 @@ import kotlin.math.roundToInt
 import java.net.HttpURLConnection
 import java.net.URL
 
+fun isGoogleMapsShortUri(uriString: String): Boolean =
+    Regex("^https://maps.app.goo.gl/.+").matches(uriString)
+
 fun googleMapsUriToGeoUri(uriString: String): String? {
     val pattern =
         Regex(
@@ -26,17 +29,14 @@ fun googleMapsUriToGeoUri(uriString: String): String? {
         val q = m.groups[2]!!.value
         return "geo:0,0?q=$q"
     }
-    return null // TODO Test
+    return null
 }
-
-fun isGoogleMapsShortUri(uriString: String): Boolean =
-    Regex("^https://maps.app.goo.gl/.+").matches(uriString) // TODO Test
 
 suspend fun requestLocationHeader(url: URL): String? =
     withContext(Dispatchers.IO) {
         val connection = url.openConnection() as HttpURLConnection
         connection.requestMethod = "HEAD"
-        connection.instanceFollowRedirects = false  // TODO Test
+        connection.instanceFollowRedirects = false
         try {
             connection.connect()
             if (connection.responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {

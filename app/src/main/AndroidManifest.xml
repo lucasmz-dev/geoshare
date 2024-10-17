@@ -16,9 +16,9 @@
         <activity
             android:name=".ShareActivity"
             android:exported="true"
-            android:label="@string/title_activity_share"
+            android:label="@string/share_activity_label"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
-            <intent-filter android:label="@string/filter_view_google_maps">
+            <intent-filter android:label="@string/share_activity_label">
                 <action android:name="android.intent.action.SEND" />
 
                 <category android:name="android.intent.category.DEFAULT" />

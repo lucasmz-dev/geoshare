@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">Share To Geo</string>
-    <string name="filter_view_google_maps">Google Maps To Geo URL</string>
-    <string name="title_activity_share">Share To Geo</string>
+    <string name="app_name">Share to Geo</string>
+    <string name="share_activity_label">Share to Geo</string>
 </resources>
