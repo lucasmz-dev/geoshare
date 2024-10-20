@@ -2,6 +2,7 @@ package page.ooooo.sharetogeo
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -60,7 +61,7 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
                             onClick = { menuExpanded = true }
                         ) {
                             Icon(
-                                Icons.Outlined.MoreVert,
+                                Icons.Default.MoreVert,
                                 contentDescription = "Menu"
                             )
                         }
@@ -100,27 +101,26 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 Text(
                     "Go to Google Maps or a web browser and share a link with Share to Geo:",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.share_to),
+                    painter = painterResource(id = if (isSystemInDarkTheme()) R.drawable.share_to_dark else R.drawable.share_to_light),
                     contentDescription = "Screenshot of a Google Maps link being shared with Share to Geo",
                     modifier = Modifier
                         .padding(horizontal = Spacing.large)
                         .clip(MaterialTheme.shapes.medium)
                 )
             }
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 Text(
                     "Share to Geo will turn the link into a geo: URL and open it with one of your installed apps:",
-                    Modifier.padding(top = Spacing.medium),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.share_from),
+                    painter = painterResource(id = if (isSystemInDarkTheme()) R.drawable.share_from_dark else R.drawable.share_from_light),
                     contentDescription = "Screenshot of Share to Geo sharing a geo: link",
                     modifier = Modifier
                         .padding(horizontal = Spacing.large)
