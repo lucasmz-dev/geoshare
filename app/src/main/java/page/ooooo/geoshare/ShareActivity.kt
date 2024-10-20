@@ -1,4 +1,4 @@
-package page.ooooo.sharetogeo
+package page.ooooo.geoshare
 
 import android.content.Intent
 import android.net.Uri

@@ -1,4 +1,4 @@
-package page.ooooo.sharetogeo
+package page.ooooo.geoshare
 
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals

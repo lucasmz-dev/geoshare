@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Share To Geo"
+rootProject.name = "Geo Share"
 include(":app")

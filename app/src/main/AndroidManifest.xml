@@ -11,14 +11,13 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ShareToGeo"
+        android:theme="@style/Theme.GeoShare"
         tools:targetApi="31">
         <activity
-            android:name=".ShareActivity"
+            android:name="page.ooooo.geoshare.ShareActivity"
             android:exported="true"
-            android:label="@string/share_activity_label"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
-            <intent-filter android:label="@string/share_activity_label">
+            <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.SEND" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -28,9 +27,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="page.ooooo.geoshare.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.ShareToGeo">
+            android:theme="@style/Theme.GeoShare">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

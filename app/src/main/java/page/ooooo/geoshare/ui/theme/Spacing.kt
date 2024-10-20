@@ -1,4 +1,4 @@
-package page.ooooo.sharetogeo.ui.theme
+package page.ooooo.geoshare.ui.theme
 
 import androidx.compose.ui.unit.dp
 

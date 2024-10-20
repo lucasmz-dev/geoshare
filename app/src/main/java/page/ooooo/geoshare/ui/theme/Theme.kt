@@ -1,4 +1,4 @@
-package page.ooooo.sharetogeo.ui.theme
+package page.ooooo.geoshare.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

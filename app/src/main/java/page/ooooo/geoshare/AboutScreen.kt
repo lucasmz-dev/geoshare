@@ -1,5 +1,6 @@
-package page.ooooo.sharetogeo
+package page.ooooo.geoshare
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -36,10 +38,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import page.ooooo.sharetogeo.ui.theme.Spacing
-import page.ooooo.sharetogeo.ui.theme.AppTheme
-import android.content.res.Configuration
-import androidx.compose.ui.graphics.ColorFilter
+import page.ooooo.geoshare.ui.theme.AppTheme
+import page.ooooo.geoshare.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTextApi::class)
 @Composable
@@ -106,7 +106,7 @@ fun AboutScreen(
                 append("You can find the code at ")
                 withLink(
                     LinkAnnotation.Url(
-                        "https://github.com/jakubvalenta/sharetogeo",
+                        "https://github.com/jakubvalenta/geoshare",
                         TextLinkStyles(
                             style = SpanStyle(
                                 color = MaterialTheme.colorScheme.tertiary,
@@ -120,7 +120,7 @@ fun AboutScreen(
                 append(", where you can also report ")
                 withLink(
                     LinkAnnotation.Url(
-                        "https://github.com/jakubvalenta/sharetogeo/issues",
+                        "https://github.com/jakubvalenta/geoshare/issues",
                         TextLinkStyles(
                             style = SpanStyle(
                                 color = MaterialTheme.colorScheme.tertiary,

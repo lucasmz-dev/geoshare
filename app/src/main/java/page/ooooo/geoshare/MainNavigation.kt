@@ -1,4 +1,4 @@
-package page.ooooo.sharetogeo
+package page.ooooo.geoshare
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost

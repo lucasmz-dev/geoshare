@@ -1,4 +1,4 @@
-package page.ooooo.sharetogeo
+package page.ooooo.geoshare
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -18,7 +18,8 @@ class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
         // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("page.ooooo.sharetogeo", appContext.packageName)
+        val appContext =
+            InstrumentationRegistry.getInstrumentation().targetContext
+        assertEquals("page.ooooo.geoshare", appContext.packageName)
     }
 }

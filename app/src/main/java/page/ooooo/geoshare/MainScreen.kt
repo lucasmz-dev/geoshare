@@ -1,4 +1,4 @@
-package page.ooooo.sharetogeo
+package page.ooooo.geoshare
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -42,18 +43,20 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
-import page.ooooo.sharetogeo.ui.theme.AppTheme
-import page.ooooo.sharetogeo.ui.theme.Spacing
+import page.ooooo.geoshare.ui.theme.AppTheme
+import page.ooooo.geoshare.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
     var menuExpanded by remember { mutableStateOf(false) }
 
+    val appName = stringResource(R.string.app_name)
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Share to Geo") },
+                title = { Text(appName) },
                 actions = {
                     Box {
                         IconButton(
@@ -103,12 +106,12 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 Text(
-                    "Go to Google Maps or a web browser and share a link with Share to Geo:",
+                    "Go to Google Maps or a web browser and share a link with $appName:",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Image(
                     painter = painterResource(id = if (isSystemInDarkTheme()) R.drawable.share_to_dark else R.drawable.share_to_light),
-                    contentDescription = "Screenshot of a Google Maps link being shared with Share to Geo",
+                    contentDescription = "Screenshot of a Google Maps link being shared with $appName",
                     modifier = Modifier
                         .padding(horizontal = Spacing.large)
                         .clip(MaterialTheme.shapes.medium)
@@ -116,12 +119,12 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
             }
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 Text(
-                    "Share to Geo will turn the link into a geo: URL and open it with one of your installed apps:",
+                    "$appName will turn the link into a geo: URL and open it with one of your installed apps:",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Image(
                     painter = painterResource(id = if (isSystemInDarkTheme()) R.drawable.share_from_dark else R.drawable.share_from_light),
-                    contentDescription = "Screenshot of Share to Geo sharing a geo: link",
+                    contentDescription = "Screenshot of $appName sharing a geo: link",
                     modifier = Modifier
                         .padding(horizontal = Spacing.large)
                         .clip(MaterialTheme.shapes.medium)
@@ -135,17 +138,17 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
                 )
             ) {
                 Row(
-                    Modifier.padding(Spacing.small),
+                    Modifier.Companion.padding(Spacing.small),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.small),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(painterResource(R.drawable.lightbulb_24px), null)
                     Text(
                         buildAnnotatedString {
-                            append("Share to Geo supports multiple Google Maps URL formats. If you however find a URL that doesn't work, please submit an ")
+                            append("$appName supports multiple Google Maps URL formats. If you however find a URL that doesn't work, please submit an ")
                             withLink(
                                 LinkAnnotation.Url(
-                                    "https://github.com/jakubvalenta/sharetogeo/issues",
+                                    "https://github.com/jakubvalenta/geoshare/issues",
                                     TextLinkStyles(
                                         style = SpanStyle(
                                             textDecoration = TextDecoration.Underline

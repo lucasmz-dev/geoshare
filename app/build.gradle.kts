@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "page.ooooo.sharetogeo"
+    namespace = "page.ooooo.geoshare"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "page.ooooo.sharetogeo"
+        applicationId = "page.ooooo.geoshare"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
