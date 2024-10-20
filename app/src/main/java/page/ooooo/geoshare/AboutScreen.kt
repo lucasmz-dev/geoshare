@@ -150,7 +150,7 @@ fun AboutScreen(
                 }
                 append(".")
             })
-            Text("If you enjoy using $appName, please donate to the project. Your donations keep me motivated.")
+            Text("If you enjoy using $appName, please donate to my Ko-Fi account. Your donations keep me motivated to work on the project.")
             Button(
                 { uriHandler.openUri("https://ko-fi.com/jakubvalenta") },
                 colors = ButtonDefaults.buttonColors(
