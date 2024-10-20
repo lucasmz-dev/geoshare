@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import page.ooooo.sharetogeo.ui.theme.Spacing
 import page.ooooo.sharetogeo.ui.theme.AppTheme
 import android.content.res.Configuration
+import androidx.compose.ui.graphics.ColorFilter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTextApi::class)
 @Composable
@@ -75,7 +76,8 @@ fun AboutScreen(
                 contentDescription = "Application icon",
                 modifier = Modifier
                     .size(192.dp)
-                    .align(Alignment.CenterHorizontally)
+                    .align(Alignment.CenterHorizontally),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
             val appName = stringResource(R.string.app_name)
             val appVersion = packageInfo?.versionName
@@ -83,23 +85,8 @@ fun AboutScreen(
                 appName + if (appVersion != null) " $appVersion" else "",
                 style = MaterialTheme.typography.headlineLarge
             )
-            Text("$appName is a noncommercial app made with passion by a sole developer.")
             Text(buildAnnotatedString {
-                append("The ")
-                withLink(
-                    LinkAnnotation.Url(
-                        "https://github.com/jakubvalenta/sharetogeo",
-                        TextLinkStyles(
-                            style = SpanStyle(
-                                color = MaterialTheme.colorScheme.tertiary,
-                                textDecoration = TextDecoration.Underline
-                            )
-                        )
-                    )
-                ) {
-                    append("code")
-                }
-                append(" is distributed under the free and open-source ")
+                append("$appName is a free and open-source app distributed under the ")
                 withLink(
                     LinkAnnotation.Url(
                         "https://www.gnu.org/licenses/gpl-3.0.txt",
@@ -114,6 +101,37 @@ fun AboutScreen(
                     append("GPL 3.0")
                 }
                 append(" license.")
+            })
+            Text(buildAnnotatedString {
+                append("You can find the code at ")
+                withLink(
+                    LinkAnnotation.Url(
+                        "https://github.com/jakubvalenta/sharetogeo",
+                        TextLinkStyles(
+                            style = SpanStyle(
+                                color = MaterialTheme.colorScheme.tertiary,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        )
+                    )
+                ) {
+                    append("GitHub")
+                }
+                append(", where you can also report ")
+                withLink(
+                    LinkAnnotation.Url(
+                        "https://github.com/jakubvalenta/sharetogeo/issues",
+                        TextLinkStyles(
+                            style = SpanStyle(
+                                color = MaterialTheme.colorScheme.tertiary,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        )
+                    )
+                ) {
+                    append("issues")
+                }
+                append(".")
             })
             Text(buildAnnotatedString {
                 append("Your feedback is welcome. You can reach me at ")
@@ -136,8 +154,8 @@ fun AboutScreen(
             Button(
                 { uriHandler.openUri("https://ko-fi.com/jakubvalenta") },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Text("donate ")

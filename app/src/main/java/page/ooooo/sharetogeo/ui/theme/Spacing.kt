@@ -3,9 +3,9 @@ package page.ooooo.sharetogeo.ui.theme
 import androidx.compose.ui.unit.dp
 
 object Spacing {
-    val extraSmall = 8.dp
-    val small = 12.dp
-    val medium = 24.dp
+    val small = 15.dp
+    val medium = 30.dp
+    val large = 45.dp
 
     val builtInTopBarPaddingEnd = 8.dp
 

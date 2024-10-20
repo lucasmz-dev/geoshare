@@ -2,8 +2,10 @@ package page.ooooo.sharetogeo
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,14 +24,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import page.ooooo.sharetogeo.ui.theme.AppTheme
 import page.ooooo.sharetogeo.ui.theme.Spacing
@@ -67,53 +77,89 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
                             )
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
                 .padding(horizontal = Spacing.windowPadding)
+                .padding(top = Spacing.medium)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(Spacing.medium)
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = Spacing.medium),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                ),
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+                Text(
+                    "Go to Google Maps or a web browser and share a link with Share to Geo:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Image(
                     painter = painterResource(id = R.drawable.share_to),
                     contentDescription = "Screenshot of a Google Maps link being shared with Share to Geo",
-                    modifier = Modifier.clip(MaterialTheme.shapes.medium)
-                )
-                Text(
-                    "Go to Google Maps or a web browser and share a link with Share to Geo.",
-                    Modifier.padding(Spacing.medium),
-                    style = MaterialTheme.typography.bodyMedium
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.large)
+                        .clip(MaterialTheme.shapes.medium)
                 )
             }
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                ),
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+                Text(
+                    "Share to Geo will turn the link into a geo: URL and open it with one of your installed apps:",
+                    Modifier.padding(top = Spacing.medium),
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Image(
                     painter = painterResource(id = R.drawable.share_from),
                     contentDescription = "Screenshot of Share to Geo sharing a geo: link",
-                    modifier = Modifier.clip(MaterialTheme.shapes.medium)
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.large)
+                        .clip(MaterialTheme.shapes.medium)
                 )
-                Text(
-                    "Share to Geo will turn the link into a geo: URL and open it with one of your installed apps.",
-                    Modifier.padding(Spacing.medium),
-                    style = MaterialTheme.typography.bodyMedium
+            }
+            Card(
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                 )
+            ) {
+                Row(
+                    Modifier.padding(Spacing.small),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(painterResource(R.drawable.lightbulb_24px), null)
+                    Text(
+                        buildAnnotatedString {
+                            append("Share to Geo supports multiple Google Maps URL formats. If you however find a URL that doesn't work, please submit an ")
+                            withLink(
+                                LinkAnnotation.Url(
+                                    "https://github.com/jakubvalenta/sharetogeo/issues",
+                                    TextLinkStyles(
+                                        style = SpanStyle(
+                                            textDecoration = TextDecoration.Underline
+                                        )
+                                    )
+                                )
+                            ) {
+                                append("issue")
+                            }
+                            append(".")
+                        },
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     }
