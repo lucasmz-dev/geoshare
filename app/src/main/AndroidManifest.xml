@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GeoShare"
-        tools:targetApi="31">
+        android:windowSoftInputMode="adjustResize"
+        tools:targetApi="35">
         <activity
             android:name="page.ooooo.geoshare.ShareActivity"
             android:exported="true"
