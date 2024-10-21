@@ -145,7 +145,7 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
                     Icon(painterResource(R.drawable.lightbulb_24px), null)
                     Text(
                         buildAnnotatedString {
-                            append("$appName supports multiple Google Maps URL formats. If you however find a URL that doesn't work, please report an ")
+                            append("$appName supports many Google Maps URL formats. Still, if you find a URL that doesn't work, please report an ")
                             withLink(
                                 LinkAnnotation.Url(
                                     "https://github.com/jakubvalenta/geoshare/issues",
