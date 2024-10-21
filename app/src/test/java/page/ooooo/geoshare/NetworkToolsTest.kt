@@ -27,8 +27,8 @@ class NetworkToolsTest {
         Mockito.`when`(mockConnection.getHeaderField("Location"))
             .thenReturn("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd")
         assertEquals(
-            networkTools.requestLocationHeader(mockUrl),
-            URL("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd")
+            URL("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd"),
+            networkTools.requestLocationHeader(mockUrl)
         )
     }
 
@@ -39,7 +39,7 @@ class NetworkToolsTest {
         Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
         Mockito.`when`(mockConnection.getResponseCode())
             .thenReturn(HttpURLConnection.HTTP_MOVED_TEMP)
-        assertEquals(networkTools.requestLocationHeader(mockUrl), null)
+        assertEquals(null, networkTools.requestLocationHeader(mockUrl))
         Mockito.verify(mockConnection).setRequestMethod("HEAD")
         Mockito.verify(mockConnection).setInstanceFollowRedirects(false)
     }
@@ -53,7 +53,7 @@ class NetworkToolsTest {
             .thenReturn(HttpURLConnection.HTTP_OK)
         Mockito.`when`(mockConnection.getHeaderField("Location"))
             .thenReturn("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd")
-        assertEquals(networkTools.requestLocationHeader(mockUrl), null)
+        assertEquals(null, networkTools.requestLocationHeader(mockUrl))
         Mockito.verify(mockConnection).setRequestMethod("HEAD")
         Mockito.verify(mockConnection).setInstanceFollowRedirects(false)
     }
@@ -67,7 +67,7 @@ class NetworkToolsTest {
             .thenReturn(HttpURLConnection.HTTP_INTERNAL_ERROR)
         Mockito.`when`(mockConnection.getHeaderField("Location"))
             .thenReturn("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd")
-        assertEquals(networkTools.requestLocationHeader(mockUrl), null)
+        assertEquals(null, networkTools.requestLocationHeader(mockUrl))
         Mockito.verify(mockConnection).setRequestMethod("HEAD")
         Mockito.verify(mockConnection).setInstanceFollowRedirects(false)
     }
@@ -81,7 +81,7 @@ class NetworkToolsTest {
             .thenReturn(HttpURLConnection.HTTP_MOVED_TEMP)
         Mockito.`when`(mockConnection.getHeaderField("Location"))
             .thenReturn("spam")
-        assertEquals(networkTools.requestLocationHeader(mockUrl), null)
+        assertEquals(null, networkTools.requestLocationHeader(mockUrl))
     }
 
 }
