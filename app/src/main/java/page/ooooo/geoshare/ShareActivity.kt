@@ -16,7 +16,7 @@ class ShareActivity : ComponentActivity() {
 
     private val intentUrlRegex = Regex("https?://\\S+")
 
-    private val googleMapsParser = GoogleMapsParser()
+    private val googleMapsUrlConverter = GoogleMapsUrlConverter()
     private val networkTools = NetworkTools()
 
     private fun getIntentUrl(): URL? {
@@ -49,12 +49,12 @@ class ShareActivity : ComponentActivity() {
 
     private suspend fun processIntent(context: Context) {
         val intentUrl = getIntentUrl() ?: return
-        val url = if (googleMapsParser.isShortUrl(intentUrl)) {
+        val url = if (googleMapsUrlConverter.isShortUrl(intentUrl)) {
             networkTools.requestLocationHeader(intentUrl) ?: return
         } else {
             intentUrl
         }
-        val geoUriString = googleMapsParser.toGeoUri(url)
+        val geoUriString = googleMapsUrlConverter.toGeoUri(url)
         if (geoUriString == null) {
             showToast(context, "Failed to create geo URL")
             return
