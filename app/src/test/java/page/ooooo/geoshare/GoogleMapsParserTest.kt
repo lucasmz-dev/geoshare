@@ -40,22 +40,6 @@ class GoogleMapsParserTest {
     }
 
     @Test
-    fun toGeoUri_http() {
-        assertEquals(
-            "geo:52.5067296,13.2599309?q=Berlin%2C%20Germany&z=11",
-            googleMapsParser.toGeoUri(URL("http://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910")),
-        )
-    }
-
-    @Test
-    fun toGeoUri_ukDomain() {
-        assertEquals(
-            "geo:52.5067296,13.2599309?q=Berlin%2C%20Germany&z=11",
-            googleMapsParser.toGeoUri(URL("https://maps.google.co.uk/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910")),
-        )
-    }
-
-    @Test
     fun toGeoUri_placeAndNegativeCoordinates() {
         assertEquals(
             "geo:-17.2165721,-149.9470294?q=Berlin%2C%20Germany&z=11",
@@ -92,6 +76,22 @@ class GoogleMapsParserTest {
         assertEquals(
             "geo:52.04,-2.35?z=15",
             googleMapsParser.toGeoUri(URL("https://maps.google.com/maps/place/52.04,-2.35/@52.03877,-2.3416,15z/data=!3m1!1e3"))
+        )
+    }
+
+    @Test
+    fun toGeoUri_placeAsCoordinatesWithPlus() {
+        assertEquals(
+            "geo:52.492611,+13.431726?z=17",
+            googleMapsParser.toGeoUri(URL("https://www.google.com/maps/place/52.492611,+13.431726/@52.4929475,13.4317905,17z/data=!4m4!3m3!8m2!3d52.4926111!4d13.4317261?force=pwa"))
+        )
+    }
+
+    @Test
+    fun toGeoUri_placeCoordinatesOnly() {
+        assertEquals(
+            "geo:52.03877,-2.3416",
+            googleMapsParser.toGeoUri(URL("https://maps.google.com/maps/place/52.03877,-2.3416/data=!3m1!1e3"))
         )
     }
 
@@ -196,6 +196,22 @@ class GoogleMapsParserTest {
         assertEquals(
             "geo:48.857832,2.295226",
             googleMapsParser.toGeoUri(URL("https://www.google.com/maps/@?fov=80&pitch=38&heading=-45&viewpoint=48.857832%2C2.295226&map_action=pano&api=1"))
+        )
+    }
+
+    @Test
+    fun toGeoUri_http() {
+        assertEquals(
+            "geo:52.5067296,13.2599309?q=Berlin%2C%20Germany&z=11",
+            googleMapsParser.toGeoUri(URL("http://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910")),
+        )
+    }
+
+    @Test
+    fun toGeoUri_ukDomain() {
+        assertEquals(
+            "geo:52.5067296,13.2599309?q=Berlin%2C%20Germany&z=11",
+            googleMapsParser.toGeoUri(URL("https://maps.google.co.uk/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910")),
         )
     }
 

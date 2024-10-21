@@ -16,7 +16,7 @@ class GoogleMapsParser(
     val hostPattern =
         """^((www|maps)\.)?google(\.[a-z]{2,3})?\.[a-z]{2,3}$""".toPattern()
     val coordRegex =
-        """(?<lat>-?\d{1,2}(\.\d{1,10})?),(?<lon>-?\d{1,3}(\.\d{1,10})?)"""
+        """(?<lat>[+-]?\d{1,2}(\.\d{1,10})?),(?<lon>[+-]?\d{1,3}(\.\d{1,10})?)"""
     val coordPattern = coordRegex.toPattern()
     val zoomRegex = """(?<z>\d{1,2}(\.\d{1,10})?)"""
     val zoomPattern = zoomRegex.toPattern()
@@ -26,9 +26,10 @@ class GoogleMapsParser(
         """^/maps/@$coordRegex,${zoomRegex}z.*$""".toPattern(),
         """^/maps/@$coordRegex.*$""".toPattern(),
         """^/maps/@$""".toPattern(),
-        """^/maps/place/$coordRegex/@[\d.,-]+,${zoomRegex}z.*$""".toPattern(),
+        """^/maps/place/$coordRegex/@[\d.,+-]+,${zoomRegex}z.*$""".toPattern(),
         """^/maps/place/$placeRegex/@$coordRegex,${zoomRegex}z.*$""".toPattern(),
         """^/maps/place/$placeRegex/@$coordRegex.*$""".toPattern(),
+        """^/maps/place/$coordRegex.*$""".toPattern(),
         """^/maps/place/$placeRegex.*$""".toPattern(),
         """^/maps/search/$coordRegex.*$""".toPattern(),
         """^/maps/search/$placeRegex.*$""".toPattern(),
