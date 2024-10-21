@@ -89,6 +89,14 @@ class GoogleMapsParserTest {
     }
 
     @Test
+    fun googleMapsUriToGeoUri_placeAsCoordinatesWithZoom() {
+        assertEquals(
+            GoogleMapsParser(FakeUriQuote()).toGeoUri("https://maps.google.com/maps/place/52.03877,-2.3416,3z/@52.03877,-2.3416,15z/data=!3m1!1e3"),
+            "geo:52.03877,-2.3416?z=15"
+        )
+    }
+
+    @Test
     fun googleMapsUriToGeoUri_placeOnly() {
         assertEquals(
             GoogleMapsParser(FakeUriQuote()).toGeoUri("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd"),

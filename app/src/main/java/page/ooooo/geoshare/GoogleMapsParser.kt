@@ -24,7 +24,7 @@ class GoogleMapsParser(private val uriQuote: UriQuote) {
     val coordinatesRegex =
         Regex("^(-?\\d{1,2}(\\.\\d{1,10})?),(-?\\d{1,3}(\\.\\d{1,10})?).*$")
     val zoomRegexes = arrayOf(
-        Regex(",(\\d{1,2}(\\.\\d{1,10})?)z"),
+        Regex("/@[\\d.,-]+,(\\d{1,2}(\\.\\d{1,10})?)z"),
         Regex("[?&]zoom=(\\d{1,2}(\\.\\d{1,10})?)"),
     )
     val pathRegexes = arrayOf(
