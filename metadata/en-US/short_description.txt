@@ -1,0 +1,1 @@
+Turn a Google Maps URL into a geo: URL
