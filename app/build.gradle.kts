@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "page.ooooo.geoshare"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "page.ooooo.geoshare"
