@@ -10,3 +10,12 @@ adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/pla
     -e android.intent.extra.TEXT 'https://maps.app.goo.gl/eukZjpeYrrvX3tDw6?g_st=ac' \
     page.ooooo.geoshare
 ```
+
+## Running release variant
+
+1. Generate signed APK.
+2. Go to `./app/release` and install the APK using adb on your device:
+
+    ```shell
+    adb -d install ./app-release.apk
+    ```
