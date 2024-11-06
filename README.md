@@ -35,10 +35,10 @@ GitHub](https://github.com/jakubvalenta/geoshare/issues).
    Expected output:
 
    ```
-   Signer #1 certificate DN: CN=Jakub Valenta
-   Signer #1 certificate SHA-256 digest: 7380367daf7c96601b3b15b69bf9a2d051a8b04793009a93ca6873bfcc46b378
-   Signer #1 certificate SHA-1 digest: b9666537efd3d2fbaf6dc9f73613252dda87bcb2
-   Signer #1 certificate MD5 digest: 3dc401479f9f6788751469d6956046c8
+   Signer #1 certificate DN: CN=Jakub Valenta, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=DE
+   Signer #1 certificate SHA-256 digest: 1b27b17a9df05321a93a47df31ed0d6645ebe55d0e89908157d71c1032d17c10
+   Signer #1 certificate SHA-1 digest: f847c6935fa376a568a56ca458896b9236e22b6c
+   Signer #1 certificate MD5 digest: 6bcaa6bd5288a6443754b85bf6700374
    ```
 
 3. Install the APK on your phone using adb:
@@ -51,58 +51,31 @@ GitHub](https://github.com/jakubvalenta/geoshare/issues).
 
 Open this repo in Android Studio to run, build and test the app.
 
-### Generate signed APK
+### Generating a signed release APK
 
-1. Create a keystore and generate a key pair:
+```shell
+make sign keystore_path=/path/to/your/keystore.jks
+```
 
-   ```shell
-   keytool -genkey -keystore page.ooooo.geoshare.jks -keyalg RSA -keysize 2048 -validity 10000 -alias key0
-   ```
+### Installing the release APK on your phone
 
-2. Create `./keystore.properties` with the key information:
+```shell
+make install
+```
 
-   ```
-   storePassword=myStorePassword
-   keyPassword=myStorePassword
-   keyAlias=key0
-   storeFile=page.ooooo.geoshare.jks
-   ```
+### Testing various Google Maps URLs
 
-3. Build and sign a release APK:
+```shell
+adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/plain \
+    -e android.intent.extra.TEXT 'https://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu\&g_ep=678910"' \
+    page.ooooo.geoshare
+```
 
-   ```shell
-   ./gradlew assembleRelease
-   ```
-
-### Install the release APK on your phone
-
-1. Connect your phone via USB.
-
-2. [Generate signed APK](#generate-signed-apk).
-
-3. Go to `./app/release` and install the APK on your phone using adb:
-
-   ```shell
-   adb -d install app-release.apk
-   ```
-
-### Manual testing of various Google Maps URLs
-
-1. Run the app in emulator.
-
-2. Send an Intent to the app using adb:
-
-   ```shell
-   adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/plain \
-       -e android.intent.extra.TEXT 'https://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu\&g_ep=678910"' \
-       page.ooooo.geoshare
-   ```
-
-   ```shell
-   adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/plain \
-       -e android.intent.extra.TEXT 'https://maps.app.goo.gl/eukZjpeYrrvX3tDw6?g_st=ac' \
-       page.ooooo.geoshare
-   ```
+```shell
+adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/plain \
+    -e android.intent.extra.TEXT 'https://maps.app.goo.gl/eukZjpeYrrvX3tDw6?g_st=ac' \
+    page.ooooo.geoshare
+```
 
 ## Contributing
 
