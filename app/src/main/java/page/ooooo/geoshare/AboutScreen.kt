@@ -100,7 +100,7 @@ fun AboutScreen(
                 ) {
                     append("GPL 3.0")
                 }
-                append(" license.")
+                append(" or later license.")
             })
             Text(buildAnnotatedString {
                 append("You can find the code at ")
