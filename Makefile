@@ -22,6 +22,10 @@ $(output_dir)/$(signed_apk_filename): $(output_dir)/$(unsigned_aligned_apk_filen
 install: $(output_dir)/$(signed_apk_filename)  ## Install the signed APK using adb
 	adb -d install "$<"
 
+.PHONY: clean
+clean:
+	-rm -r app/build
+
 .PHONY: check-keystore-path
 check-keystore-path:
 ifeq ($(keystore_path),)
