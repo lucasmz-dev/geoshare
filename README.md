@@ -24,7 +24,7 @@ GitHub](https://github.com/jakubvalenta/geoshare/issues).
 ### From APK
 
 1. Download the APK from [GitHub
-   releases](https://github.com/jakubvalenta/geoshare/releases/download/v1.0.0/page.ooooo.geoshare.apk).
+   releases](https://github.com/jakubvalenta/geoshare/releases/download/v1.0.1/page.ooooo.geoshare.apk).
 
 2. Verify the APK signature:
 
