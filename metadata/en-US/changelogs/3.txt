@@ -1,0 +1,2 @@
+You can now share not only Google Maps URLs but also geo: URLs with Geo Share.
+If you do that, Geo Share will share the geo: URL back unchanged.
