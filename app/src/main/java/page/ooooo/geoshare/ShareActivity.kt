@@ -12,12 +12,25 @@ import kotlinx.coroutines.launch
 import java.net.MalformedURLException
 import java.net.URL
 
+const val EXTRA_PROCESSED = "page.ooooo.geoshare.EXTRA_PROCESSED"
+
 class ShareActivity : ComponentActivity() {
 
     private val intentUrlRegex = Regex("https?://\\S+")
 
     private val googleMapsUrlConverter = GoogleMapsUrlConverter()
     private val networkTools = NetworkTools()
+
+    private fun isIntentProcessed() =
+        intent.getStringExtra(EXTRA_PROCESSED) != null
+
+    private fun getIntentGeoUri(): Uri? {
+        return if (intent.action == Intent.ACTION_VIEW && intent.data != null && intent.scheme == "geo") {
+            intent.data
+        } else {
+            null
+        }
+    }
 
     private fun getIntentUrl(): URL? {
         val intentAction = intent.action
@@ -48,19 +61,33 @@ class ShareActivity : ComponentActivity() {
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 
     private suspend fun processIntent(context: Context) {
-        val intentUrl = getIntentUrl() ?: return
-        val url = if (googleMapsUrlConverter.isShortUrl(intentUrl)) {
-            networkTools.requestLocationHeader(intentUrl) ?: return
-        } else {
-            intentUrl
-        }
-        val geoUriString = googleMapsUrlConverter.toGeoUri(url)
-        if (geoUriString == null) {
-            showToast(context, "Failed to create geo URL")
+        if (isIntentProcessed()) {
+            showToast(context, "Nothing to do")
             return
         }
-        showToast(context, "Opened geo URL")
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(geoUriString)))
+        var geoUri = getIntentGeoUri()
+        if (geoUri != null) {
+            showToast(context, "Opened geo URL unchanged")
+        } else {
+            val intentUrl = getIntentUrl() ?: return
+            val url = if (googleMapsUrlConverter.isShortUrl(intentUrl)) {
+                networkTools.requestLocationHeader(intentUrl) ?: return
+            } else {
+                intentUrl
+            }
+            val geoUriString = googleMapsUrlConverter.toGeoUri(url)
+            if (geoUriString == null) {
+                showToast(context, "Failed to create geo URL")
+                return
+            }
+            geoUri = Uri.parse(geoUriString)
+            showToast(context, "Opened geo URL")
+        }
+        startActivity(Intent().apply {
+            action = Intent.ACTION_VIEW
+            putExtra(EXTRA_PROCESSED, "true")
+            data = geoUri
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
