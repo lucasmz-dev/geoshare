@@ -13,9 +13,13 @@ align: $(output_dir)/$(unsigned_aligned_apk_filename)  ## Align the unsigned APK
 $(output_dir)/$(unsigned_aligned_apk_filename): $(output_dir)/$(unsigned_apk_filename)
 	zipalign -v -p 4 "$<" "$@"
 
-sign: $(output_dir)/$(signed_apk_filename)  ## Sign the aligned unsigned APK
+sign: $(output_dir)/$(signed_apk_filename)  ## Sign the aligned unsigned APK. Example: make sign keystore_path=/path/to/your/keystore.jks
 
-$(output_dir)/$(signed_apk_filename): $(output_dir)/$(unsigned_aligned_apk_filename) | check-keystore-path
+$(output_dir)/$(signed_apk_filename): $(output_dir)/$(unsigned_aligned_apk_filename)
+ifeq ($(keystore_path),)
+	@echo "You must set the variable 'keystore_path'."
+	exit 1
+endif
 	apksigner sign --ks "$(keystore_path)" --out "$@" "$<"
 
 .PHONY: install
@@ -25,13 +29,6 @@ install: $(output_dir)/$(signed_apk_filename)  ## Install the signed APK using a
 .PHONY: clean
 clean:
 	-rm -r app/build
-
-.PHONY: check-keystore-path
-check-keystore-path:
-ifeq ($(keystore_path),)
-	@echo "You must set the variable 'keystore_path'."
-	exit 1
-endif
 
 .PHONY: help
 help:
