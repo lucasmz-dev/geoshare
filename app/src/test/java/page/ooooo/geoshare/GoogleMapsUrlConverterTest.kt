@@ -233,7 +233,7 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun isGoogleMapsSphortUri_correct() {
+    fun isGoogleMapsSphortUri_mapsAppGooGlCorrect() {
         assertEquals(
             true,
             googleMapsUrlConverter.isShortUrl(URL("https://maps.app.goo.gl/foo"))
@@ -241,11 +241,47 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun isGoogleMapsShortUri_missingPath() {
+    fun isGoogleMapsShortUri_mapsAppGooGlMissingPath() {
         assertEquals(
             false,
             googleMapsUrlConverter.isShortUrl(URL("https://maps.app.goo.gl/"))
         )
+    }
+
+    @Test
+    fun isGoogleMapsSphortUri_appGooGlCorrect() {
+        assertEquals(
+            true,
+            googleMapsUrlConverter.isShortUrl(URL("https://app.goo.gl/maps/foo"))
+        )
+    }
+
+    @Test
+    fun isGoogleMapsSphortUri_appGooGlWrongPath() {
+        assertEquals(
+            false,
+            googleMapsUrlConverter.isShortUrl(URL("https://app.goo.gl/maps"))
+        )
+        assertEquals(
+            false,
+            googleMapsUrlConverter.isShortUrl(URL("https://app.goo.gl/maps/"))
+        )
+        assertEquals(
+            false,
+            googleMapsUrlConverter.isShortUrl(URL("https://app.goo.gl/foo/bar"))
+        )
+    }
+
+    @Test
+    fun isGoogleMapsSphortUri_gooGlCorrect() {
+        assertEquals(true, googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps/foo")))
+    }
+
+    @Test
+    fun isGoogleMapsSphortUri_gooGlWrongPath() {
+        assertEquals(false, googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps")))
+        assertEquals(false, googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps/")))
+        assertEquals(false, googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/foo/bar")))
     }
 
     @Test

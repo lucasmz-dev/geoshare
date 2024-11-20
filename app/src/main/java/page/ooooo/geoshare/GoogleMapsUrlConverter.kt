@@ -42,10 +42,11 @@ class GoogleMapsUrlConverter(
         "viewpoint" to listOf(coordPattern),
         "zoom" to listOf(zoomPattern)
     )
+    val shortUrlPattern =
+        """^https?://(maps\.app\.goo\.gl/|(app\.)?goo\.gl/maps/).+$""".toPattern()
 
     fun isShortUrl(url: URL): Boolean =
-        (url.protocol == "http" || url.protocol == "https") && url.host == "maps.app.goo.gl" && (url.path?.length
-            ?: 0) > 2
+        shortUrlPattern.matcher(url.toString()).matches()
 
     fun toGeoUri(url: URL): String? {
         if (url.protocol != "http" && url.protocol != "https") {
