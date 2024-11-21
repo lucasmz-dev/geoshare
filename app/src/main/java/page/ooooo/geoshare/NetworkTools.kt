@@ -8,10 +8,15 @@ import java.net.URL
 
 class NetworkTools(private val log: ILog = DefaultLog()) {
 
+    val connectTimeout = 5_000
+    val readTimeout = 10_000
+
     suspend fun requestLocationHeader(url: URL): URL? =
         withContext(Dispatchers.IO) {
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "HEAD"
+            connection.connectTimeout = connectTimeout
+            connection.readTimeout = readTimeout
             connection.instanceFollowRedirects = false
             try {
                 connection.connect()
@@ -40,6 +45,8 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
     suspend fun getText(url: URL): String? =
         withContext(Dispatchers.IO) {
             val connection = url.openConnection() as HttpURLConnection
+            connection.connectTimeout = connectTimeout
+            connection.readTimeout = readTimeout
             connection.instanceFollowRedirects = false
             // Remove User-Agent, otherwise we receive Google Maps Lite HTML,
             // which doesn't contain coordinates.
