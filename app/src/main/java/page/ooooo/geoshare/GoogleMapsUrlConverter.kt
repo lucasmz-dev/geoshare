@@ -11,11 +11,11 @@ class GoogleMapsUrlConverter(
     val hostPattern =
         """^((www|maps)\.)?google(\.[a-z]{2,3})?\.[a-z]{2,3}$""".toPattern()
     val coordRegex =
-        """\+?(?<lat>-?\d{1,2}(\.\d{1,10})?),[+\s]?(?<lon>-?\d{1,3}(\.\d{1,10})?)"""
+        """\+?(?<lat>-?\d{1,2}(\.\d{1,15})?),[+\s]?(?<lon>-?\d{1,3}(\.\d{1,15})?)"""
     val coordPattern = coordRegex.toPattern()
     val dataCoordRegex =
-        """!3d(?<lat>-?\d{1,2}(\.\d{1,10})?)!4d(?<lon>-?\d{1,3}(\.\d{1,10})?)"""
-    val zoomRegex = """(?<z>\d{1,2}(\.\d{1,10})?)"""
+        """!3d(?<lat>-?\d{1,2}(\.\d{1,15})?)!4d(?<lon>-?\d{1,3}(\.\d{1,15})?)"""
+    val zoomRegex = """(?<z>\d{1,2}(\.\d{1,15})?)"""
     val zoomPattern = zoomRegex.toPattern()
     val queryPattern = """(?<q>.+)""".toPattern()
     val placeRegex = """(?<q>[^/]+)"""

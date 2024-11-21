@@ -41,6 +41,14 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
+    fun toGeoUri_placeAndPositiveCoordinatesWithManyDecimalPlaces() {
+        assertEquals(
+            "geo:44.448337599999995,26.0834555",
+            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Strada+Occidentului+7,+Bucure%C8%99ti,+Romania/data=!4m6!3m5!1s0x40b201fdfa573623:0x4f53bb5ad3fdc97f!7e2!8m2!3d44.448337599999995!4d26.0834555?utm_source=mstt_1&entry=gps&coh=192189&g_ep=abc"))
+        )
+    }
+
+    @Test
     fun toGeoUri_placeAndNegativeCoordinates() {
         assertEquals(
             "geo:-17.2165721,-149.9470294?q=Berlin%2C%20Germany&z=11",
