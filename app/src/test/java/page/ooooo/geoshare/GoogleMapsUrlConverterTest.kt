@@ -68,7 +68,31 @@ class GoogleMapsUrlConverterTest {
     fun toGeoUri_placeAndData() {
         assertEquals(
             "geo:40.785091,-73.968285?q=Central%20Park&z=15",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Central+Park/@40.785091,-73.968285,15z/data=!3m1!4b1!4m5!3m4!1s0x89c2589a018531e3:0xb9df1f3170d990b5!8m2!3d40.785091!4d-73.968285")),
+            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Central+Park/@40.785091,-73.968285,15z/data=!3m1!4b1!4m5!3m4!1s0x89c2589a018531e3:0xb9df1f3170d990b5!8m2")),
+        )
+    }
+
+    @Test
+    fun toGeoUri_placeAndPositiveCoordinatesAndPositiveDataCoordinates() {
+        assertEquals(
+            "geo:44.4490541,26.0888398?z=11",
+            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/RAI+-+Romantic+%26+Intimate/@44.5190589,25.7489796,11.42z/data=!4m6!3m5!1s0x40b1ffed911b9fcf:0x7394a7e7855d3929!8m2!3d44.4490541!4d26.0888398!16s%2Fg%2F11svmp0zhs"))
+        )
+    }
+
+    @Test
+    fun toGeoUri_placeAndNegativeCoordinatesAndNegativeDataCoordinates() {
+        assertEquals(
+            "geo:40.785091,-73.968285?z=15",
+            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Central+Park/@40.8,-73.9,15z/data=!3m1!4b1!4m5!3m4!1s0x89c2589a018531e3:0xb9df1f3170d990b5!8m2!3d40.785091!4d-73.968285")),
+        )
+    }
+
+    @Test
+    fun toGeoUri_placeAndPositiveDataCoordinates() {
+        assertEquals(
+            "geo:44.4490541,26.0888398",
+            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/RAI+-+Romantic+%26+Intimate,+Calea+Victoriei+202+Bucure%C8%99ti,+Bucuresti+010098,+Rom%C3%A2nia/data=!4m6!3m5!1s0x40b1ffed911b9fcf:0x7394a7e7855d3929!8m2!3d44.4490541!4d26.0888398!16s%2Fg%2F11svmp0zhs"))
         )
     }
 
@@ -84,7 +108,7 @@ class GoogleMapsUrlConverterTest {
     fun toGeoUri_placeAsCoordinatesWithPlus() {
         assertEquals(
             "geo:52.492611,13.431726?z=17",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/52.492611,+13.431726/@52.4929475,13.4317905,17z/data=!4m4!3m3!8m2!3d52.4926111!4d13.4317261?force=pwa"))
+            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/52.492611,+13.431726/@52.4929475,13.4317905,17z/data=!4m4!3m3!8m2?force=pwa"))
         )
     }
 
@@ -274,14 +298,26 @@ class GoogleMapsUrlConverterTest {
 
     @Test
     fun isGoogleMapsSphortUri_gooGlCorrect() {
-        assertEquals(true, googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps/foo")))
+        assertEquals(
+            true,
+            googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps/foo"))
+        )
     }
 
     @Test
     fun isGoogleMapsSphortUri_gooGlWrongPath() {
-        assertEquals(false, googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps")))
-        assertEquals(false, googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps/")))
-        assertEquals(false, googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/foo/bar")))
+        assertEquals(
+            false,
+            googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps"))
+        )
+        assertEquals(
+            false,
+            googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps/"))
+        )
+        assertEquals(
+            false,
+            googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/foo/bar"))
+        )
     }
 
     @Test
