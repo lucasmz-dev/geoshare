@@ -4,6 +4,7 @@
 .cxx
 .externalNativeBuild
 .gradle
+.kotlin
 /.idea/assetWizardSettings.xml
 /.idea/caches
 /.idea/deploymentTargetSelector.xml
