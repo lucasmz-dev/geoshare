@@ -36,4 +36,27 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
             }
             return@withContext null
         }
+
+    suspend fun getText(url: URL): String? =
+        withContext(Dispatchers.IO) {
+            val connection = url.openConnection() as HttpURLConnection
+            connection.instanceFollowRedirects = false
+            // Remove User-Agent, otherwise we receive Google Maps Lite HTML,
+            // which doesn't contain coordinates.
+            connection.setRequestProperty("User-Agent", "")
+            try {
+                connection.connect()
+                val responseCode = connection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    return@withContext connection.getInputStream().reader()
+                        .use { it.readText() }
+                }
+                log.w(null, "Received HTTP code $responseCode for $url")
+            } catch (e: Exception) {
+                log.w(null, e.message ?: "Unknown network error for $url")
+            } finally {
+                connection.disconnect()
+            }
+            return@withContext null
+        }
 }

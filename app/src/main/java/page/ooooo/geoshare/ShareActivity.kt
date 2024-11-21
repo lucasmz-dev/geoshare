@@ -73,9 +73,10 @@ class ShareActivity : ComponentActivity() {
             showToast(context, "Nothing to do")
             return
         }
-        var geoUri = getIntentGeoUri()
-        if (geoUri != null) {
+        val intentGeoUri = getIntentGeoUri()
+        val geoUri = if (intentGeoUri != null) {
             showToast(context, "Opened geo URL unchanged")
+            intentGeoUri
         } else {
             val intentUrl = getIntentUrl() ?: return
             val url = if (googleMapsUrlConverter.isShortUrl(intentUrl)) {
@@ -89,13 +90,26 @@ class ShareActivity : ComponentActivity() {
             } else {
                 intentUrl
             }
-            val geoUriString = googleMapsUrlConverter.toGeoUri(url)
-            if (geoUriString == null) {
+            val geoUriBuilderFromUrl = googleMapsUrlConverter.parseUrl(url)
+            if (geoUriBuilderFromUrl == null) {
                 showToast(context, "Failed to create geo URL")
                 return
             }
-            geoUri = Uri.parse(geoUriString)
+            val geoUriBuilder =
+                if (geoUriBuilderFromUrl.coords.lat != "0" || geoUriBuilderFromUrl.coords.lon != "0") {
+                    geoUriBuilderFromUrl
+                } else {
+                    val html = networkTools.getText(url)
+                    if (html == null) {
+                        showToast(context, "Failed to fetch Google Maps page")
+                        return
+                    }
+                    val geoUriBuilderFromHtml =
+                        googleMapsUrlConverter.parseHtml(html)
+                    geoUriBuilderFromHtml ?: geoUriBuilderFromUrl
+                }
             showToast(context, "Opened geo URL")
+            Uri.parse(geoUriBuilder.toString())
         }
         startActivity(Intent().apply {
             action = Intent.ACTION_VIEW

@@ -73,7 +73,7 @@ adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/pla
 
 ```shell
 adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/plain \
-    -e android.intent.extra.TEXT 'https://maps.app.goo.gl/eukZjpeYrrvX3tDw6?g_st=ac' \
+    -e android.intent.extra.TEXT 'https://maps.app.goo.gl/TmbeHMiLEfTBws9EA' \
     page.ooooo.geoshare
 ```
 

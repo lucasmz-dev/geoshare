@@ -50,7 +50,7 @@ data class GeoUriParams(
         .fastJoinToString("&")
 }
 
-data class GeoUri(private val uriQuote: UriQuote = DefaultUriQuote()) {
+data class GeoUriBuilder(private val uriQuote: UriQuote = DefaultUriQuote()) {
     val coords: GeoUriCoords = GeoUriCoords()
     val params: GeoUriParams = GeoUriParams(uriQuote = uriQuote)
 

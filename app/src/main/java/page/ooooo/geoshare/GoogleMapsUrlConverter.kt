@@ -15,6 +15,7 @@ class GoogleMapsUrlConverter(
     val coordPattern = coordRegex.toPattern()
     val dataCoordRegex =
         """!3d(?<lat>-?\d{1,2}(\.\d{1,15})?)!4d(?<lon>-?\d{1,3}(\.\d{1,15})?)"""
+    val htmlCoordRegex = """/@$coordRegex""".toPattern()
     val zoomRegex = """(?<z>\d{1,2}(\.\d{1,15})?)"""
     val zoomPattern = zoomRegex.toPattern()
     val queryPattern = """(?<q>.+)""".toPattern()
@@ -52,7 +53,7 @@ class GoogleMapsUrlConverter(
     fun isShortUrl(url: URL): Boolean =
         shortUrlPattern.matcher(url.toString()).matches()
 
-    fun toGeoUri(url: URL): String? {
+    fun parseUrl(url: URL): GeoUriBuilder? {
         if (url.protocol != "http" && url.protocol != "https") {
             log.w(null, "Unknown protocol in Google Maps URL $url")
             return null
@@ -75,8 +76,8 @@ class GoogleMapsUrlConverter(
             log.w(null, "Failed to parse Google Maps URL $url")
             return null
         }
-        val geoUri = GeoUri(uriQuote = uriQuote)
-        geoUri.fromMatcher(m)
+        val geoUriBuilder = GeoUriBuilder(uriQuote = uriQuote)
+        geoUriBuilder.fromMatcher(m)
         if (url.query != null) {
             for (rawParam in url.query.split('&')) {
                 val paramParts = rawParam.split('=')
@@ -88,11 +89,22 @@ class GoogleMapsUrlConverter(
                     val m = it.matcher(paramValue)
                     if (m.matches()) m else null
                 } ?: continue
-                geoUri.fromMatcher(m)
+                geoUriBuilder.fromMatcher(m)
             }
         }
-        val geoUriString = geoUri.toString()
-        log.i(null, "Converted $url to $geoUriString")
-        return geoUriString
+        log.i(null, "Converted $url to $geoUriBuilder")
+        return geoUriBuilder
+    }
+
+    fun parseHtml(html: String): GeoUriBuilder? {
+        val m = htmlCoordRegex.matcher(html)
+        if (!m.find()) {
+            log.w(null, "Failed to parse Google Maps HTML document")
+            return null
+        }
+        val geoUriBuilder = GeoUriBuilder(uriQuote = uriQuote)
+        geoUriBuilder.fromMatcher(m)
+        log.i(null, "Parsed HTML document to $geoUriBuilder")
+        return geoUriBuilder
     }
 }

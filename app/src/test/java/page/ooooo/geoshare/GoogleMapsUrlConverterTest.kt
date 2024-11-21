@@ -17,250 +17,269 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun toGeoUri_coordinatesOnly() {
+    fun parse_coordinatesOnly() {
         assertEquals(
             "geo:52.5067296,13.2599309?z=6",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/@52.5067296,13.2599309,6z"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/@52.5067296,13.2599309,6z"))
         )
     }
 
     @Test
-    fun toGeoUri_coordinatesOnlyStreetView() {
+    fun parse_coordinatesOnlyStreetView() {
         assertEquals(
             "geo:53.512825,57.6891441",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/@53.512825,57.6891441,0a,75y,90t/data=abc?utm_source=mstt_0&g_ep=def"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/@53.512825,57.6891441,0a,75y,90t/data=abc?utm_source=mstt_0&g_ep=def"))
         )
     }
 
     @Test
-    fun toGeoUri_placeAndPositiveCoordinates() {
+    fun parse_placeAndPositiveCoordinates() {
         assertEquals(
             "geo:52.5067296,13.2599309?q=Berlin%2C%20Germany&z=11",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910"))
         )
     }
 
     @Test
-    fun toGeoUri_placeAndPositiveCoordinatesWithManyDecimalPlaces() {
+    fun parse_placeAndPositiveCoordinatesWithManyDecimalPlaces() {
         assertEquals(
             "geo:44.448337599999995,26.0834555",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Strada+Occidentului+7,+Bucure%C8%99ti,+Romania/data=!4m6!3m5!1s0x40b201fdfa573623:0x4f53bb5ad3fdc97f!7e2!8m2!3d44.448337599999995!4d26.0834555?utm_source=mstt_1&entry=gps&coh=192189&g_ep=abc"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/Strada+Occidentului+7,+Bucure%C8%99ti,+Romania/data=!4m6!3m5!1s0x40b201fdfa573623:0x4f53bb5ad3fdc97f!7e2!8m2!3d44.448337599999995!4d26.0834555?utm_source=mstt_1&entry=gps&coh=192189&g_ep=abc"))
         )
     }
 
     @Test
-    fun toGeoUri_placeAndNegativeCoordinates() {
+    fun parse_placeAndNegativeCoordinates() {
         assertEquals(
             "geo:-17.2165721,-149.9470294?q=Berlin%2C%20Germany&z=11",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Berlin,+Germany/@-17.2165721,-149.9470294,11z/"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/Berlin,+Germany/@-17.2165721,-149.9470294,11z/"))
         )
     }
 
     @Test
-    fun toGeoUri_placeAndIntegerCoordinates() {
+    fun parse_placeAndIntegerCoordinates() {
         assertEquals(
             "geo:52,13?q=Berlin%2C%20Germany&z=11",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Berlin,+Germany/@52,13,11z/"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/Berlin,+Germany/@52,13,11z/"))
         )
     }
 
     @Test
-    fun toGeoUri_placeAndFractionalZoom() {
+    fun parse_placeAndFractionalZoom() {
         assertEquals(
             "geo:52.5067296,13.2599309?q=Berlin%2C%20Germany&z=6",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,6.33z/"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,6.33z/"))
         )
     }
 
     @Test
-    fun toGeoUri_placeAndData() {
+    fun parse_placeAndData() {
         assertEquals(
             "geo:40.785091,-73.968285?q=Central%20Park&z=15",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Central+Park/@40.785091,-73.968285,15z/data=!3m1!4b1!4m5!3m4!1s0x89c2589a018531e3:0xb9df1f3170d990b5!8m2")),
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/Central+Park/@40.785091,-73.968285,15z/data=!3m1!4b1!4m5!3m4!1s0x89c2589a018531e3:0xb9df1f3170d990b5!8m2")),
         )
     }
 
     @Test
-    fun toGeoUri_placeAndPositiveCoordinatesAndPositiveDataCoordinates() {
+    fun parse_placeAndPositiveCoordinatesAndPositiveDataCoordinates() {
         assertEquals(
             "geo:44.4490541,26.0888398?z=11",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/RAI+-+Romantic+%26+Intimate/@44.5190589,25.7489796,11.42z/data=!4m6!3m5!1s0x40b1ffed911b9fcf:0x7394a7e7855d3929!8m2!3d44.4490541!4d26.0888398!16s%2Fg%2F11svmp0zhs"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/RAI+-+Romantic+%26+Intimate/@44.5190589,25.7489796,11.42z/data=!4m6!3m5!1s0x40b1ffed911b9fcf:0x7394a7e7855d3929!8m2!3d44.4490541!4d26.0888398!16s%2Fg%2F11svmp0zhs"))
         )
     }
 
     @Test
-    fun toGeoUri_placeAndNegativeCoordinatesAndNegativeDataCoordinates() {
+    fun parse_placeAndNegativeCoordinatesAndNegativeDataCoordinates() {
         assertEquals(
             "geo:40.785091,-73.968285?z=15",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Central+Park/@40.8,-73.9,15z/data=!3m1!4b1!4m5!3m4!1s0x89c2589a018531e3:0xb9df1f3170d990b5!8m2!3d40.785091!4d-73.968285")),
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/Central+Park/@40.8,-73.9,15z/data=!3m1!4b1!4m5!3m4!1s0x89c2589a018531e3:0xb9df1f3170d990b5!8m2!3d40.785091!4d-73.968285")),
         )
     }
 
     @Test
-    fun toGeoUri_placeAndPositiveDataCoordinates() {
+    fun parse_placeAndPositiveDataCoordinates() {
         assertEquals(
             "geo:44.4490541,26.0888398",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/RAI+-+Romantic+%26+Intimate,+Calea+Victoriei+202+Bucure%C8%99ti,+Bucuresti+010098,+Rom%C3%A2nia/data=!4m6!3m5!1s0x40b1ffed911b9fcf:0x7394a7e7855d3929!8m2!3d44.4490541!4d26.0888398!16s%2Fg%2F11svmp0zhs"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/RAI+-+Romantic+%26+Intimate,+Calea+Victoriei+202+Bucure%C8%99ti,+Bucuresti+010098,+Rom%C3%A2nia/data=!4m6!3m5!1s0x40b1ffed911b9fcf:0x7394a7e7855d3929!8m2!3d44.4490541!4d26.0888398!16s%2Fg%2F11svmp0zhs"))
         )
     }
 
     @Test
-    fun toGeoUri_placeAsCoordinates() {
+    fun parse_placeAsCoordinates() {
         assertEquals(
             "geo:52.04,-2.35?z=15",
-            googleMapsUrlConverter.toGeoUri(URL("https://maps.google.com/maps/place/52.04,-2.35/@52.03877,-2.3416,15z/data=!3m1!1e3"))
+            googleMapsUrlConverter.parseUrl(URL("https://maps.google.com/maps/place/52.04,-2.35/@52.03877,-2.3416,15z/data=!3m1!1e3"))
         )
     }
 
     @Test
-    fun toGeoUri_placeAsCoordinatesWithPlus() {
+    fun parse_placeAsCoordinatesWithPlus() {
         assertEquals(
             "geo:52.492611,13.431726?z=17",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/52.492611,+13.431726/@52.4929475,13.4317905,17z/data=!4m4!3m3!8m2?force=pwa"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/52.492611,+13.431726/@52.4929475,13.4317905,17z/data=!4m4!3m3!8m2?force=pwa"))
         )
     }
 
     @Test
-    fun toGeoUri_placeCoordinatesOnly() {
+    fun parse_placeCoordinatesOnly() {
         assertEquals(
             "geo:52.03877,-2.3416",
-            googleMapsUrlConverter.toGeoUri(URL("https://maps.google.com/maps/place/52.03877,-2.3416/data=!3m1!1e3"))
+            googleMapsUrlConverter.parseUrl(URL("https://maps.google.com/maps/place/52.03877,-2.3416/data=!3m1!1e3"))
         )
     }
 
     @Test
-    fun toGeoUri_placeOnly() {
+    fun parse_placeOnly() {
         assertEquals(
             "geo:0,0?q=Pozna%C5%84%20Old%20Town%2C%2061-001%20Pozna%C5%84%2C%20Poland",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd"))
         )
     }
 
     @Test
-    fun toGeoUri_searchCoordinates() {
+    fun parse_searchCoordinates() {
         assertEquals(
             "geo:48.8584,2.2945",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/search/48.8584,2.2945"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/search/48.8584,2.2945"))
         )
     }
 
     @Test
-    fun toGeoUri_searchPlace() {
+    fun parse_searchPlace() {
         assertEquals(
             "geo:0,0?q=restaurants%20near%20me",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/search/restaurants+near+me"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/search/restaurants+near+me"))
         )
     }
 
     @Test
-    fun toGeoUri_searchQueryCoordinates() {
+    fun parse_searchQueryCoordinates() {
         assertEquals(
             "geo:47.5951518,-122.3316393",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/search/?query_place_id=ChIJKxjxuaNqkFQR3CK6O1HNNqY&query=47.5951518%2C-122.3316393&api=1"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/search/?query_place_id=ChIJKxjxuaNqkFQR3CK6O1HNNqY&query=47.5951518%2C-122.3316393&api=1"))
         )
     }
 
     @Test
-    fun toGeoUri_searchQueryPlace() {
+    fun parse_searchQueryPlace() {
         assertEquals(
             "geo:0,0?q=centurylink%20field",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/search/?api=1&query=centurylink%2Bfield"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/search/?api=1&query=centurylink%2Bfield"))
         )
     }
 
     @Test
-    fun toGeoUri_directionsCoordinates() {
+    fun parse_directionsCoordinates() {
         assertEquals(
             "geo:34.0522,-118.2437",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/dir/40.7128,-74.0060/34.0522,-118.2437"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/dir/40.7128,-74.0060/34.0522,-118.2437"))
         )
     }
 
     @Test
-    fun toGeoUri_directionsFromTo() {
+    fun toGeoUri_directionsFromToBuilder() {
         assertEquals(
             "geo:0,0?q=Los%20Angeles%2C%20CA",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/dir/New+York,+NY/Los+Angeles,+CA"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/dir/New+York,+NY/Los+Angeles,+CA"))
         )
     }
 
     @Test
-    fun toGeoUri_directionsFromToVia() {
+    fun toGeoUri_directionsFromToViaBuilder() {
         assertEquals(
             "geo:0,0?q=Washington%2C%20DC",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/dir/New+York,+NY/Philadelphia,+PA/Washington,+DC"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/dir/New+York,+NY/Philadelphia,+PA/Washington,+DC"))
         )
     }
 
     @Test
-    fun toGeoUri_directionsFromToWithData() {
+    fun toGeoUri_directionsFromToWithDataBuilder() {
         assertEquals(
             "geo:0,0?q=Potsdam",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/dir/Berlin/Potsdam/data=abcd"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/dir/Berlin/Potsdam/data=abcd"))
         )
     }
 
     @Test
-    fun toGeoUri_streetView() {
+    fun parse_streetView() {
         assertEquals(
             "geo:48.8584,2.2945",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/@48.8584,2.2945,3a,75y,90t/data=!3m8!1e1!3m6!1sAF1QipP5ELjVeDJfzgBQBp5XM-HsNU0Ep1k_KgE!2e10!3e11!6shttps:%2F%2Flh5.googleusercontent.com%2Fp%2FAF1QipP5ELjVeDJfzgBQBp5XM-HsNU0Ep1k_KgE%3Dw203-h100-k-no-pi-0-ya293.79999-ro-0-fo100!7i10240!8i5120"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/@48.8584,2.2945,3a,75y,90t/data=!3m8!1e1!3m6!1sAF1QipP5ELjVeDJfzgBQBp5XM-HsNU0Ep1k_KgE!2e10!3e11!6shttps:%2F%2Flh5.googleusercontent.com%2Fp%2FAF1QipP5ELjVeDJfzgBQBp5XM-HsNU0Ep1k_KgE%3Dw203-h100-k-no-pi-0-ya293.79999-ro-0-fo100!7i10240!8i5120"))
         )
     }
 
     @Test
-    fun toGeoUri_apiCenter() {
+    fun parse_apiCenter() {
         assertEquals(
             "geo:-33.712206,150.311941?z=12",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/@?api=1&map_action=map&center=-33.712206%2C150.311941&zoom=12&basemap=terrain"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/@?api=1&map_action=map&center=-33.712206%2C150.311941&zoom=12&basemap=terrain"))
         )
     }
 
     @Test
-    fun toGeoUri_apiDirections() {
+    fun parse_apiDirections() {
         assertEquals(
             "geo:0,0?q=Cherbourg%2CFrance",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/dir/?api=1&origin=Paris%2CFrance&destination=Cherbourg%2CFrance&travelmode=driving&waypoints=Versailles%2CFrance%7CChartres%2CFrance%7CLe%2BMans%2CFrance%7CCaen%2CFrance"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/dir/?api=1&origin=Paris%2CFrance&destination=Cherbourg%2CFrance&travelmode=driving&waypoints=Versailles%2CFrance%7CChartres%2CFrance%7CLe%2BMans%2CFrance%7CCaen%2CFrance"))
         )
     }
 
     @Test
-    fun toGeoUri_apiViewpoint() {
+    fun parse_apiViewpoint() {
         assertEquals(
             "geo:48.857832,2.295226",
-            googleMapsUrlConverter.toGeoUri(URL("https://www.google.com/maps/@?fov=80&pitch=38&heading=-45&viewpoint=48.857832%2C2.295226&map_action=pano&api=1"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/@?fov=80&pitch=38&heading=-45&viewpoint=48.857832%2C2.295226&map_action=pano&api=1"))
         )
     }
 
     @Test
-    fun toGeoUri_http() {
+    fun parse_http() {
         assertEquals(
             "geo:52.5067296,13.2599309?q=Berlin%2C%20Germany&z=11",
-            googleMapsUrlConverter.toGeoUri(URL("http://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910")),
+            googleMapsUrlConverter.parseUrl(URL("http://www.google.com/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910")),
         )
     }
 
     @Test
-    fun toGeoUri_ukDomain() {
+    fun parse_ukDomain() {
         assertEquals(
             "geo:52.5067296,13.2599309?q=Berlin%2C%20Germany&z=11",
-            googleMapsUrlConverter.toGeoUri(URL("https://maps.google.co.uk/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910")),
+            googleMapsUrlConverter.parseUrl(URL("https://maps.google.co.uk/maps/place/Berlin,+Germany/@52.5067296,13.2599309,11z/data=12345?entry=ttu&g_ep=678910")),
         )
     }
 
     @Test
-    fun toGeoUri_unknownProtocol() {
+    fun parse_unknownProtocol() {
         assertEquals(
             null,
-            googleMapsUrlConverter.toGeoUri(URL("ftp://www.google.com/maps/@52.5067296,13.2599309,6z"))
+            googleMapsUrlConverter.parseUrl(URL("ftp://www.google.com/maps/@52.5067296,13.2599309,6z"))
         )
     }
 
     @Test
-    fun toGeoUri_unknownHost() {
+    fun parse_unknownHost() {
         assertEquals(
             null,
-            googleMapsUrlConverter.toGeoUri(URL("https://www.example.com/"))
+            googleMapsUrlConverter.parseUrl(URL("https://www.example.com/"))
+        )
+    }
+
+    @Test
+    fun parseHtml_success() {
+        val html =
+            this.javaClass.classLoader!!.getResource("TmbeHMiLEfTBws9EA.html")!!
+                .readText()
+        assertEquals(
+            "geo:44.4490541,26.0888398",
+            googleMapsUrlConverter.parseHtml(html)
+        )
+    }
+
+    @Test
+    fun parseHtml_failure() {
+        assertEquals(
+            null,
+            googleMapsUrlConverter.parseHtml("spam")
         )
     }
 
@@ -281,7 +300,7 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun isGoogleMapsSphortUri_appGooGlCorrect() {
+    fun isGoogleMapsShortUri_appGooGlCorrect() {
         assertEquals(
             true,
             googleMapsUrlConverter.isShortUrl(URL("https://app.goo.gl/maps/foo"))
@@ -289,7 +308,7 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun isGoogleMapsSphortUri_appGooGlWrongPath() {
+    fun isGoogleMapsShortUri_appGooGlWrongPath() {
         assertEquals(
             false,
             googleMapsUrlConverter.isShortUrl(URL("https://app.goo.gl/maps"))
@@ -305,7 +324,7 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun isGoogleMapsSphortUri_gooGlCorrect() {
+    fun isGoogleMapsShortUri_gooGlCorrect() {
         assertEquals(
             true,
             googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps/foo"))
@@ -313,7 +332,7 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun isGoogleMapsSphortUri_gooGlWrongPath() {
+    fun isGoogleMapsShortUri_gooGlWrongPath() {
         assertEquals(
             false,
             googleMapsUrlConverter.isShortUrl(URL("https://goo.gl/maps"))
