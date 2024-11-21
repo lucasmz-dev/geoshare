@@ -79,7 +79,13 @@ class ShareActivity : ComponentActivity() {
         } else {
             val intentUrl = getIntentUrl() ?: return
             val url = if (googleMapsUrlConverter.isShortUrl(intentUrl)) {
-                networkTools.requestLocationHeader(intentUrl) ?: return
+                val locationHeader =
+                    networkTools.requestLocationHeader(intentUrl)
+                if (locationHeader == null) {
+                    showToast(context, "Failed to resolve short URL")
+                    return
+                }
+                locationHeader
             } else {
                 intentUrl
             }
