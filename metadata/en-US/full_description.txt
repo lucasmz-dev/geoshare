@@ -1,6 +1,3 @@
 <b>Usage</b>
-
-<ol>
-  <li>Go to Google Maps or a web browser and share a link with Geo Share.</li>
-  <li>Geo Share will turn the link into a geo: URL and open it with one of your installed apps.</li>
-</ol>
+1. Go to Google Maps or a web browser and share a link with Geo Share.
+2. Geo Share will turn the link into a geo: URL and open it with one of your installed apps.
