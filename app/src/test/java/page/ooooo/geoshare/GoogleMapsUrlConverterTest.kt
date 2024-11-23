@@ -197,7 +197,7 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun toGeoUri_directionsFromToBuilder() {
+    fun toGeoUri_directionsFromTo() {
         assertEquals(
             "geo:0,0?q=Los%20Angeles%2C%20CA",
             googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/dir/New+York,+NY/Los+Angeles,+CA"))
@@ -206,7 +206,7 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun toGeoUri_directionsFromToViaBuilder() {
+    fun toGeoUri_directionsFromToVia() {
         assertEquals(
             "geo:0,0?q=Washington%2C%20DC",
             googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/dir/New+York,+NY/Philadelphia,+PA/Washington,+DC"))
@@ -215,10 +215,19 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun toGeoUri_directionsFromToWithDataBuilder() {
+    fun toGeoUri_directionsFromToWithData() {
         assertEquals(
             "geo:0,0?q=Potsdam",
             googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/dir/Berlin/Potsdam/data=abcd"))
+                .toString()
+        )
+    }
+
+    @Test
+    fun parse_directionsEmpty() {
+        assertEquals(
+            "geo:0,0",
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/dir/"))
                 .toString()
         )
     }
@@ -255,6 +264,24 @@ class GoogleMapsUrlConverterTest {
         assertEquals(
             "geo:48.857832,2.295226",
             googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/@?fov=80&pitch=38&heading=-45&viewpoint=48.857832%2C2.295226&map_action=pano&api=1"))
+                .toString()
+        )
+    }
+
+    @Test
+    fun parse_qParameter() {
+        assertEquals(
+            "geo:48.857832,2.295226",
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps?foo=bar&q=48.857832%2C2.295226&spam"))
+                .toString()
+        )
+    }
+
+    @Test
+    fun parse_qParameterEmpty() {
+        assertEquals(
+            "geo:0,0",
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps"))
                 .toString()
         )
     }

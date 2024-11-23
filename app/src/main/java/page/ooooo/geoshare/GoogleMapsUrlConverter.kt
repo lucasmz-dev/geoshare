@@ -39,10 +39,12 @@ class GoogleMapsUrlConverter(
         """^/maps/dir/.*/$coordRegex$""".toPattern(),
         """^/maps/dir/.*/$placeRegex$""".toPattern(),
         """^/maps/dir/$""".toPattern(),
+        """^/maps$""".toPattern(),
     )
     val queryPatterns = hashMapOf<String, List<Pattern>>(
         "center" to listOf(coordPattern),
         "destination" to listOf(coordPattern, queryPattern),
+        "q" to listOf(coordPattern),
         "query" to listOf(coordPattern, queryPattern),
         "viewpoint" to listOf(coordPattern),
         "zoom" to listOf(zoomPattern)
