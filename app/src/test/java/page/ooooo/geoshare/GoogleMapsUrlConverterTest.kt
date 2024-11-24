@@ -278,6 +278,15 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
+    fun parse_qParameterWithoutPath() {
+        assertEquals(
+            "geo:39.797573,18.370173",
+            googleMapsUrlConverter.parseUrl(URL("https://maps.google.com/?q=39.797573,18.370173&entry=gps&g_ep=abc&shorturl=1"))
+                .toString()
+        )
+    }
+
+    @Test
     fun parse_qParameterEmpty() {
         assertEquals(
             "geo:0,0",

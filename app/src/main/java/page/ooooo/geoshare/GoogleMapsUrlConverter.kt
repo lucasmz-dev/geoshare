@@ -40,6 +40,7 @@ class GoogleMapsUrlConverter(
         """^/maps/dir/.*/$placeRegex$""".toPattern(),
         """^/maps/dir/$""".toPattern(),
         """^/maps$""".toPattern(),
+        """^/$""".toPattern(),
     )
     val queryPatterns = hashMapOf<String, List<Pattern>>(
         "center" to listOf(coordPattern),
