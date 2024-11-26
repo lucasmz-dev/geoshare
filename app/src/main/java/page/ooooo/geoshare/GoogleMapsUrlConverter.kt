@@ -54,7 +54,7 @@ class GoogleMapsUrlConverter(
     val queryPatterns = hashMapOf<String, List<Pattern>>(
         "center" to listOf(coordPattern),
         "destination" to listOf(coordPattern, queryPattern),
-        "q" to listOf(coordPattern),
+        "q" to listOf(coordPattern, queryPattern),
         "query" to listOf(coordPattern, queryPattern),
         "viewpoint" to listOf(coordPattern),
         "zoom" to listOf(zoomPattern)

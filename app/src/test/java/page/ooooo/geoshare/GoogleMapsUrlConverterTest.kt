@@ -269,10 +269,19 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun parse_qParameter() {
+    fun parse_qParameterCoordinates() {
         assertEquals(
             "geo:48.857832,2.295226",
             googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps?foo=bar&q=48.857832%2C2.295226&spam"))
+                .toString()
+        )
+    }
+
+    @Test
+    fun parse_qParameterPlace() {
+        assertEquals(
+            "geo:0,0?q=Central%20Park",
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps?foo=bar&q=Central%20Park&spam"))
                 .toString()
         )
     }
