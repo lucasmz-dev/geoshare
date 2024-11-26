@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Geo Share</string>
+    <string name="copy_activity">Copy geo: URL</string>
+    <string name="share_activity">Share geo: URL</string>
 </resources>

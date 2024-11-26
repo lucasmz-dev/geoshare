@@ -1,7 +1,16 @@
 package page.ooooo.geoshare
 
+import android.content.Intent
+import android.net.Uri
 import java.net.URL
 import java.util.regex.Pattern
+
+sealed class GeoUriAction {
+    data class Open(val geoUri: Uri) : GeoUriAction()
+    data class OpenUnchanged(val geoUri: Uri) : GeoUriAction()
+    data class Fail(val message: String) : GeoUriAction()
+    class Noop() : GeoUriAction()
+}
 
 class GoogleMapsUrlConverter(
     private val log: ILog = DefaultLog(),
@@ -109,5 +118,34 @@ class GoogleMapsUrlConverter(
         geoUriBuilder.fromMatcher(m)
         log.i(null, "Parsed HTML document to $geoUriBuilder")
         return geoUriBuilder
+    }
+
+    suspend fun processIntent(
+        intent: Intent,
+        networkTools: NetworkTools
+    ): GeoUriAction {
+        val intentGeoUri = getIntentGeoUri(intent)
+        if (intentGeoUri != null) {
+            return GeoUriAction.OpenUnchanged(intentGeoUri)
+        }
+        val intentUrl = getIntentUrl(intent) ?: return GeoUriAction.Noop()
+        val url = if (isShortUrl(intentUrl)) {
+            networkTools.requestLocationHeader(intentUrl)
+                ?: return GeoUriAction.Fail("Failed to resolve short URL")
+        } else {
+            intentUrl
+        }
+        val geoUriBuilderFromUrl = parseUrl(url)
+            ?: return GeoUriAction.Fail("Failed to create geo URL")
+        val geoUriBuilder =
+            if (geoUriBuilderFromUrl.coords.lat != "0" || geoUriBuilderFromUrl.coords.lon != "0") {
+                geoUriBuilderFromUrl
+            } else {
+                val html = networkTools.getText(url)
+                    ?: return GeoUriAction.Fail("Failed to fetch Google Maps page")
+                val geoUriBuilderFromHtml = parseHtml(html)
+                geoUriBuilderFromHtml ?: geoUriBuilderFromUrl
+            }
+        return GeoUriAction.Open(Uri.parse(geoUriBuilder.toString()))
     }
 }
