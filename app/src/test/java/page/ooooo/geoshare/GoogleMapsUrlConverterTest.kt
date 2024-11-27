@@ -152,6 +152,15 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
+    fun parse_placelistsList() {
+        assertEquals(
+            "geo:0,0",
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/placelists/list/abcdef?g_ep=ghijkl%3D&g_st=isi"))
+                .toString()
+        )
+    }
+
+    @Test
     fun parse_searchCoordinates() {
         assertEquals(
             "geo:48.8584,2.2945",

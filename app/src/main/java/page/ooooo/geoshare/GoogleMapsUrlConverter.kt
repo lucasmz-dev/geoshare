@@ -40,6 +40,7 @@ class GoogleMapsUrlConverter(
         """^/maps/place/$placeRegex/@$coordRegex.*$""".toPattern(),
         """^/maps/place/$coordRegex.*$""".toPattern(),
         """^/maps/place/$placeRegex.*$""".toPattern(),
+        """^/maps/placelists/list/.*$""".toPattern(),
         """^/maps/search/$coordRegex.*$""".toPattern(),
         """^/maps/search/$placeRegex.*$""".toPattern(),
         """^/maps/search/$""".toPattern(),
