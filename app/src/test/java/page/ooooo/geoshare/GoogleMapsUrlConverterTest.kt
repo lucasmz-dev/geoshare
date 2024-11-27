@@ -278,6 +278,15 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
+    fun parse_qParameterCoordinatesWithEmptyPath() {
+        assertEquals(
+            "geo:39.797573,18.370173",
+            googleMapsUrlConverter.parseUrl(URL("https://maps.google.com/?q=39.797573,18.370173&entry=gps&g_ep=abc&shorturl=1"))
+                .toString()
+        )
+    }
+
+    @Test
     fun parse_qParameterPlace() {
         assertEquals(
             "geo:0,0?q=Central%20Park",
@@ -287,10 +296,10 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun parse_qParameterWithoutPath() {
+    fun parse_qParameterPlaceWithoutPath() {
         assertEquals(
-            "geo:39.797573,18.370173",
-            googleMapsUrlConverter.parseUrl(URL("https://maps.google.com/?q=39.797573,18.370173&entry=gps&g_ep=abc&shorturl=1"))
+            "geo:0,0?q=Caf%C3%A9%20Heinemann%2C%20Bismarckstra%C3%9Fe%2091%2C%2041061%20M%C3%B6nchengladbach",
+            googleMapsUrlConverter.parseUrl(URL("https://maps.google.com?q=Caf%C3%A9+Heinemann,+Bismarckstra%C3%9Fe+91,+41061+M%C3%B6nchengladbach"))
                 .toString()
         )
     }
@@ -358,10 +367,18 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun isGoogleMapsSphortUri_mapsAppGooGlCorrect() {
+    fun isGoogleMapsShortUri_mapsAppGooGlCorrect() {
         assertEquals(
             true,
             googleMapsUrlConverter.isShortUrl(URL("https://maps.app.goo.gl/foo"))
+        )
+    }
+
+    @Test
+    fun isGoogleMapsShortUri_mapsAppGooGlWithQueryStringCorrect() {
+        assertEquals(
+            true,
+            googleMapsUrlConverter.isShortUrl(URL("https://maps.app.goo.gl/foo?g_st=isi"))
         )
     }
 
