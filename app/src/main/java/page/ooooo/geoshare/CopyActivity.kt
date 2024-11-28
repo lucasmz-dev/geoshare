@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -27,6 +28,7 @@ class CopyActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val systemHasClipboardEditor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
         lifecycleScope.launch {
             val action = googleMapsUrlConverter.processIntent(
                 intent,
@@ -38,12 +40,16 @@ class CopyActivity : ComponentActivity() {
                 }
 
                 is GeoUriAction.Open -> {
-                    showToast("Copied geo: link to clipboard") // TODO if androidVersion < 13
+                    if (!systemHasClipboardEditor) {
+                        showToast("Copied geo: link to clipboard")
+                    }
                     copy(this@CopyActivity, action.geoUri)
                 }
 
                 is GeoUriAction.OpenUnchanged -> {
-                    showToast("Copied geo: link to clipboard unchanged") // TODO if androidVersion < 13
+                    if (!systemHasClipboardEditor) {
+                        showToast("Copied geo: link to clipboard unchanged")
+                    }
                     copy(this@CopyActivity, action.geoUri)
                 }
 
