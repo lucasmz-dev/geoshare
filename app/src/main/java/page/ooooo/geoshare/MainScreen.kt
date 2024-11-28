@@ -48,7 +48,10 @@ import page.ooooo.geoshare.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
+fun MainScreen(
+    onNavigateToAboutScreen: () -> Unit = {},
+    onNavigateToFaqScreen: () -> Unit = {}
+) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     val appName = stringResource(R.string.app_name)
@@ -72,6 +75,13 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false }
                         ) {
+                            DropdownMenuItem(
+                                text = { Text("FAQ") },
+                                onClick = {
+                                    menuExpanded = false
+                                    onNavigateToFaqScreen()
+                                }
+                            )
                             DropdownMenuItem(
                                 text = { Text("About") },
                                 onClick = {
@@ -119,7 +129,7 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
             }
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 Text(
-                    "$appName will turn the link into a geo: URL and open it with one of your installed apps:",
+                    "$appName will turn the link into a geo: link and open it with one of your installed apps:",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Image(
@@ -145,7 +155,7 @@ fun MainScreen(onNavigateToAboutScreen: () -> Unit = {}) {
                     Icon(painterResource(R.drawable.lightbulb_24px), null)
                     Text(
                         buildAnnotatedString {
-                            append("$appName supports many Google Maps URL formats. Still, if you find a URL that doesn't work, please report an ")
+                            append("$appName supports many Google Maps URL formats. Still, if you find a link that doesn't work, please report an ")
                             withLink(
                                 LinkAnnotation.Url(
                                     "https://github.com/jakubvalenta/geoshare/issues",

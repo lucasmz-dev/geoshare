@@ -43,12 +43,12 @@ class ShareActivity : ComponentActivity() {
                 }
 
                 is GeoUriAction.Open -> {
-                    showToast("Opened geo URL")
+                    showToast("Opened geo: link")
                     open(action.geoUri)
                 }
 
                 is GeoUriAction.OpenUnchanged -> {
-                    showToast("Opened geo URL unchanged")
+                    showToast("Opened geo: link unchanged")
                     open(action.geoUri)
                 }
 

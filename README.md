@@ -2,42 +2,73 @@
 
 # Geo Share
 
-An Android app to turn Google Maps URLs into geo: URLs.
+An Android app to turn Google Maps links into geo: links.
 
 [<img src="https://f-droid.org/badge/get-it-on.png"
-    alt="Get it on F-Droid"
-    height="80">](https://f-droid.org/packages/page.ooooo.geoshare/)
+alt="Get it on F-Droid"
+height="80">](https://f-droid.org/packages/page.ooooo.geoshare/)
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
-    alt="Get it on Izzy on Droid"
-    height="80">](https://apt.izzysoft.de/packages/page.ooooo.geoshare)
+alt="Get it on Izzy on Droid"
+height="80">](https://apt.izzysoft.de/packages/page.ooooo.geoshare)
 
 ## Usage
 
 1. Go to Google Maps or a web browser and share a link with Geo Share:
 
    <img src="./app/src/main/res/drawable-mdpi/share_to_light.png"
-       alt="Screenshot of a Google Maps link being shared with Geo Share"
-       width="540">
+   alt="Screenshot of a Google Maps link being shared with Geo Share"
+   width="540">
 
-2. Geo Share will turn the link into a geo: URL and open it with one of your
+2. Geo Share will turn the link into a geo: link and open it with one of your
    installed apps:
 
    <img src="./app/src/main/res/drawable-mdpi/share_from_light.png"
-       alt="Screenshot of Geo Share sharing a geo: link"
-       width="540">
+   alt="Screenshot of Geo Share sharing a geo: link"
+   width="540">
 
-Geo Share supports many Google Maps URL formats. Still, if you find a URL that
+Geo Share supports many Google Maps URL formats. Still, if you find a link that
 doesn't work, please report an [issue on
 GitHub](https://github.com/jakubvalenta/geoshare/issues).
+
+## How it works & anti-features
+
+There are three scenarios how Geo Share turns a Google Maps URL into a geo: URI.
+Two of them **communicate with Google's servers**.
+
+1. If the Google Maps URL already contains geographical coordinates, then it's
+   parsed and no request to Google's servers is made. Example:
+   `https://www.google.com/maps/place/Central+Park/data=!3d44.4490541!4d26.0888398`
+
+2. If the Google Maps URL doesn't contain geographical coordinates, then an HTTP
+   GET request is made to the Google Maps URL and the coordinates are parsed
+   from the HTML response. Example:
+   `https://www.google.com/maps/place/Central+Park/`
+
+   You can imagine it as such a command:
+
+    ```shell
+    curl https://www.google.com/maps/place/Central+Park/ | grep -E '/@[0-9.,-]+'
+    ```
+
+3. If the Google Maps URL is a short link, then an HTTP HEAD request is made to
+   the short link. Then the full Google Maps URL is read from the response
+   headers and we go to scenario 1. or 2. Notice that in case of scenario 2.,
+   another request will be made, so two requests in total.
+
+   You can imagine it as such a command:
+
+    ```shell
+    curl -I https://maps.app.goo.gl/TmbeHMiLEfTBws9EA | grep location:
+    ```
 
 ## Screenshots
 
 [<img src="./metadata/en-US/images/phoneScreenshots/1.png"
-    alt="Geo Share screenshot"
-    width="270">](./metadata/en-US/images/phoneScreenshots/1.png)
+alt="Geo Share screenshot"
+width="270">](./metadata/en-US/images/phoneScreenshots/1.png)
 [<img src="./metadata/en-US/images/phoneScreenshots/2.png"
-    alt="Geo Share screenshot in dark mode"
-    width="270">](./metadata/en-US/images/phoneScreenshots/2.png)
+alt="Geo Share screenshot in dark mode"
+width="270">](./metadata/en-US/images/phoneScreenshots/2.png)
 
 ## Installation
 
@@ -90,7 +121,7 @@ make sign keystore_path=/path/to/your/keystore.jks
 make install
 ```
 
-### Testing various Google Maps URLs
+### Testing various Google Maps links
 
 ```shell
 adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/plain \

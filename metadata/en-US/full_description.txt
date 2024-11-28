@@ -1,3 +1,8 @@
 <b>Usage</b>
 1. Go to Google Maps or a web browser and share a link with Geo Share.
-2. Geo Share will turn the link into a geo: URL and open it with one of your installed apps.
+2. Geo Share will turn the link into a geo: link and open it with one of your installed apps.
+You can also copy the geo: link into clipboard.
+<b>How it works and anti-features</b>
+Geo Share gets the geographical coordinates required to create a geo: link by parsing the Google Maps URL.
+But not all Google Maps URLs contain coordinates, so in such cases Geo Share communicates with Google to read the coordinates from the HTTP headers or the HTML document of the Google Maps link.
+You can find more information in the app, on its FAQ screen.

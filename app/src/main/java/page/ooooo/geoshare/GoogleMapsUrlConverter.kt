@@ -132,12 +132,12 @@ class GoogleMapsUrlConverter(
         val intentUrl = getIntentUrl(intent) ?: return GeoUriAction.Noop()
         val url = if (isShortUrl(intentUrl)) {
             networkTools.requestLocationHeader(intentUrl)
-                ?: return GeoUriAction.Fail("Failed to resolve short URL")
+                ?: return GeoUriAction.Fail("Failed to resolve short link")
         } else {
             intentUrl
         }
         val geoUriBuilderFromUrl = parseUrl(url)
-            ?: return GeoUriAction.Fail("Failed to create geo URL")
+            ?: return GeoUriAction.Fail("Failed to create geo: link")
         val geoUriBuilder =
             if (geoUriBuilderFromUrl.coords.lat != "0" || geoUriBuilderFromUrl.coords.lon != "0") {
                 geoUriBuilderFromUrl

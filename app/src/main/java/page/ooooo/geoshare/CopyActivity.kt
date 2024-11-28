@@ -21,7 +21,7 @@ class CopyActivity : ComponentActivity() {
     private fun copy(context: Context, geoUri: Uri) {
         val clipboardManager =
             context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("geo URL", geoUri.toString())
+        val clip = ClipData.newPlainText("geo: link", geoUri.toString())
         clipboardManager.setPrimaryClip(clip)
     }
 
@@ -38,12 +38,12 @@ class CopyActivity : ComponentActivity() {
                 }
 
                 is GeoUriAction.Open -> {
-                    showToast("Copied geo URL to clipboard")
+                    showToast("Copied geo: link to clipboard") // TODO if androidVersion < 13
                     copy(this@CopyActivity, action.geoUri)
                 }
 
                 is GeoUriAction.OpenUnchanged -> {
-                    showToast("Copied geo URL to clipboard unchanged")
+                    showToast("Copied geo: link to clipboard unchanged") // TODO if androidVersion < 13
                     copy(this@CopyActivity, action.geoUri)
                 }
 

@@ -13,8 +13,14 @@ fun MainNavigation() {
         composable("about") {
             AboutScreen(onNavigateToMainScreen = { navController.navigate("main") })
         }
+        composable("faq") {
+            FaqScreen(onNavigateToMainScreen = { navController.navigate("main") })
+        }
         composable("main") {
-            MainScreen(onNavigateToAboutScreen = { navController.navigate("about") })
+            MainScreen(
+                onNavigateToAboutScreen = { navController.navigate("about") },
+                onNavigateToFaqScreen = { navController.navigate("faq") }
+            )
         }
     }
 }

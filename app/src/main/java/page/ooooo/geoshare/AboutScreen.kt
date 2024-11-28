@@ -137,8 +137,7 @@ fun AboutScreen(
                 append("Your feedback is welcome. You can reach me at ")
                 withLink(
                     LinkAnnotation.Url(
-                        "mailto:jakub@jakubvalenta.cz",
-                        TextLinkStyles(
+                        "mailto:jakub@jakubvalenta.cz", TextLinkStyles(
                             style = SpanStyle(
                                 color = MaterialTheme.colorScheme.tertiary,
                                 textDecoration = TextDecoration.Underline
