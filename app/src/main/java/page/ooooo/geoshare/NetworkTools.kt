@@ -35,7 +35,10 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
                 }
                 log.w(null, "Received HTTP code $responseCode for $url")
             } catch (e: Exception) {
-                log.w(null, e.message ?: "Unknown network error for $url")
+                log.w(
+                    null,
+                    "Network error for $url ${log.getStackTraceString(e)}"
+                )
             } finally {
                 connection.disconnect()
             }
@@ -60,7 +63,10 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
                 }
                 log.w(null, "Received HTTP code $responseCode for $url")
             } catch (e: Exception) {
-                log.w(null, e.message ?: "Unknown network error for $url")
+                log.w(
+                    null,
+                    "Network error for $url ${log.getStackTraceString(e)}"
+                )
             } finally {
                 connection.disconnect()
             }
