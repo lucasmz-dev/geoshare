@@ -1,7 +1,7 @@
 package page.ooooo.geoshare
 
 import androidx.compose.ui.util.fastJoinToString
-import java.util.regex.Matcher
+import com.google.re2j.Matcher
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt

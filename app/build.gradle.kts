@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "page.ooooo.geoshare"
-        minSdk = 26
+        minSdk = 25
         targetSdk = 35
         versionCode = 7
         versionName = "1.4.0"
@@ -32,11 +32,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_16
+        targetCompatibility = JavaVersion.VERSION_16
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "16"
     }
     buildFeatures {
         compose = true
@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.re2j)
     testImplementation(libs.junit)
     testImplementation(libs.mockitoCore)
     testImplementation(libs.kotlinx.coroutines.test)

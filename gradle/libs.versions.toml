@@ -11,6 +11,7 @@ composeBom = "2024.11.00"
 mockitoCore = "5.14.2"
 kotlinxCoroutinesTest = "1.9.0"
 navigationCompose = "2.8.4"
+re2j = "1.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +31,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 mockitoCore = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+re2j = { group = "com.google.re2j", name = "re2j", version.ref = "re2j" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

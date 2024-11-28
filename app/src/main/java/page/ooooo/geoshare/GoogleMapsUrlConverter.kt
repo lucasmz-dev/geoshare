@@ -3,7 +3,7 @@ package page.ooooo.geoshare
 import android.content.Intent
 import android.net.Uri
 import java.net.URL
-import java.util.regex.Pattern
+import com.google.re2j.Pattern
 
 sealed class GeoUriAction {
     data class Open(val geoUri: Uri) : GeoUriAction()
@@ -18,39 +18,39 @@ class GoogleMapsUrlConverter(
 ) {
 
     val hostPattern =
-        """^((www|maps)\.)?google(\.[a-z]{2,3})?\.[a-z]{2,3}$""".toPattern()
+        Pattern.compile("""^((www|maps)\.)?google(\.[a-z]{2,3})?\.[a-z]{2,3}$""")
     val coordRegex =
-        """\+?(?<lat>-?\d{1,2}(\.\d{1,15})?),[+\s]?(?<lon>-?\d{1,3}(\.\d{1,15})?)"""
-    val coordPattern = coordRegex.toPattern()
+        """\+?(?P<lat>-?\d{1,2}(\.\d{1,15})?),[+\s]?(?P<lon>-?\d{1,3}(\.\d{1,15})?)"""
+    val coordPattern = Pattern.compile(coordRegex)
     val dataCoordRegex =
-        """!3d(?<lat>-?\d{1,2}(\.\d{1,15})?)!4d(?<lon>-?\d{1,3}(\.\d{1,15})?)"""
-    val htmlCoordRegex = """/@$coordRegex""".toPattern()
-    val zoomRegex = """(?<z>\d{1,2}(\.\d{1,15})?)"""
-    val zoomPattern = zoomRegex.toPattern()
-    val queryPattern = """(?<q>.+)""".toPattern()
-    val placeRegex = """(?<q>[^/]+)"""
+        """!3d(?P<lat>-?\d{1,2}(\.\d{1,15})?)!4d(?P<lon>-?\d{1,3}(\.\d{1,15})?)"""
+    val htmlCoordRegex = Pattern.compile("""/@$coordRegex""")
+    val zoomRegex = """(?P<z>\d{1,2}(\.\d{1,15})?)"""
+    val zoomPattern = Pattern.compile(zoomRegex)
+    val queryPattern = Pattern.compile("""(?P<q>.+)""")
+    val placeRegex = """(?P<q>[^/]+)"""
     val pathPatterns = listOf(
-        """^/maps/.*/@[\d.,+-]+,${zoomRegex}z/data=.*$dataCoordRegex.*$""".toPattern(),
-        """^/maps/.*/data=.*$dataCoordRegex.*$""".toPattern(),
-        """^/maps/@$coordRegex,${zoomRegex}z.*$""".toPattern(),
-        """^/maps/@$coordRegex.*$""".toPattern(),
-        """^/maps/@$""".toPattern(),
-        """^/maps/place/$coordRegex/@[\d.,+-]+,${zoomRegex}z.*$""".toPattern(),
-        """^/maps/place/$placeRegex/@$coordRegex,${zoomRegex}z.*$""".toPattern(),
-        """^/maps/place/$placeRegex/@$coordRegex.*$""".toPattern(),
-        """^/maps/place/$coordRegex.*$""".toPattern(),
-        """^/maps/place/$placeRegex.*$""".toPattern(),
-        """^/maps/placelists/list/.*$""".toPattern(),
-        """^/maps/search/$coordRegex.*$""".toPattern(),
-        """^/maps/search/$placeRegex.*$""".toPattern(),
-        """^/maps/search/$""".toPattern(),
-        """^/maps/dir/.*/$coordRegex/data[^/]*$""".toPattern(),
-        """^/maps/dir/.*/$placeRegex/data[^/]*$""".toPattern(),
-        """^/maps/dir/.*/$coordRegex$""".toPattern(),
-        """^/maps/dir/.*/$placeRegex$""".toPattern(),
-        """^/maps/dir/$""".toPattern(),
-        """^/maps$""".toPattern(),
-        """^/?$""".toPattern(),
+        Pattern.compile("""^/maps/.*/@[\d.,+-]+,${zoomRegex}z/data=.*$dataCoordRegex.*$"""),
+        Pattern.compile("""^/maps/.*/data=.*$dataCoordRegex.*$"""),
+        Pattern.compile("""^/maps/@$coordRegex,${zoomRegex}z.*$"""),
+        Pattern.compile("""^/maps/@$coordRegex.*$"""),
+        Pattern.compile("""^/maps/@$"""),
+        Pattern.compile("""^/maps/place/$coordRegex/@[\d.,+-]+,${zoomRegex}z.*$"""),
+        Pattern.compile("""^/maps/place/$placeRegex/@$coordRegex,${zoomRegex}z.*$"""),
+        Pattern.compile("""^/maps/place/$placeRegex/@$coordRegex.*$"""),
+        Pattern.compile("""^/maps/place/$coordRegex.*$"""),
+        Pattern.compile("""^/maps/place/$placeRegex.*$"""),
+        Pattern.compile("""^/maps/placelists/list/.*$"""),
+        Pattern.compile("""^/maps/search/$coordRegex.*$"""),
+        Pattern.compile("""^/maps/search/$placeRegex.*$"""),
+        Pattern.compile("""^/maps/search/$"""),
+        Pattern.compile("""^/maps/dir/.*/$coordRegex/data[^/]*$"""),
+        Pattern.compile("""^/maps/dir/.*/$placeRegex/data[^/]*$"""),
+        Pattern.compile("""^/maps/dir/.*/$coordRegex$"""),
+        Pattern.compile("""^/maps/dir/.*/$placeRegex$"""),
+        Pattern.compile("""^/maps/dir/$"""),
+        Pattern.compile("""^/maps$"""),
+        Pattern.compile("""^/?$"""),
     )
     val queryPatterns = hashMapOf<String, List<Pattern>>(
         "center" to listOf(coordPattern),
@@ -61,7 +61,7 @@ class GoogleMapsUrlConverter(
         "zoom" to listOf(zoomPattern)
     )
     val shortUrlPattern =
-        """^https?://(maps\.app\.goo\.gl/|(app\.)?goo\.gl/maps/).+$""".toPattern()
+        Pattern.compile("""^https?://(maps\.app\.goo\.gl/|(app\.)?goo\.gl/maps/).+$""")
 
     fun isShortUrl(url: URL): Boolean =
         shortUrlPattern.matcher(url.toString()).matches()
