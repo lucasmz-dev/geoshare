@@ -24,7 +24,6 @@ class GoogleMapsUrlConverter(
     val coordPattern = Pattern.compile(coordRegex)
     val dataCoordRegex =
         """!3d(?P<lat>-?\d{1,2}(\.\d{1,15})?)!4d(?P<lon>-?\d{1,3}(\.\d{1,15})?)"""
-    val htmlCoordRegex = Pattern.compile("""/@$coordRegex""")
     val zoomRegex = """(?P<z>\d{1,2}(\.\d{1,15})?)"""
     val zoomPattern = Pattern.compile(zoomRegex)
     val queryPattern = Pattern.compile("""(?P<q>.+)""")
@@ -59,6 +58,10 @@ class GoogleMapsUrlConverter(
         "query" to listOf(coordPattern, queryPattern),
         "viewpoint" to listOf(coordPattern),
         "zoom" to listOf(zoomPattern)
+    )
+    val htmlPatterns = listOf(
+        Pattern.compile("""/@$coordRegex"""),
+        Pattern.compile("""\[null,null,$coordRegex\]"""),
     )
     val shortUrlPattern =
         Pattern.compile("""^https?://(maps\.app\.goo\.gl/|(app\.)?goo\.gl/maps/).+$""")
@@ -110,8 +113,11 @@ class GoogleMapsUrlConverter(
     }
 
     fun parseHtml(html: String): GeoUriBuilder? {
-        val m = htmlCoordRegex.matcher(html)
-        if (!m.find()) {
+        val m = htmlPatterns.firstNotNullOfOrNull {
+            val m = it.matcher(html)
+            if (m.find()) m else null
+        }
+        if (m == null) {
             log.w(null, "Failed to parse Google Maps HTML document")
             return null
         }

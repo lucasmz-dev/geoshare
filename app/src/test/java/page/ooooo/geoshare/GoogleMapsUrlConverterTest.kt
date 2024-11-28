@@ -357,12 +357,23 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
-    fun parseHtml_success() {
+    fun parseHtml_link() {
         val html =
             this.javaClass.classLoader!!.getResource("TmbeHMiLEfTBws9EA.html")!!
                 .readText()
         assertEquals(
             "geo:44.4490541,26.0888398",
+            googleMapsUrlConverter.parseHtml(html).toString()
+        )
+    }
+
+    @Test
+    fun parseHtml_array() {
+        val html =
+            this.javaClass.classLoader!!.getResource("mfmnkPs6RuGyp0HOmXLSKg.html")!!
+                .readText()
+        assertEquals(
+            "geo:59.1293656,11.4585672",
             googleMapsUrlConverter.parseHtml(html).toString()
         )
     }
