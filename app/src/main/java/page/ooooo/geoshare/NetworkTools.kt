@@ -50,7 +50,7 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
             val connection = url.openConnection() as HttpURLConnection
             connection.connectTimeout = connectTimeout
             connection.readTimeout = readTimeout
-            connection.instanceFollowRedirects = false
+            connection.instanceFollowRedirects = true
             // Remove User-Agent, otherwise we receive Google Maps Lite HTML,
             // which doesn't contain coordinates.
             connection.setRequestProperty("User-Agent", "")
