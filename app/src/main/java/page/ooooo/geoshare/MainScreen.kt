@@ -108,13 +108,17 @@ fun MainScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
-                .padding(horizontal = Spacing.windowPadding)
-                .padding(top = Spacing.medium)
+                .padding(
+                    horizontal = Spacing.windowPadding
+                )
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+            Column(
+                Modifier.padding(top = Spacing.small),
+                verticalArrangement = Arrangement.spacedBy(Spacing.small)
+            ) {
                 Text(
                     "Go to Google Maps or a web browser and share a link with $appName:",
                     style = MaterialTheme.typography.bodyMedium
@@ -141,6 +145,7 @@ fun MainScreen(
                 )
             }
             Card(
+                Modifier.padding(bottom = Spacing.small),
                 shape = MaterialTheme.shapes.extraLarge,
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,

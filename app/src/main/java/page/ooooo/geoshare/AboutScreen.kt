@@ -34,6 +34,7 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,101 +69,94 @@ fun AboutScreen(
                 .consumeWindowInsets(innerPadding)
                 .padding(horizontal = Spacing.windowPadding)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(Spacing.medium)
+                .verticalScroll(rememberScrollState())
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = "Application icon",
                 modifier = Modifier
-                    .size(192.dp)
+                    .size(144.dp)
                     .align(Alignment.CenterHorizontally),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
-            val appName = stringResource(R.string.app_name)
-            val appVersion = packageInfo?.versionName
-            Text(
-                appName + if (appVersion != null) " $appVersion" else "",
-                style = MaterialTheme.typography.headlineLarge
-            )
-            Text(buildAnnotatedString {
-                append("$appName is a free and open-source app distributed under the ")
-                withLink(
-                    LinkAnnotation.Url(
-                        "https://www.gnu.org/licenses/gpl-3.0.txt",
-                        TextLinkStyles(
-                            style = SpanStyle(
-                                color = MaterialTheme.colorScheme.tertiary,
-                                textDecoration = TextDecoration.Underline
-                            )
-                        )
-                    )
-                ) {
-                    append("GPL 3.0")
-                }
-                append(" or later license.")
-            })
-            Text(buildAnnotatedString {
-                append("You can find the code at ")
-                withLink(
-                    LinkAnnotation.Url(
-                        "https://github.com/jakubvalenta/geoshare",
-                        TextLinkStyles(
-                            style = SpanStyle(
-                                color = MaterialTheme.colorScheme.tertiary,
-                                textDecoration = TextDecoration.Underline
-                            )
-                        )
-                    )
-                ) {
-                    append("GitHub")
-                }
-                append(", where you can also report ")
-                withLink(
-                    LinkAnnotation.Url(
-                        "https://github.com/jakubvalenta/geoshare/issues",
-                        TextLinkStyles(
-                            style = SpanStyle(
-                                color = MaterialTheme.colorScheme.tertiary,
-                                textDecoration = TextDecoration.Underline
-                            )
-                        )
-                    )
-                ) {
-                    append("issues")
-                }
-                append(".")
-            })
-            Text(buildAnnotatedString {
-                append("Your feedback is welcome. You can reach me at ")
-                withLink(
-                    LinkAnnotation.Url(
-                        "mailto:jakub@jakubvalenta.cz", TextLinkStyles(
-                            style = SpanStyle(
-                                color = MaterialTheme.colorScheme.tertiary,
-                                textDecoration = TextDecoration.Underline
-                            )
-                        )
-                    )
-                ) {
-                    append("jakub@jakubvalenta.cz")
-                }
-                append(".")
-            })
-            Text("If you enjoy using $appName, please donate to my Ko-Fi account. Your donations keep me motivated to work on the project.")
-            Button(
-                { uriHandler.openUri("https://ko-fi.com/jakubvalenta") },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                val appName = stringResource(R.string.app_name)
+                val appVersion = packageInfo?.versionName
+                Text(
+                    appName + if (appVersion != null) " $appVersion" else "",
+                    style = MaterialTheme.typography.headlineSmall
                 )
-            ) {
-                Text("donate ")
-                Icon(
-                    painterResource(R.drawable.open_in_new_24px),
-                    contentDescription = "External link",
-                    modifier = Modifier.size(16.dp)
+                val paragraphStyle = MaterialTheme.typography.bodyMedium.copy(
+                    lineBreak = LineBreak.Paragraph
                 )
+                val linkStyle = SpanStyle(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    textDecoration = TextDecoration.Underline
+                )
+                Text(buildAnnotatedString {
+                    append("$appName is a free and open-source app distributed under the ")
+                    withLink(
+                        LinkAnnotation.Url(
+                            "https://www.gnu.org/licenses/gpl-3.0.txt",
+                            TextLinkStyles(linkStyle)
+                        )
+                    ) {
+                        append("GPL 3.0")
+                    }
+                    append(" or later license.")
+                }, style = paragraphStyle)
+                Text(buildAnnotatedString {
+                    append("You can find the code at ")
+                    withLink(
+                        LinkAnnotation.Url(
+                            "https://github.com/jakubvalenta/geoshare",
+                            TextLinkStyles(linkStyle)
+                        )
+                    ) {
+                        append("GitHub")
+                    }
+                    append(", where you can also report ")
+                    withLink(
+                        LinkAnnotation.Url(
+                            "https://github.com/jakubvalenta/geoshare/issues",
+                            TextLinkStyles(linkStyle)
+                        )
+                    ) {
+                        append("issues")
+                    }
+                    append(".")
+                }, style = paragraphStyle)
+                Text(buildAnnotatedString {
+                    append("Your feedback is welcome. You can reach me at ")
+                    withLink(
+                        LinkAnnotation.Url(
+                            "mailto:jakub@jakubvalenta.cz",
+                            TextLinkStyles(linkStyle)
+                        )
+                    ) {
+                        append("jakub@jakubvalenta.cz")
+                    }
+                    append(".")
+                }, style = paragraphStyle)
+                Text(
+                    "If you enjoy using $appName, please donate to my Ko-Fi account. Your donations keep me motivated to work on the project.",
+                    style = paragraphStyle
+                )
+                Button(
+                    { uriHandler.openUri("https://ko-fi.com/jakubvalenta") },
+                    Modifier.padding(bottom = Spacing.small),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text("donate ")
+                    Icon(
+                        painterResource(R.drawable.open_in_new_24px),
+                        contentDescription = "External link",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
         }
     }
