@@ -1,1 +1,1 @@
-Turn Google Maps links into a geo: links
+Turn Google Maps links into geo: links
