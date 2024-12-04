@@ -1,4 +1,4 @@
-package page.ooooo.geoshare
+package page.ooooo.geoshare.lib
 
 import androidx.compose.ui.util.fastJoinToString
 import com.google.re2j.Matcher
@@ -51,8 +51,8 @@ data class GeoUriParams(
 }
 
 data class GeoUriBuilder(private val uriQuote: UriQuote = DefaultUriQuote()) {
-    val coords: GeoUriCoords = GeoUriCoords()
-    val params: GeoUriParams = GeoUriParams(uriQuote = uriQuote)
+    var coords: GeoUriCoords = GeoUriCoords()
+    var params: GeoUriParams = GeoUriParams(uriQuote = uriQuote)
 
     fun fromMatcher(m: Matcher) {
         coords.fromMatcher(m)

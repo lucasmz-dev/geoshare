@@ -31,14 +31,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.LineBreak
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import page.ooooo.geoshare.components.ParagraphText
+import page.ooooo.geoshare.components.linkStyle
 import page.ooooo.geoshare.ui.theme.AppTheme
 import page.ooooo.geoshare.ui.theme.Spacing
 
@@ -84,33 +83,26 @@ fun AboutScreen(
                 val appVersion = packageInfo?.versionName
                 Text(
                     appName + if (appVersion != null) " $appVersion" else "",
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
                 )
-                val paragraphStyle = MaterialTheme.typography.bodyMedium.copy(
-                    lineBreak = LineBreak.Paragraph
-                )
-                val linkStyle = SpanStyle(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    textDecoration = TextDecoration.Underline
-                )
-                Text(buildAnnotatedString {
+                ParagraphText(buildAnnotatedString {
                     append("$appName is a free and open-source app distributed under the ")
                     withLink(
                         LinkAnnotation.Url(
                             "https://www.gnu.org/licenses/gpl-3.0.txt",
-                            TextLinkStyles(linkStyle)
+                            TextLinkStyles(linkStyle())
                         )
                     ) {
                         append("GPL 3.0")
                     }
                     append(" or later license.")
-                }, style = paragraphStyle)
-                Text(buildAnnotatedString {
+                })
+                ParagraphText(buildAnnotatedString {
                     append("You can find the code at ")
                     withLink(
                         LinkAnnotation.Url(
                             "https://github.com/jakubvalenta/geoshare",
-                            TextLinkStyles(linkStyle)
+                            TextLinkStyles(linkStyle())
                         )
                     ) {
                         append("GitHub")
@@ -119,42 +111,41 @@ fun AboutScreen(
                     withLink(
                         LinkAnnotation.Url(
                             "https://github.com/jakubvalenta/geoshare/issues",
-                            TextLinkStyles(linkStyle)
+                            TextLinkStyles(linkStyle())
                         )
                     ) {
                         append("issues")
                     }
                     append(".")
-                }, style = paragraphStyle)
-                Text(buildAnnotatedString {
+                })
+                ParagraphText(buildAnnotatedString {
                     append("Your feedback is welcome. You can reach me at ")
                     withLink(
                         LinkAnnotation.Url(
                             "mailto:jakub@jakubvalenta.cz",
-                            TextLinkStyles(linkStyle)
+                            TextLinkStyles(linkStyle())
                         )
                     ) {
                         append("jakub@jakubvalenta.cz")
                     }
                     append(".")
-                }, style = paragraphStyle)
-                Text(
-                    "If you enjoy using $appName, please donate to my Ko-Fi account. Your donations keep me motivated to work on the project.",
-                    style = paragraphStyle
+                })
+                ParagraphText(
+                    "If you enjoy using $appName, please donate to my Ko-Fi account. Your donations keep me motivated to work on the project."
                 )
                 Button(
                     { uriHandler.openUri("https://ko-fi.com/jakubvalenta") },
                     Modifier.padding(bottom = Spacing.small),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
                     )
                 ) {
                     Text("donate ")
                     Icon(
                         painterResource(R.drawable.open_in_new_24px),
                         contentDescription = "External link",
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                 }
             }
@@ -165,9 +156,16 @@ fun AboutScreen(
 // Previews
 
 @Preview(showBackground = true)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun AboutScreenPreview() {
+private fun DefaultPreview() {
+    AppTheme {
+        AboutScreen()
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun DarkPreview() {
     AppTheme {
         AboutScreen()
     }

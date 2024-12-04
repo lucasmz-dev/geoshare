@@ -11,15 +11,27 @@ fun MainNavigation() {
 
     NavHost(navController = navController, startDestination = "main") {
         composable("about") {
-            AboutScreen(onNavigateToMainScreen = { navController.navigate("main") })
+            AboutScreen(
+                onNavigateToMainScreen = { navController.navigate("main") },
+            )
         }
         composable("faq") {
-            FaqScreen(onNavigateToMainScreen = { navController.navigate("main") })
+            FaqScreen(
+                onNavigateToMainScreen = { navController.navigate("main") },
+                onNavigateToUserPreferencesScreen = { navController.navigate("user_preferences") }
+            )
         }
         composable("main") {
             MainScreen(
                 onNavigateToAboutScreen = { navController.navigate("about") },
-                onNavigateToFaqScreen = { navController.navigate("faq") }
+                onNavigateToFaqScreen = { navController.navigate("faq") },
+                onNavigateToUserPreferencesScreen = { navController.navigate("user_preferences") }
+            )
+        }
+        composable("user_preferences") {
+            UserPreferencesScreen(
+                onNavigateToMainScreen = { navController.navigate("main") },
+                onNavigateToFaqScreen = { navController.navigate("faq") },
             )
         }
     }

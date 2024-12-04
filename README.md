@@ -33,33 +33,41 @@ GitHub](https://github.com/jakubvalenta/geoshare/issues).
 ## How it works & anti-features
 
 There are three scenarios how Geo Share turns a Google Maps URL into a geo: URI.
-Two of them **communicate with Google's servers**.
+Two of them **can connect to Google's servers**.
 
-1. If the Google Maps URL already contains geographical coordinates, then it's
-   parsed and no request to Google's servers is made. Example:
-   `https://www.google.com/maps/place/Central+Park/data=!3d44.4490541!4d26.0888398`
+1. If the Google Maps URL already contains geographical coordinates (for example
+   `https://www.google.com/maps/place/Central+Park/data=!3d44.4490541!4d26.0888398`),
+   then it's parsed and no request to Google's servers is made.
 
-2. If the Google Maps URL doesn't contain geographical coordinates, then an HTTP
-   GET request is made to the Google Maps URL and the coordinates are parsed
-   from the HTML response. Example:
-   `https://www.google.com/maps/place/Central+Park/`
+2. If the Google Maps URL doesn't contain geographical coordinates (for example
+   `https://www.google.com/maps/place/Central+Park/`), then Geo Share asks you
+   if it can connect to Google.
 
-   You can imagine it as such a command:
+   If you allow connecting to Google, then Geo Share makes an **HTTP GET
+   request** to Google Maps and parses the coordinates from the HTML response.
+   You can imagine it as `curl https://www.google.com/maps/place/Central+Park/ |
+   grep -E '/@[0-9.,-]+'`.
 
-    ```shell
-    curl https://www.google.com/maps/place/Central+Park/ | grep -E '/@[0-9.,-]+'
-    ```
+   If you don't allow connecting to Google, then Geo Share creates a geo: link
+   with a place search term (for example `geo:0,0?q=Central%20Park`).
 
-3. If the Google Maps URL is a short link, then an HTTP HEAD request is made to
-   the short link. Then the full Google Maps URL is read from the response
-   headers and we go to scenario 1. or 2. Notice that in case of scenario 2.,
-   another request will be made, so two requests in total.
+3. If the Google Maps URL is a short link (for example
+   `https://maps.app.goo.gl/TmbeHMiLEfTBws9EA`), then Geo Share asks you if it
+   can connect to Google.
 
-   You can imagine it as such a command:
+   If you allow connecting to Google, then Geo Share makes an **HTTP HEAD
+   request** to the short link and reads the full link from the response
+   headers. You can imagine it as `curl -I
+   https://maps.app.goo.gl/TmbeHMiLEfTBws9EA | grep location:`. Then Geo Share
+   continues with scenario 1. or 2., depending on whether the full link contains
+   coordinates or not. In case of scenario 2., another connection to Google will
+   be made, but this time without asking.
 
-    ```shell
-    curl -I https://maps.app.goo.gl/TmbeHMiLEfTBws9EA | grep location:
-    ```
+   If you don't allow connecting to Google, then Geo Share cancels the creation
+   of the geo: link.
+
+Go to Preferences to permanently allow or deny connecting to Google instead of
+always asking, which is the default.
 
 ## Screenshots
 

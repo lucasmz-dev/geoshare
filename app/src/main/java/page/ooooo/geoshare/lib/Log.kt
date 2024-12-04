@@ -1,4 +1,4 @@
-package page.ooooo.geoshare
+package page.ooooo.geoshare.lib
 
 import android.util.Log
 

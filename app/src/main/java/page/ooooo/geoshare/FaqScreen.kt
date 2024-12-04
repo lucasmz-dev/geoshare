@@ -21,15 +21,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineBreak
-import androidx.compose.ui.text.style.TextIndent
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
+import page.ooooo.geoshare.components.ListItemParagraphText
+import page.ooooo.geoshare.components.ListItemText
+import page.ooooo.geoshare.components.ParagraphText
+import page.ooooo.geoshare.components.codeStyle
+import page.ooooo.geoshare.components.linkStyle
 import page.ooooo.geoshare.ui.theme.AppTheme
 import page.ooooo.geoshare.ui.theme.Spacing
 
@@ -37,6 +41,7 @@ import page.ooooo.geoshare.ui.theme.Spacing
 @Composable
 fun FaqScreen(
     onNavigateToMainScreen: () -> Unit = {},
+    onNavigateToUserPreferencesScreen: () -> Unit = {},
 ) {
     Scaffold(topBar = {
         TopAppBar(title = { Text("FAQ") }, navigationIcon = {
@@ -60,75 +65,85 @@ fun FaqScreen(
             val appName = stringResource(R.string.app_name)
             Text(
                 "How it works & anti-features",
-                Modifier.padding(top = Spacing.small),
-                style = MaterialTheme.typography.headlineSmall
+                Modifier.padding(top = Spacing.tiny),
+                style = MaterialTheme.typography.headlineSmall,
             )
-            val paragraphStyle = MaterialTheme.typography.bodyMedium.copy(
-                lineBreak = LineBreak.Paragraph
-            )
-            val codeStyle = SpanStyle(
-                color = MaterialTheme.colorScheme.secondary,
-                fontFamily = FontFamily.Monospace
-            )
-            val listItemIndent = 15.sp
-            val listItemStyle = paragraphStyle.copy(
-                textIndent = TextIndent(restLine = listItemIndent)
-            )
-            val listItemParagraphStyle = listItemStyle.copy(
-                textIndent = TextIndent(
-                    firstLine = listItemIndent, restLine = listItemIndent
-                )
-            )
-            Text(
-                buildAnnotatedString {
-                    append("There are three scenarios how $appName turns a Google Maps URL into a geo: URI. Two of them ")
-                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("communicate with Google's servers")
-                    }
-                    append(".")
-                }, style = paragraphStyle
-            )
-            Text(buildAnnotatedString {
-                append("1. If the Google Maps URL already contains geographical coordinates, then it's parsed and no request to Google's servers is made. Example: ")
-                withStyle(codeStyle) {
+            ParagraphText(buildAnnotatedString {
+                append("There are three scenarios how $appName turns a Google Maps URL into a geo: URI. Two of them ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("can connect to Google's servers")
+                }
+                append(".")
+            })
+            ListItemText(buildAnnotatedString {
+                append("1. If the Google Maps URL already contains geographical coordinates (for example ")
+                withStyle(codeStyle()) {
                     append(
                         "https://www.google.com/maps/place/Central+Park/data=!3d44.4490541!4d26.0888398"
                     )
                 }
-            }, style = listItemStyle)
-            Text(buildAnnotatedString {
-                append("2. If the Google Maps URL doesn't contain geographical coordinates, then an HTTP GET request is made to the Google Maps URL and the coordinates are parsed from the HTML response. Example: ")
-                withStyle(codeStyle) {
-                    append("https://www.google.com/maps/place/Central+Park/")
+                append("), then it's parsed and no request to Google's servers is made.")
+            })
+            ListItemText(buildAnnotatedString {
+                append("2. If the Google Maps URL doesn't contain geographical coordinates (for example ")
+                withStyle(codeStyle()) {
+                    append(
+                        "https://www.google.com/maps/place/Central+Park/"
+                    )
                 }
-            }, style = listItemStyle)
-            Text(
-                "You can imagine it as such a command:",
-                style = listItemParagraphStyle
-            )
-            Text(
+                append("), then $appName asks you if it can connect to Google.")
+            })
+            ListItemParagraphText(buildAnnotatedString {
+                append("If you allow connecting to Google, then $appName makes an ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("HTTP GET request")
+                }
+                append(" to Google Maps and parses the coordinates from the HTML response. You can imagine it as ")
+                withStyle(codeStyle()) {
+                    append("curl https://www.google.com/maps/place/Central+Park/ | grep -E '/@[0-9.,-]+'")
+                }
+                append(".")
+            })
+            ListItemParagraphText(buildAnnotatedString {
+                append("If you don't allow connecting to Google, then $appName creates a geo: link with a place search term (for example ")
+                withStyle(codeStyle()) {
+                    append("geo:0,0?q=Central%20Park")
+                }
+                append(").")
+            })
+            ListItemText(buildAnnotatedString {
+                append("3. If the Google Maps URL is a short link (for example ")
+                withStyle(codeStyle()) {
+                    append("https://maps.app.goo.gl/TmbeHMiLEfTBws9EA")
+                }
+                append("), then $appName asks you if it can connect to Google.")
+            })
+            ListItemParagraphText(buildAnnotatedString {
+                append("If you allow connecting to Google, then $appName makes an ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append("HTTP HEAD request")
+                }
+                append(" to the short link and reads the full link from the response headers. You can imagine it as ")
+                withStyle(codeStyle()) {
+                    append("curl -I https://maps.app.goo.gl/TmbeHMiLEfTBws9EA | grep location:")
+                }
+                append(". Then $appName continues with scenario 1. or 2., depending on whether the full link contains coordinates or not. In case of scenario 2., another connection to Google will be made, but this time without asking.")
+            })
+            ListItemParagraphText("If you don't allow connecting to Google, then $appName cancels the creation of the geo: link.")
+            ParagraphText(
                 buildAnnotatedString {
-                    withStyle(codeStyle) {
-                        append("curl https://www.google.com/maps/place/Central+Park/ | grep -E '/@[0-9.,-]+'")
+                    append("Go to ")
+                    withLink(
+                        LinkAnnotation.Clickable(
+                            "preferences",
+                            TextLinkStyles(linkStyle()),
+                        ) { onNavigateToUserPreferencesScreen() }
+                    ) {
+                        append("Preferences")
                     }
-                }, style = listItemParagraphStyle
-            )
-            Text(
-                "3. If the Google Maps URL is a short link, then an HTTP HEAD request is made to the short link. Then the full Google Maps URL is read from the response headers and we go to scenario 1. or 2. Notice that in case of scenario 2., another request will be made, so two requests in total.",
-                style = listItemStyle
-            )
-            Text(
-                "You can imagine it as such a command:",
-                style = listItemParagraphStyle
-            )
-            Text(
-                buildAnnotatedString {
-                    withStyle(codeStyle) {
-                        append("curl -I https://maps.app.goo.gl/TmbeHMiLEfTBws9EA | grep location:")
-                    }
+                    append(" to permanently allow or deny connecting to Google instead of always asking, which is the default.")
                 },
                 Modifier.padding(bottom = Spacing.small),
-                style = listItemParagraphStyle
             )
         }
     }
@@ -137,9 +152,16 @@ fun FaqScreen(
 // Previews
 
 @Preview(showBackground = true)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun FaqScreenPreview() {
+private fun DefaultPreview() {
+    AppTheme {
+        FaqScreen()
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun DarkPreview() {
     AppTheme {
         FaqScreen()
     }

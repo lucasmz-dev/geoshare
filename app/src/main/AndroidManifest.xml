@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <application
+        android:name=".Application"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -18,7 +19,7 @@
             android:name="page.ooooo.geoshare.CopyActivity"
             android:exported="true"
             android:label="@string/copy_activity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            android:theme="@style/Theme.Geoshare.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -104,7 +105,7 @@
             android:name="page.ooooo.geoshare.ShareActivity"
             android:exported="true"
             android:label="@string/share_activity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            android:theme="@style/Theme.Geoshare.Translucent">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 

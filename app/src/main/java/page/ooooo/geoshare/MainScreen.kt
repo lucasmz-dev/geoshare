@@ -50,11 +50,11 @@ import page.ooooo.geoshare.ui.theme.Spacing
 @Composable
 fun MainScreen(
     onNavigateToAboutScreen: () -> Unit = {},
-    onNavigateToFaqScreen: () -> Unit = {}
+    onNavigateToFaqScreen: () -> Unit = {},
+    onNavigateToUserPreferencesScreen: () -> Unit = {},
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
-
     val appName = stringResource(R.string.app_name)
+    var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -75,6 +75,13 @@ fun MainScreen(
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false }
                         ) {
+                            DropdownMenuItem(
+                                text = { Text("Preferences") },
+                                onClick = {
+                                    menuExpanded = false
+                                    onNavigateToUserPreferencesScreen()
+                                }
+                            )
                             DropdownMenuItem(
                                 text = { Text("FAQ") },
                                 onClick = {
@@ -186,9 +193,16 @@ fun MainScreen(
 // Previews
 
 @Preview(showBackground = true)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun MainScreenPreview() {
+private fun DefaultPreview() {
+    AppTheme {
+        MainScreen()
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun DarkPreview() {
     AppTheme {
         MainScreen()
     }

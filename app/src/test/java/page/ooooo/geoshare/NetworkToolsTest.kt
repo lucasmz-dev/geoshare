@@ -5,6 +5,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
+import page.ooooo.geoshare.lib.FakeLog
+import page.ooooo.geoshare.lib.NetworkTools
 import java.net.HttpURLConnection
 import java.net.URL
 

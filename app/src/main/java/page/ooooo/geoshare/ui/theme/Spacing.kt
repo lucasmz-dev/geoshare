@@ -3,6 +3,7 @@ package page.ooooo.geoshare.ui.theme
 import androidx.compose.ui.unit.dp
 
 object Spacing {
+    val tiny = 8.dp
     val small = 15.dp
     val medium = 30.dp
     val large = 45.dp

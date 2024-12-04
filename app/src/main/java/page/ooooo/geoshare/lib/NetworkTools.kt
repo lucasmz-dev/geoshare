@@ -1,4 +1,4 @@
-package page.ooooo.geoshare
+package page.ooooo.geoshare.lib
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -8,8 +8,8 @@ import java.net.URL
 
 class NetworkTools(private val log: ILog = DefaultLog()) {
 
-    val connectTimeout = 5_000
-    val readTimeout = 10_000
+    private val connectTimeout = 5_000
+    private val readTimeout = 10_000
 
     suspend fun requestLocationHeader(url: URL): URL? =
         withContext(Dispatchers.IO) {
@@ -36,8 +36,7 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
                 log.w(null, "Received HTTP code $responseCode for $url")
             } catch (e: Exception) {
                 log.w(
-                    null,
-                    "Network error for $url ${log.getStackTraceString(e)}"
+                    null, "Network error for $url ${log.getStackTraceString(e)}"
                 )
             } finally {
                 connection.disconnect()
@@ -64,8 +63,7 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
                 log.w(null, "Received HTTP code $responseCode for $url")
             } catch (e: Exception) {
                 log.w(
-                    null,
-                    "Network error for $url ${log.getStackTraceString(e)}"
+                    null, "Network error for $url ${log.getStackTraceString(e)}"
                 )
             } finally {
                 connection.disconnect()
