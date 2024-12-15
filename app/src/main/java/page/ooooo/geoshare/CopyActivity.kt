@@ -8,11 +8,14 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import page.ooooo.geoshare.ui.theme.AppTheme
 
 @AndroidEntryPoint
-class CopyActivity : ComponentActivity() {
+class CopyActivity() : ComponentActivity() {
+
+    private val viewModel: ConversionViewModel by viewModels()
 
     private fun showToast(text: String, duration: Int = Toast.LENGTH_SHORT) {
         Toast.makeText(this@CopyActivity, text, duration).show()
@@ -45,13 +48,14 @@ class CopyActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AppTheme {
-                ShareScreen(
+                ConversionScreen(
                     intent,
                     onSucceeded = { geoUri, unchanged ->
                         onSucceeded(geoUri, unchanged)
                     },
                     onFailed = { message -> onFailed(message) },
                     onNoop = { onNoop() },
+                    viewModel = viewModel,
                 )
             }
         }

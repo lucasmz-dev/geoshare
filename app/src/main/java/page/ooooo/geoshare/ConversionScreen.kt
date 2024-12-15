@@ -16,20 +16,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import page.ooooo.geoshare.components.PermissionDialog
 import page.ooooo.geoshare.components.codeStyle
-import page.ooooo.geoshare.lib.Failed
+import page.ooooo.geoshare.lib.ConversionFailed
 import page.ooooo.geoshare.lib.Noop
 import page.ooooo.geoshare.lib.RequestedParseHtmlPermission
 import page.ooooo.geoshare.lib.RequestedUnshortenPermission
-import page.ooooo.geoshare.lib.Succeeded
+import page.ooooo.geoshare.lib.ConversionSucceeded
 import page.ooooo.geoshare.lib.truncateMiddle
 
 @Composable
-fun ShareScreen(
+fun ConversionScreen(
     intent: Intent,
     onSucceeded: (geoUri: String, unchanged: Boolean) -> Unit,
     onFailed: (message: String) -> Unit,
     onNoop: () -> Unit,
-    viewModel: ShareViewModel = hiltViewModel(),
+    viewModel: ConversionViewModel = hiltViewModel(),
 ) {
     val appName = stringResource(R.string.app_name)
     val currentState by viewModel.currentState.collectAsStateWithLifecycle()
@@ -85,14 +85,14 @@ fun ShareScreen(
             }
         }
 
-        is Succeeded -> {
-            (currentState as Succeeded).let {
+        is ConversionSucceeded -> {
+            (currentState as ConversionSucceeded).let {
                 onSucceeded(it.geoUri, it.unchanged)
             }
         }
 
-        is Failed -> {
-            onFailed((currentState as Failed).message)
+        is ConversionFailed -> {
+            onFailed((currentState as ConversionFailed).message)
         }
 
         is Noop -> {

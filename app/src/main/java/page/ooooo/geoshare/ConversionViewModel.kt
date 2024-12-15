@@ -1,6 +1,9 @@
 package page.ooooo.geoshare
 
+import android.app.Activity
 import android.content.Intent
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.result.ActivityResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,23 +23,28 @@ import page.ooooo.geoshare.lib.IntentParser
 import page.ooooo.geoshare.lib.NetworkTools
 import page.ooooo.geoshare.lib.PermissionState
 import page.ooooo.geoshare.lib.ReceivedIntent
-import page.ooooo.geoshare.lib.ShareStateContext
+import page.ooooo.geoshare.lib.ConversionStateContext
+import page.ooooo.geoshare.lib.DismissedSharePermission
+import page.ooooo.geoshare.lib.ReceivedGeoUri
 import page.ooooo.geoshare.lib.State
+import page.ooooo.geoshare.lib.XiaomiTools
 import javax.inject.Inject
 
 @HiltViewModel
-class ShareViewModel @Inject constructor(
+class ConversionViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
 
-    private val stateContext = ShareStateContext(
+    private val stateContext = ConversionStateContext(
         googleMapsUrlConverter = GoogleMapsUrlConverter(),
         intentParser = IntentParser(),
         networkTools = NetworkTools(),
         userPreferencesRepository = userPreferencesRepository,
+        xiaomiTools = XiaomiTools(),
     )
 
-    private val _currentState = MutableStateFlow<State>(Initial())
+    private val _currentState =
+        MutableStateFlow<State>(Initial())
     val currentState: StateFlow<State> = _currentState
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -71,6 +79,33 @@ class ShareViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    fun share(activity: Activity, geoUri: String, unchanged: Boolean) {
+        transition(ReceivedGeoUri(stateContext, activity, geoUri, unchanged))
+    }
+
+    fun showSharePermissionsEditor(
+        activity: Activity,
+        launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+        onError: (message: String) -> Unit,
+    ) {
+        stateContext.xiaomiTools.showPermissionsEditor(
+            activity,
+            launcher,
+            onError,
+        )
+    }
+
+    fun retryShare() {
+        viewModelScope.launch {
+            stateContext.transition()
+            _currentState.value = stateContext.currentState
+        }
+    }
+
+    fun dismissShare() {
+        transition(DismissedSharePermission())
     }
 
     private fun transition(newState: State) {

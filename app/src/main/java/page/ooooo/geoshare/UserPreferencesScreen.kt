@@ -36,7 +36,7 @@ import page.ooooo.geoshare.ui.theme.Spacing
 fun UserPreferencesScreen(
     onNavigateToMainScreen: () -> Unit = {},
     onNavigateToFaqScreen: () -> Unit = {},
-    viewModel: ShareViewModel = hiltViewModel(),
+    viewModel: ConversionViewModel = hiltViewModel(),
 ) {
     val values by viewModel.userPreferencesValues.collectAsStateWithLifecycle()
     Scaffold(topBar = {
@@ -71,7 +71,7 @@ fun UserPreferencesScreen(
 
 @Composable
 fun <T> UserPreferencesItem(
-    viewModel: ShareViewModel,
+    viewModel: ConversionViewModel,
     userPreference: UserPreference<T>,
     value: T,
     onNavigateToFaqScreen: () -> Unit,
@@ -100,7 +100,7 @@ fun <T> UserPreferencesItem(
 private fun DefaultPreview() {
     AppTheme {
         UserPreferencesScreen(
-            viewModel = ShareViewModel(FakeUserPreferencesRepository())
+            viewModel = ConversionViewModel(FakeUserPreferencesRepository())
         )
     }
 }
@@ -110,7 +110,7 @@ private fun DefaultPreview() {
 private fun DarkPreview() {
     AppTheme {
         UserPreferencesScreen(
-            viewModel = ShareViewModel(FakeUserPreferencesRepository())
+            viewModel = ConversionViewModel(FakeUserPreferencesRepository())
         )
     }
 }
