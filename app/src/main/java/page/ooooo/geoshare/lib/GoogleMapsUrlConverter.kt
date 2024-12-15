@@ -1,6 +1,7 @@
 package page.ooooo.geoshare.lib
 
 import com.google.re2j.Pattern
+import java.net.MalformedURLException
 import java.net.URL
 
 class GoogleMapsUrlConverter(
@@ -32,6 +33,7 @@ class GoogleMapsUrlConverter(
         Pattern.compile("""^/maps/place/$placeRegex/@$coordRegex.*$"""),
         Pattern.compile("""^/maps/place/$coordRegex.*$"""),
         Pattern.compile("""^/maps/place/$placeRegex.*$"""),
+        Pattern.compile("""^/maps/place//.*$"""),
         Pattern.compile("""^/maps/placelists/list/.*$"""),
         Pattern.compile("""^/maps/search/$coordRegex.*$"""),
         Pattern.compile("""^/maps/search/$placeRegex.*$"""),
@@ -42,6 +44,7 @@ class GoogleMapsUrlConverter(
         Pattern.compile("""^/maps/dir/.*/$placeRegex$"""),
         Pattern.compile("""^/maps/dir/$"""),
         Pattern.compile("""^/maps$"""),
+        Pattern.compile("""^/search$"""),
         Pattern.compile("""^/?$"""),
     )
     val queryPatterns = hashMapOf<String, List<Pattern>>(
@@ -56,8 +59,10 @@ class GoogleMapsUrlConverter(
         Pattern.compile("""/@$coordRegex"""),
         Pattern.compile("""\[null,null,$coordRegex\]"""),
     )
+    val googleSearchHtmlPattern =
+        Pattern.compile("""data-url="(?P<url>[^"]+)""")
     val shortUrlPattern =
-        Pattern.compile("""^https?://(maps\.app\.goo\.gl/|(app\.)?goo\.gl/maps/).+$""")
+        Pattern.compile("""^https?://(maps\.app\.goo\.gl/|(app\.)?goo\.gl/maps/|g.co/kgs/).+$""")
 
     fun isShortUrl(url: URL): Boolean =
         shortUrlPattern.matcher(url.toString()).matches()
@@ -118,5 +123,27 @@ class GoogleMapsUrlConverter(
         geoUriBuilder.fromMatcher(m)
         log.i(null, "Parsed HTML document to $geoUriBuilder")
         return geoUriBuilder
+    }
+
+    fun parseGoogleSearchHtml(html: String): URL? {
+        val m = googleSearchHtmlPattern.matcher(html)
+            .let { if (it.find()) it else null }
+        if (m == null) {
+            log.w(null, "Failed to parse Google Search HTML document")
+            return null
+        }
+        val relativeOrAbsoluteUrlString = m.group("url")
+        val absoluteUrlString = relativeOrAbsoluteUrlString.replace(
+            "^/".toRegex(),
+            "https://www.google.com/"
+        )
+        val absoluteUrl = try {
+            URL(absoluteUrlString)
+        } catch (_: MalformedURLException) {
+            log.w(null, "Invalid URL $absoluteUrlString")
+            return null
+        }
+        log.i(null, "Parsed Google Search HTML document to $absoluteUrl")
+        return absoluteUrl
     }
 }

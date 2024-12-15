@@ -20,22 +20,28 @@ data class ReceivedIntent(
         if (intentGeoUri != null) {
             return Succeeded(intentGeoUri, unchanged = true)
         }
-        val intentUrl = context.intentParser.getIntentUrl(intent) ?: return Noop()
+        val url = context.intentParser.getIntentUrl(intent) ?: return Noop()
+        return ReceivedUrl(context, url, null)
+    }
+}
+
+data class ReceivedUrl(
+    val context: ShareStateContext,
+    val intentUrl: URL,
+    val permission: Permission?,
+) : ShareState() {
+    override suspend fun transition(): State {
         val isShortUrl = context.googleMapsUrlConverter.isShortUrl(intentUrl)
         if (!isShortUrl) {
-            return UnshortenedUrl(context, intentUrl, Permission.ASK)
+            return UnshortenedUrl(context, intentUrl, permission)
         }
-        return when (context.userPreferencesRepository.getValue(connectToGooglePermission)) {
-            Permission.ALWAYS ->
-                GrantedUnshortenPermission(
-                    context,
-                    intentUrl,
-                )
-            Permission.ASK ->
-                RequestedUnshortenPermission(
-                    context,
-                    intentUrl,
-                )
+        return when (permission ?: context.userPreferencesRepository.getValue(
+            connectToGooglePermission
+        )) {
+            Permission.ALWAYS -> GrantedUnshortenPermission(context, intentUrl)
+
+            Permission.ASK -> RequestedUnshortenPermission(context, intentUrl)
+
             Permission.NEVER -> DeniedUnshortenPermission()
         }
     }
@@ -84,14 +90,17 @@ class DeniedUnshortenPermission() : ShareState() {
 data class UnshortenedUrl(
     val context: ShareStateContext,
     val url: URL,
-    val permission: Permission,
+    val permission: Permission?,
 ) : ShareState() {
     override suspend fun transition(): State {
         val geoUriBuilderFromUrl = context.googleMapsUrlConverter.parseUrl(url)
             ?: return Failed("Failed to create geo: link")
         var geoUriFromUrl = geoUriBuilderFromUrl.toString()
         if (geoUriBuilderFromUrl.coords.lat == "0" && geoUriBuilderFromUrl.coords.lon == "0") {
-            return when (permission) {
+            return when (permission
+                ?: context.userPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )) {
                 Permission.ALWAYS -> GrantedParseHtmlPermission(
                     context,
                     url,
@@ -149,6 +158,11 @@ data class GrantedParseHtmlPermission(
             context.googleMapsUrlConverter.parseHtml(html)
         if (geoUriBuilderFromHtml != null) {
             return Succeeded(geoUriBuilderFromHtml.toString())
+        }
+        val googleMapsUrl =
+            context.googleMapsUrlConverter.parseGoogleSearchHtml(html)
+        if (googleMapsUrl != null) {
+            return ReceivedUrl(context, googleMapsUrl, Permission.ALWAYS)
         }
         return Succeeded(geoUriFromUrl)
     }

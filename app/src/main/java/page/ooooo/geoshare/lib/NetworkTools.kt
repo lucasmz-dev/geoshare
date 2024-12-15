@@ -11,6 +11,12 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
     private val connectTimeout = 5_000
     private val readTimeout = 10_000
 
+    // Set custom User-Agent, so that we don't receive Google Lite HTML, which
+    // doesn't contain coordinates in case of Maps or maps link in case of
+    // Search.
+    private val userAgent =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+
     suspend fun requestLocationHeader(url: URL): URL? =
         withContext(Dispatchers.IO) {
             val connection = url.openConnection() as HttpURLConnection
@@ -50,9 +56,7 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
             connection.connectTimeout = connectTimeout
             connection.readTimeout = readTimeout
             connection.instanceFollowRedirects = true
-            // Remove User-Agent, otherwise we receive Google Maps Lite HTML,
-            // which doesn't contain coordinates.
-            connection.setRequestProperty("User-Agent", "")
+            connection.setRequestProperty("User-Agent", userAgent)
             try {
                 connection.connect()
                 val responseCode = connection.responseCode

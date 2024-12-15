@@ -33,6 +33,7 @@ import page.ooooo.geoshare.lib.IntentParser
 import page.ooooo.geoshare.lib.NetworkTools
 import page.ooooo.geoshare.lib.Noop
 import page.ooooo.geoshare.lib.ReceivedIntent
+import page.ooooo.geoshare.lib.ReceivedUrl
 import page.ooooo.geoshare.lib.RequestedUnshortenPermission
 import page.ooooo.geoshare.lib.ShareStateContext
 import page.ooooo.geoshare.lib.Succeeded
@@ -107,7 +108,7 @@ class ShareStateTest {
     }
 
     @Test
-    fun receivedIntent_intentDoesNotContainShortUrl_returnsUnshortenedUrl() =
+    fun receivedIntent_intentContainsUrl_returnsReceivedUrlWithPermissionNull() =
         runTest {
             val intent = Intent()
             val mockIntentParser = Mockito.mock(IntentParser::class.java)
@@ -123,24 +124,16 @@ class ShareStateTest {
             )
             val shareState = ReceivedIntent(shareStateContext, intent)
             assertEquals(
-                UnshortenedUrl(
-                    shareStateContext,
-                    URL("https://maps.google.com/foo"),
-                    Permission.ASK,
+                ReceivedUrl(
+                    shareStateContext, URL("https://maps.google.com/foo"), null
                 ),
                 shareState.transition(),
             )
         }
 
     @Test
-    fun receivedIntent_intentContainsShortUrlAndPermissionIsAlways_returnsGrantedUnshortenPermission() =
+    fun receivedUrl_urlIsShortUrl_returnsUnshortenedUrlAndPassesPermission() =
         runTest {
-            val intent = Intent()
-            val mockIntentParser = Mockito.mock(IntentParser::class.java)
-            Mockito.`when`(mockIntentParser.getIntentGeoUri(intent))
-                .thenReturn(null)
-            Mockito.`when`(mockIntentParser.getIntentUrl(intent))
-                .thenReturn(URL("https://maps.app.goo.gl/foo"))
             val mockUserPreferencesRepository = Mockito.mock(
                 FakeUserPreferencesRepository::class.java
             )
@@ -148,16 +141,50 @@ class ShareStateTest {
                 mockUserPreferencesRepository.getValue(
                     connectToGooglePermission
                 )
-            ).thenReturn(Permission.ALWAYS)
+            ).thenThrow(NotImplementedError::class.java)
             val shareStateContext = ShareStateContext(
+                googleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+            )
+            val permission = Permission.NEVER
+            val shareState = ReceivedUrl(
+                shareStateContext,
+                URL("https://maps.google.com/foo"),
+                permission,
+            )
+            assertEquals(
+                UnshortenedUrl(
+                    shareStateContext,
+                    URL("https://maps.google.com/foo"),
+                    permission,
+                ),
+                shareState.transition(),
+            )
+        }
+
+    @Test
+    fun receivedUrl_urlIsShortUrlAndPermissionIsAlways_returnsGrantedUnshortenPermission() =
+        runTest {
+            val mockUserPreferencesRepository = Mockito.mock(
+                FakeUserPreferencesRepository::class.java
+            )
+            Mockito.`when`(
+                mockUserPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )
+            ).thenThrow(NotImplementedError::class.java)
+            var shareStateContext = ShareStateContext(
                 googleMapsUrlConverter,
                 mockIntentParser,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
             )
-            val shareState = ReceivedIntent(
+            val shareState = ReceivedUrl(
                 shareStateContext,
-                intent,
+                URL("https://maps.app.goo.gl/foo"),
+                Permission.ALWAYS,
             )
             assertEquals(
                 GrantedUnshortenPermission(
@@ -169,14 +196,8 @@ class ShareStateTest {
         }
 
     @Test
-    fun receivedIntent_intentContainsShortUrlAndPermissionIsAsk_returnsRequestedUnshortenPermission() =
+    fun receivedUrl_urlIsShortUrlAndPermissionIsAsk_returnsRequestedUnshortenPermission() =
         runTest {
-            val intent = Intent()
-            val mockIntentParser = Mockito.mock(IntentParser::class.java)
-            Mockito.`when`(mockIntentParser.getIntentGeoUri(intent))
-                .thenReturn(null)
-            Mockito.`when`(mockIntentParser.getIntentUrl(intent))
-                .thenReturn(URL("https://maps.app.goo.gl/foo"))
             val mockUserPreferencesRepository = Mockito.mock(
                 FakeUserPreferencesRepository::class.java
             )
@@ -184,16 +205,17 @@ class ShareStateTest {
                 mockUserPreferencesRepository.getValue(
                     connectToGooglePermission
                 )
-            ).thenReturn(Permission.ASK)
+            ).thenThrow(NotImplementedError::class.java)
             val shareStateContext = ShareStateContext(
                 googleMapsUrlConverter,
                 mockIntentParser,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
             )
-            val shareState = ReceivedIntent(
+            val shareState = ReceivedUrl(
                 shareStateContext,
-                intent,
+                URL("https://maps.app.goo.gl/foo"),
+                Permission.ASK,
             )
             assertEquals(
                 RequestedUnshortenPermission(
@@ -205,14 +227,95 @@ class ShareStateTest {
         }
 
     @Test
-    fun receivedIntent_intentContainsShortUrlAndPermissionIsNever_returnsDeniedUnshortenPermission() =
+    fun receivedUrl_urlIsShortUrlAndPermissionIsNever_returnsDeniedUnshortenPermission() =
         runTest {
-            val intent = Intent()
-            val mockIntentParser = Mockito.mock(IntentParser::class.java)
-            Mockito.`when`(mockIntentParser.getIntentGeoUri(intent))
-                .thenReturn(null)
-            Mockito.`when`(mockIntentParser.getIntentUrl(intent))
-                .thenReturn(URL("https://maps.app.goo.gl/foo"))
+            val mockUserPreferencesRepository = Mockito.mock(
+                FakeUserPreferencesRepository::class.java
+            )
+            Mockito.`when`(
+                mockUserPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )
+            ).thenThrow(NotImplementedError::class.java)
+            var shareStateContext = ShareStateContext(
+                googleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                mockUserPreferencesRepository,
+            )
+            val shareState = ReceivedUrl(
+                shareStateContext,
+                URL("https://maps.app.goo.gl/foo"),
+                Permission.NEVER,
+            )
+            assertTrue(shareState.transition() is DeniedUnshortenPermission)
+        }
+
+    @Test
+    fun receivedUrl_urlIsShortUrlAndPermissionIsNullAndPreferencePermissionIsAlways_returnsGrantedUnshortenPermission() =
+        runTest {
+            val mockUserPreferencesRepository = Mockito.mock(
+                FakeUserPreferencesRepository::class.java
+            )
+            Mockito.`when`(
+                mockUserPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )
+            ).thenReturn(Permission.ALWAYS)
+            var shareStateContext = ShareStateContext(
+                googleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                mockUserPreferencesRepository,
+            )
+            val shareState = ReceivedUrl(
+                shareStateContext,
+                URL("https://maps.app.goo.gl/foo"),
+                null,
+            )
+            assertEquals(
+                GrantedUnshortenPermission(
+                    shareStateContext,
+                    URL("https://maps.app.goo.gl/foo"),
+                ),
+                shareState.transition(),
+            )
+        }
+
+    @Test
+    fun receivedUrl_urlIsShortUrlAndPermissionIsNullAndPreferencePermissionIsAsk_returnsRequestedUnshortenPermission() =
+        runTest {
+            val mockUserPreferencesRepository = Mockito.mock(
+                FakeUserPreferencesRepository::class.java
+            )
+            Mockito.`when`(
+                mockUserPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )
+            ).thenReturn(Permission.ASK)
+            var shareStateContext = ShareStateContext(
+                googleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                mockUserPreferencesRepository,
+            )
+            val shareState = ReceivedUrl(
+                shareStateContext,
+                URL("https://maps.app.goo.gl/foo"),
+                null,
+            )
+            assertEquals(
+                RequestedUnshortenPermission(
+                    shareStateContext,
+                    URL("https://maps.app.goo.gl/foo"),
+                ),
+                shareState.transition(),
+            )
+        }
+
+    @Test
+    fun receivedUrl_urlIsShortUrlAndPermissionIsNullAndPreferencePermissionIsNever_returnsDeniedUnshortenPermission() =
+        runTest {
             val mockUserPreferencesRepository = Mockito.mock(
                 FakeUserPreferencesRepository::class.java
             )
@@ -227,9 +330,10 @@ class ShareStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
             )
-            val shareState = ReceivedIntent(
+            val shareState = ReceivedUrl(
                 shareStateContext,
-                intent,
+                URL("https://maps.app.goo.gl/foo"),
+                null,
             )
             assertTrue(shareState.transition() is DeniedUnshortenPermission)
         }
@@ -555,14 +659,208 @@ class ShareStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
             )
-            val shareState =
-                UnshortenedUrl(shareStateContext, url, Permission.NEVER)
+            val shareState = UnshortenedUrl(
+                shareStateContext,
+                url,
+                Permission.NEVER,
+            )
             assertTrue(shareState.transition() is DeniedParseHtmlPermission)
         }
 
     @Test
-    fun unshortenUrl_parsingUrlReturnsNonZeroCoordinates_returnsSucceedWithGeoUriFromUrl() =
-        runTest {}
+    fun unshortenedUrl_parsingUrlReturnsZeroCoordinatesAndPermissionIsNullAndPreferencePermissionIsAlways_returnsGrantedParseHtmlPermission() =
+        runTest {
+            val url = URL("https://maps.google.com/foo")
+            val mockGoogleMapsUrlConverter =
+                Mockito.mock(GoogleMapsUrlConverter::class.java)
+            val geoUriBuilderFromUrl = GeoUriBuilder(fakeUriQuote)
+            geoUriBuilderFromUrl.coords = GeoUriCoords("0", "0")
+            geoUriBuilderFromUrl.params =
+                GeoUriParams(q = "fromUrl", uriQuote = fakeUriQuote)
+            Mockito.`when`(mockGoogleMapsUrlConverter.parseUrl(url))
+                .thenReturn(geoUriBuilderFromUrl)
+            val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
+            Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            Mockito.`when`(mockNetworkTools.getText(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            val mockUserPreferencesRepository = Mockito.mock(
+                FakeUserPreferencesRepository::class.java
+            )
+            Mockito.`when`(
+                mockUserPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )
+            ).thenReturn(Permission.ALWAYS)
+            val shareStateContext = ShareStateContext(
+                mockGoogleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                mockUserPreferencesRepository,
+            )
+            val shareState = UnshortenedUrl(shareStateContext, url, null)
+            assertEquals(
+                GrantedParseHtmlPermission(
+                    shareStateContext,
+                    url,
+                    geoUriBuilderFromUrl.toString(),
+                ),
+                shareState.transition(),
+            )
+        }
+
+    @Test
+    fun unshortenedUrl_parsingUrlReturnsZeroCoordinatesAndPermissionIsNullAndPreferencePermissionIsAsk_returnsRequestedParseHtmlPermission() =
+        runTest {
+            val url = URL("https://maps.google.com/foo")
+            val mockGoogleMapsUrlConverter =
+                Mockito.mock(GoogleMapsUrlConverter::class.java)
+            val geoUriBuilderFromUrl = GeoUriBuilder(fakeUriQuote)
+            geoUriBuilderFromUrl.coords = GeoUriCoords("0", "0")
+            geoUriBuilderFromUrl.params =
+                GeoUriParams(q = "fromUrl", uriQuote = fakeUriQuote)
+            Mockito.`when`(mockGoogleMapsUrlConverter.parseUrl(url))
+                .thenReturn(geoUriBuilderFromUrl)
+            val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
+            Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            Mockito.`when`(mockNetworkTools.getText(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            val mockUserPreferencesRepository = Mockito.mock(
+                FakeUserPreferencesRepository::class.java
+            )
+            Mockito.`when`(
+                mockUserPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )
+            ).thenReturn(Permission.ASK)
+            val shareStateContext = ShareStateContext(
+                mockGoogleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                mockUserPreferencesRepository,
+            )
+            val shareState = UnshortenedUrl(shareStateContext, url, null)
+            assertEquals(
+                RequestedParseHtmlPermission(
+                    shareStateContext,
+                    url,
+                    geoUriBuilderFromUrl.toString(),
+                ),
+                shareState.transition(),
+            )
+        }
+
+    @Test
+    fun unshortenedUrl_parsingUrlReturnsZeroCoordinatesAndPermissionIsNullAndPreferencePermissionIsNever_returnsDeniedParseHtmlPermission() =
+        runTest {
+            val url = URL("https://maps.google.com/foo")
+            val mockGoogleMapsUrlConverter =
+                Mockito.mock(GoogleMapsUrlConverter::class.java)
+            val geoUriBuilderFromUrl = GeoUriBuilder(fakeUriQuote)
+            geoUriBuilderFromUrl.coords = GeoUriCoords("0", "0")
+            geoUriBuilderFromUrl.params =
+                GeoUriParams(q = "fromUrl", uriQuote = fakeUriQuote)
+            Mockito.`when`(mockGoogleMapsUrlConverter.parseUrl(url))
+                .thenReturn(geoUriBuilderFromUrl)
+            val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
+            Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            Mockito.`when`(mockNetworkTools.getText(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            val mockUserPreferencesRepository = Mockito.mock(
+                FakeUserPreferencesRepository::class.java
+            )
+            Mockito.`when`(
+                mockUserPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )
+            ).thenReturn(Permission.NEVER)
+            val shareStateContext = ShareStateContext(
+                mockGoogleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                mockUserPreferencesRepository,
+            )
+            val shareState = UnshortenedUrl(shareStateContext, url, null)
+            assertTrue(shareState.transition() is DeniedParseHtmlPermission)
+        }
+
+    @Test
+    fun unshortenedUrl_parsingUrlReturnsNonZeroLat_returnsSucceedWithGeoUriFromUrl() =
+        runTest {
+            val url = URL("https://maps.google.com/foo")
+            val mockGoogleMapsUrlConverter =
+                Mockito.mock(GoogleMapsUrlConverter::class.java)
+            val geoUriBuilderFromUrl = GeoUriBuilder(fakeUriQuote)
+            geoUriBuilderFromUrl.coords = GeoUriCoords("1", "0")
+            geoUriBuilderFromUrl.params =
+                GeoUriParams(q = "fromUrl", uriQuote = fakeUriQuote)
+            Mockito.`when`(mockGoogleMapsUrlConverter.parseUrl(url))
+                .thenReturn(geoUriBuilderFromUrl)
+            val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
+            Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            Mockito.`when`(mockNetworkTools.getText(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            val mockUserPreferencesRepository = Mockito.mock(
+                FakeUserPreferencesRepository::class.java
+            )
+            Mockito.`when`(
+                mockUserPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )
+            ).thenThrow(NotImplementedError::class.java)
+            val shareStateContext = ShareStateContext(
+                mockGoogleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                mockUserPreferencesRepository,
+            )
+            val shareState = UnshortenedUrl(shareStateContext, url, null)
+            assertEquals(
+                Succeeded(geoUriBuilderFromUrl.toString()),
+                shareState.transition(),
+            )
+        }
+
+    @Test
+    fun unshortenedUrl_parsingUrlReturnsNonZeroLon_returnsSucceedWithGeoUriFromUrl() =
+        runTest {
+            val url = URL("https://maps.google.com/foo")
+            val mockGoogleMapsUrlConverter =
+                Mockito.mock(GoogleMapsUrlConverter::class.java)
+            val geoUriBuilderFromUrl = GeoUriBuilder(fakeUriQuote)
+            geoUriBuilderFromUrl.coords = GeoUriCoords("0", "1")
+            geoUriBuilderFromUrl.params =
+                GeoUriParams(q = "fromUrl", uriQuote = fakeUriQuote)
+            Mockito.`when`(mockGoogleMapsUrlConverter.parseUrl(url))
+                .thenReturn(geoUriBuilderFromUrl)
+            val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
+            Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            Mockito.`when`(mockNetworkTools.getText(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            val mockUserPreferencesRepository = Mockito.mock(
+                FakeUserPreferencesRepository::class.java
+            )
+            Mockito.`when`(
+                mockUserPreferencesRepository.getValue(
+                    connectToGooglePermission
+                )
+            ).thenThrow(NotImplementedError::class.java)
+            val shareStateContext = ShareStateContext(
+                mockGoogleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                mockUserPreferencesRepository,
+            )
+            val shareState = UnshortenedUrl(shareStateContext, url, null)
+            assertEquals(
+                Succeeded(geoUriBuilderFromUrl.toString()),
+                shareState.transition(),
+            )
+        }
 
     @Test
     fun requestedParseHtmlPermission_transition_returnsNull() = runTest {
@@ -809,7 +1107,7 @@ class ShareStateTest {
         }
 
     @Test
-    fun grantedParseHtmlPermission_parsingHtmlFails_returnsSucceededWithGeoUriFromHtml() =
+    fun grantedParseHtmlPermission_parsingHtmlFailsAndParsingGoogleSearchHtmlFails_returnsSucceededWithGeoUriFromHtml() =
         runTest {
             val url = URL("https://maps.google.com/foo")
             val html = "<html></html>"
@@ -820,6 +1118,8 @@ class ShareStateTest {
             geoUriBuilderFromUrl.params =
                 GeoUriParams(q = "fromUrl", uriQuote = fakeUriQuote)
             Mockito.`when`(mockGoogleMapsUrlConverter.parseHtml(html))
+                .thenReturn(null)
+            Mockito.`when`(mockGoogleMapsUrlConverter.parseGoogleSearchHtml(html))
                 .thenReturn(null)
             val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
             Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
@@ -838,6 +1138,46 @@ class ShareStateTest {
             )
             assertEquals(
                 Succeeded(geoUriBuilderFromUrl.toString()),
+                shareState.transition(),
+            )
+        }
+
+    @Test
+    fun grantedParseHtmlPermission_parsingHtmlFailsAndParsingGoogleSearchHtmlSucceeds_returnsReceivedUrlWithGoogleMapsUrlAndPermissionAlways() =
+        runTest {
+            val url = URL("https://g.co/kgs/foo")
+            val html = "<html></html>"
+            val mockGoogleMapsUrlConverter =
+                Mockito.mock(GoogleMapsUrlConverter::class.java)
+            val geoUriBuilderFromUrl = GeoUriBuilder(fakeUriQuote)
+            geoUriBuilderFromUrl.coords = GeoUriCoords("0", "0")
+            geoUriBuilderFromUrl.params =
+                GeoUriParams(q = "fromUrl", uriQuote = fakeUriQuote)
+            Mockito.`when`(mockGoogleMapsUrlConverter.parseHtml(html))
+                .thenReturn(null)
+            Mockito.`when`(mockGoogleMapsUrlConverter.parseGoogleSearchHtml(html))
+                .thenReturn(URL("https://maps.google.com/foo"))
+            val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
+            Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            Mockito.`when`(mockNetworkTools.getText(url)).thenReturn(html)
+            val shareStateContext = ShareStateContext(
+                mockGoogleMapsUrlConverter,
+                mockIntentParser,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+            )
+            val shareState = GrantedParseHtmlPermission(
+                shareStateContext,
+                url,
+                geoUriBuilderFromUrl.toString(),
+            )
+            assertEquals(
+                ReceivedUrl(
+                    shareStateContext,
+                    URL("https://maps.google.com/foo"),
+                    Permission.ALWAYS,
+                ),
                 shareState.transition(),
             )
         }
