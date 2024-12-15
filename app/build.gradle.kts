@@ -15,8 +15,8 @@ android {
         applicationId = "page.ooooo.geoshare"
         minSdk = 25
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.5.1"
+        versionCode = 10
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
