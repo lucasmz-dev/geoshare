@@ -1,33 +1,24 @@
 package page.ooooo.geoshare
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import page.ooooo.geoshare.components.RadioButtonGroup
 import page.ooooo.geoshare.data.di.FakeUserPreferencesRepository
 import page.ooooo.geoshare.data.local.preferences.UserPreference
 import page.ooooo.geoshare.data.local.preferences.connectToGooglePermission
+import page.ooooo.geoshare.data.local.preferences.lastRunVersionCode
 import page.ooooo.geoshare.ui.theme.AppTheme
 import page.ooooo.geoshare.ui.theme.Spacing
 
@@ -38,7 +29,7 @@ fun UserPreferencesScreen(
     onNavigateToFaqScreen: () -> Unit = {},
     viewModel: ConversionViewModel = hiltViewModel(),
 ) {
-    val values by viewModel.userPreferencesValues.collectAsStateWithLifecycle()
+    val userPreferencesValues by viewModel.userPreferencesValues.collectAsStateWithLifecycle()
     Scaffold(topBar = {
         TopAppBar(title = { Text("Preferences") }, navigationIcon = {
             IconButton(onClick = onNavigateToMainScreen) {
@@ -61,10 +52,18 @@ fun UserPreferencesScreen(
             UserPreferencesItem(
                 viewModel,
                 connectToGooglePermission,
-                values.connectToGooglePermissionValue,
+                userPreferencesValues.connectToGooglePermissionValue,
                 onNavigateToFaqScreen,
                 Modifier.padding(top = Spacing.tiny),
             )
+            if (BuildConfig.DEBUG) {
+                UserPreferencesItem(
+                    viewModel,
+                    lastRunVersionCode,
+                    userPreferencesValues.introShownForVersionCodeValue,
+                    onNavigateToFaqScreen,
+                )
+            }
         }
     }
 }
@@ -84,12 +83,9 @@ fun <T> UserPreferencesItem(
             style = MaterialTheme.typography.bodyLarge,
         )
         userPreference.description(onNavigateToFaqScreen)
-        RadioButtonGroup(
-            options = userPreference.options,
-            selectedValue = value,
-            onSelect = { viewModel.setUserPreferenceValue(userPreference, it) },
-            modifier = Modifier.padding(top = Spacing.tiny)
-        )
+        userPreference.component(value) {
+            viewModel.setUserPreferenceValue(userPreference, it)
+        }
     }
 }
 
@@ -100,7 +96,10 @@ fun <T> UserPreferencesItem(
 private fun DefaultPreview() {
     AppTheme {
         UserPreferencesScreen(
-            viewModel = ConversionViewModel(FakeUserPreferencesRepository())
+            viewModel = ConversionViewModel(
+                FakeUserPreferencesRepository(),
+                SavedStateHandle(),
+            )
         )
     }
 }
@@ -110,7 +109,10 @@ private fun DefaultPreview() {
 private fun DarkPreview() {
     AppTheme {
         UserPreferencesScreen(
-            viewModel = ConversionViewModel(FakeUserPreferencesRepository())
+            viewModel = ConversionViewModel(
+                FakeUserPreferencesRepository(),
+                SavedStateHandle(),
+            )
         )
     }
 }

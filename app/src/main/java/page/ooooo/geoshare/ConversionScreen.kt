@@ -1,9 +1,7 @@
 package page.ooooo.geoshare
 
-import android.content.Intent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -16,31 +14,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import page.ooooo.geoshare.components.PermissionDialog
 import page.ooooo.geoshare.components.codeStyle
-import page.ooooo.geoshare.lib.ConversionFailed
-import page.ooooo.geoshare.lib.Noop
-import page.ooooo.geoshare.lib.RequestedParseHtmlPermission
-import page.ooooo.geoshare.lib.RequestedUnshortenPermission
-import page.ooooo.geoshare.lib.ConversionSucceeded
-import page.ooooo.geoshare.lib.truncateMiddle
+import page.ooooo.geoshare.lib.*
 
 @Composable
-fun ConversionScreen(
-    intent: Intent,
-    onSucceeded: (geoUri: String, unchanged: Boolean) -> Unit,
-    onFailed: (message: String) -> Unit,
-    onNoop: () -> Unit,
-    viewModel: ConversionViewModel = hiltViewModel(),
-) {
+fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
     val appName = stringResource(R.string.app_name)
     val currentState by viewModel.currentState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(intent) {
-        viewModel.start(intent)
-    }
-
     when (currentState) {
         is RequestedUnshortenPermission -> {
-            val currentState = currentState as RequestedUnshortenPermission
+            val requestedUnshortenPermission =
+                currentState as RequestedUnshortenPermission
             PermissionDialog(
                 title = "Connect to Google?",
                 confirmText = "Allow",
@@ -53,7 +37,7 @@ fun ConversionScreen(
                     buildAnnotatedString {
                         append("The link ")
                         withStyle(codeStyle()) {
-                            append(currentState.intentUrl.toString())
+                            append(requestedUnshortenPermission.url.toString())
                         }
                         append(" doesn't contain coordinates or place name. $appName must connect to Google to get the information.")
                     },
@@ -63,7 +47,8 @@ fun ConversionScreen(
         }
 
         is RequestedParseHtmlPermission -> {
-            val currentState = currentState as RequestedParseHtmlPermission
+            val requestedParseHtmlPermission =
+                currentState as RequestedParseHtmlPermission
             PermissionDialog(
                 title = "Connect to Google?",
                 confirmText = "Allow",
@@ -76,7 +61,7 @@ fun ConversionScreen(
                     buildAnnotatedString {
                         append("The link ")
                         withStyle(codeStyle()) {
-                            append(truncateMiddle(currentState.url.toString()))
+                            append(truncateMiddle(requestedParseHtmlPermission.url.toString()))
                         }
                         append(" doesn't contain coordinates. $appName can connect to Google to get them, or it can create a geo: link with a search term instead.")
                     },
@@ -84,21 +69,5 @@ fun ConversionScreen(
                 )
             }
         }
-
-        is ConversionSucceeded -> {
-            (currentState as ConversionSucceeded).let {
-                onSucceeded(it.geoUri, it.unchanged)
-            }
-        }
-
-        is ConversionFailed -> {
-            onFailed((currentState as ConversionFailed).message)
-        }
-
-        is Noop -> {
-            onNoop()
-        }
-
-        else -> {}
     }
 }

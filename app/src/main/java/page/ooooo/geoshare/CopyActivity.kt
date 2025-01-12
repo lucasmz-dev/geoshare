@@ -1,62 +1,75 @@
 package page.ooooo.geoshare
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import page.ooooo.geoshare.lib.ConversionFailed
+import page.ooooo.geoshare.lib.ConversionSucceeded
+import page.ooooo.geoshare.lib.CopyingFinished
+import page.ooooo.geoshare.lib.Message
 import page.ooooo.geoshare.ui.theme.AppTheme
 
 @AndroidEntryPoint
-class CopyActivity() : ComponentActivity() {
+class CopyActivity : ComponentActivity() {
 
     private val viewModel: ConversionViewModel by viewModels()
-
-    private fun showToast(text: String, duration: Int = Toast.LENGTH_SHORT) {
-        Toast.makeText(this@CopyActivity, text, duration).show()
-    }
-
-    private fun onSucceeded(geoUri: String, unchanged: Boolean) {
-        val systemHasClipboardEditor =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-        if (!systemHasClipboardEditor) {
-            showToast(if (!unchanged) "Copied geo: link to clipboard" else "Copied geo: link to clipboard unchanged")
-        }
-        val clipboardManager =
-            this@CopyActivity.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("geo: link", geoUri)
-        clipboardManager.setPrimaryClip(clip)
-        finish() // FIXME Copy before destroying the activity.
-    }
-
-    private fun onFailed(message: String) {
-        showToast(message, Toast.LENGTH_LONG)
-        finish()
-    }
-
-    private fun onNoop() {
-        finish()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val context = LocalContext.current
+            val clipboardManager = LocalClipboardManager.current
+            val currentState by viewModel.currentState.collectAsStateWithLifecycle()
+            val message by viewModel.message.collectAsStateWithLifecycle()
+
             AppTheme {
-                ConversionScreen(
-                    intent,
-                    onSucceeded = { geoUri, unchanged ->
-                        onSucceeded(geoUri, unchanged)
-                    },
-                    onFailed = { message -> onFailed(message) },
-                    onNoop = { onNoop() },
-                    viewModel = viewModel,
-                )
+                ConversionScreen(viewModel)
+            }
+
+            LaunchedEffect(intent) {
+                viewModel.start(intent)
+            }
+
+            LaunchedEffect(message) {
+                if (message != null) {
+                    (message as Message).let {
+                        Toast.makeText(
+                            context,
+                            it.text,
+                            if (it.type == Message.Type.SUCCESS) {
+                                Toast.LENGTH_SHORT
+                            } else {
+                                Toast.LENGTH_LONG
+                            },
+                        ).show()
+                    }
+                    viewModel.dismissMessage()
+                }
+            }
+
+            when (currentState) {
+                is ConversionSucceeded -> {
+                    viewModel.copy(clipboardManager)
+                }
+
+                is ConversionFailed -> {
+                    finish()
+                }
+
+                is CopyingFinished -> {
+                    // TODO Sometimes the Android Clipboard Editor doesn't appear. Possibly because we call finish() too fast.
+                    finish()
+                }
             }
         }
     }

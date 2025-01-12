@@ -45,4 +45,5 @@ class FakeUserPreferencesRepository @Inject constructor() :
 
 val defaultFakeUserPreferences = UserPreferencesValues(
     connectToGooglePermissionValue = Permission.ALWAYS,
+    introShownForVersionCodeValue = 0,
 )

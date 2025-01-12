@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -53,7 +54,25 @@ fun ParagraphText(
 }
 
 @Composable
+fun ParagraphText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color,
+) {
+    Text(text, modifier, color, style = paragraphStyle())
+}
+
+@Composable
 @Suppress("unused")
+fun ParagraphText(
+    text: AnnotatedString,
+    modifier: Modifier = Modifier,
+    color: Color,
+) {
+    Text(text, modifier, color, style = paragraphStyle())
+}
+
+@Composable
 fun ParagraphText(
     text: String,
     modifier: Modifier = Modifier,
@@ -62,6 +81,7 @@ fun ParagraphText(
 }
 
 @Composable
+@Suppress("unused")
 fun ListItemText(
     text: String,
     modifier: Modifier = Modifier,

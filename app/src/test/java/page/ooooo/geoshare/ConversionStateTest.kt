@@ -1,13 +1,14 @@
 package page.ooooo.geoshare
 
-import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.result.ActivityResult
+import android.net.Uri
+import android.os.Build
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
@@ -19,58 +20,49 @@ import page.ooooo.geoshare.data.UserPreferencesRepository
 import page.ooooo.geoshare.data.di.FakeUserPreferencesRepository
 import page.ooooo.geoshare.data.local.preferences.Permission
 import page.ooooo.geoshare.data.local.preferences.connectToGooglePermission
-import page.ooooo.geoshare.lib.ConversionFailed
-import page.ooooo.geoshare.lib.ConversionStateContext
-import page.ooooo.geoshare.lib.ConversionSucceeded
-import page.ooooo.geoshare.lib.DeniedParseHtmlPermission
-import page.ooooo.geoshare.lib.DeniedUnshortenPermission
-import page.ooooo.geoshare.lib.DismissedSharePermission
-import page.ooooo.geoshare.lib.FakeLog
-import page.ooooo.geoshare.lib.FakeUriQuote
-import page.ooooo.geoshare.lib.GeoUriBuilder
-import page.ooooo.geoshare.lib.GeoUriCoords
-import page.ooooo.geoshare.lib.GeoUriParams
-import page.ooooo.geoshare.lib.GoogleMapsUrlConverter
-import page.ooooo.geoshare.lib.GrantedParseHtmlPermission
-import page.ooooo.geoshare.lib.GrantedSharePermission
-import page.ooooo.geoshare.lib.GrantedUnshortenPermission
-import page.ooooo.geoshare.lib.ILog
-import page.ooooo.geoshare.lib.Initial
-import page.ooooo.geoshare.lib.IntentParser
-import page.ooooo.geoshare.lib.NetworkTools
-import page.ooooo.geoshare.lib.Noop
-import page.ooooo.geoshare.lib.ReceivedGeoUri
-import page.ooooo.geoshare.lib.ReceivedIntent
-import page.ooooo.geoshare.lib.ReceivedUrl
-import page.ooooo.geoshare.lib.RequestedParseHtmlPermission
-import page.ooooo.geoshare.lib.RequestedSharePermission
-import page.ooooo.geoshare.lib.RequestedUnshortenPermission
-import page.ooooo.geoshare.lib.UnshortenedUrl
-import page.ooooo.geoshare.lib.XiaomiTools
+import page.ooooo.geoshare.lib.*
 import java.net.URL
 
 class ConversionStateTest {
 
-    private lateinit var fakeActivity: Activity
     private lateinit var fakeLog: ILog
+    private lateinit var fakeOnMessage: (message: Message) -> Unit
     private lateinit var fakeUriQuote: FakeUriQuote
     private lateinit var googleMapsUrlConverter: GoogleMapsUrlConverter
-    private lateinit var mockIntentParser: IntentParser
+    private lateinit var mockContext: Context
+    private lateinit var mockIntentTools: IntentTools
     private lateinit var mockNetworkTools: NetworkTools
+    private lateinit var mockSettingsLauncherWrapper: ManagedActivityResultLauncherWrapper
     private lateinit var mockXiaomiTools: XiaomiTools
     private lateinit var fakeUserPreferencesRepository: UserPreferencesRepository
 
     @Before
     fun before() = runTest {
         fakeLog = FakeLog()
+        fakeOnMessage = {}
         fakeUriQuote = FakeUriQuote()
         googleMapsUrlConverter = GoogleMapsUrlConverter(fakeLog, fakeUriQuote)
 
-        mockIntentParser = Mockito.mock(IntentParser::class.java)
-        Mockito.`when`(mockIntentParser.getIntentGeoUri(any<Intent>()))
+        mockContext = Mockito.mock(Context::class.java)
+        Mockito.`when`(mockContext.packageName)
             .thenThrow(NotImplementedError::class.java)
-        Mockito.`when`(mockIntentParser.getIntentUrl(any<Intent>()))
+        Mockito.`when`(mockContext.getSystemService(any<String>()))
             .thenThrow(NotImplementedError::class.java)
+
+        mockIntentTools = Mockito.mock(IntentTools::class.java)
+        Mockito.`when`(mockIntentTools.isProcessed(any<Intent>()))
+            .thenThrow(NotImplementedError::class.java)
+        Mockito.`when`(mockIntentTools.getIntentGeoUri(any<Intent>()))
+            .thenThrow(NotImplementedError::class.java)
+        Mockito.`when`(mockIntentTools.getIntentUrlString(any<Intent>()))
+            .thenThrow(NotImplementedError::class.java)
+        Mockito.`when`(
+            mockIntentTools.share(
+                any<Context>(),
+                any<String>(),
+                any<String>(),
+            )
+        ).thenThrow(NotImplementedError::class.java)
 
         mockNetworkTools = Mockito.mock(NetworkTools::class.java)
         Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
@@ -78,18 +70,21 @@ class ConversionStateTest {
         Mockito.`when`(mockNetworkTools.getText(any<URL>()))
             .thenThrow(NotImplementedError::class.java)
 
-        fakeActivity = Activity()
+        mockSettingsLauncherWrapper =
+            Mockito.mock(ManagedActivityResultLauncherWrapper::class.java)
+        Mockito.`when`(mockSettingsLauncherWrapper.launcher)
+            .thenThrow(NotImplementedError::class.java)
+
         mockXiaomiTools = Mockito.mock(XiaomiTools::class.java)
         Mockito.`when`(
             mockXiaomiTools.isBackgroundStartActivityPermissionGranted(
-                any<Activity>()
+                any<Context>()
             )
         ).thenThrow(NotImplementedError::class.java)
         Mockito.`when`(
-            mockXiaomiTools.showPermissionsEditor(
-                any<Activity>(),
-                any<ManagedActivityResultLauncher<Intent, ActivityResult>>(),
-                any<(String) -> Unit>(),
+            mockXiaomiTools.showPermissionEditor(
+                any<Context>(),
+                any<ManagedActivityResultLauncherWrapper>(),
             )
         ).thenThrow(NotImplementedError::class.java)
 
@@ -97,25 +92,49 @@ class ConversionStateTest {
     }
 
     @Test
-    fun initial_returnsNull() =
-        runTest {
-            val state = Initial()
-            assertNull(state.transition())
-        }
+    fun initial_returnsNull() = runTest {
+        val state = Initial()
+        assertNull(state.transition())
+    }
+
+    @Test
+    fun receivedIntent_intentIsProcessed_returnsFailed() = runTest {
+        val intent = Intent()
+        val mockIntentTools = Mockito.mock(IntentTools::class.java)
+        Mockito.`when`(mockIntentTools.isProcessed(intent)).thenReturn(true)
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
+        )
+        val state = ReceivedIntent(stateContext, intent)
+        assertEquals(
+            ConversionFailed(stateContext, "Nothing to do"),
+            state.transition(),
+        )
+    }
 
     @Test
     fun receivedIntent_intentContainsGeoUri_returnsSucceededUnchanged() =
         runTest {
             val intent = Intent()
-            val mockIntentParser = Mockito.mock(IntentParser::class.java)
-            Mockito.`when`(mockIntentParser.getIntentGeoUri(intent))
+            val mockIntentTools = Mockito.mock(IntentTools::class.java)
+            Mockito.`when`(mockIntentTools.isProcessed(intent))
+                .thenReturn(false)
+            Mockito.`when`(mockIntentTools.getIntentGeoUri(intent))
                 .thenReturn("geo:1,2?q=fromIntent")
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = ReceivedIntent(stateContext, intent)
             assertEquals(
@@ -125,45 +144,233 @@ class ConversionStateTest {
         }
 
     @Test
-    fun receivedIntent_intentDoesNotContainUrl_returnsNoop() = runTest {
+    fun receivedIntent_intentDoesNotContainUrl_returnsFailed() = runTest {
         val intent = Intent()
-        val mockIntentParser = Mockito.mock(IntentParser::class.java)
-        Mockito.`when`(mockIntentParser.getIntentGeoUri(intent))
+        val mockIntentTools = Mockito.mock(IntentTools::class.java)
+        Mockito.`when`(mockIntentTools.isProcessed(intent)).thenReturn(false)
+        Mockito.`when`(mockIntentTools.getIntentGeoUri(intent)).thenReturn(null)
+        Mockito.`when`(mockIntentTools.getIntentUrlString(intent))
             .thenReturn(null)
-        Mockito.`when`(mockIntentParser.getIntentUrl(intent)).thenReturn(null)
         val stateContext = ConversionStateContext(
             googleMapsUrlConverter,
-            mockIntentParser,
+            mockIntentTools,
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
         )
         val state = ReceivedIntent(stateContext, intent)
-        assertTrue(state.transition() is Noop)
+        assertEquals(
+            ConversionFailed(stateContext, "Missing URL"),
+            state.transition(),
+        )
     }
 
     @Test
-    fun receivedIntent_intentContainsUrl_returnsReceivedUrlWithPermissionNull() =
+    fun receivedIntent_intentContainsUrl_returnsReceivedUrlStringWithPermissionNull() =
         runTest {
             val intent = Intent()
-            val mockIntentParser = Mockito.mock(IntentParser::class.java)
-            Mockito.`when`(mockIntentParser.getIntentGeoUri(intent))
+            val mockIntentTools = Mockito.mock(IntentTools::class.java)
+            Mockito.`when`(mockIntentTools.isProcessed(intent))
+                .thenReturn(false)
+            Mockito.`when`(mockIntentTools.getIntentGeoUri(intent))
                 .thenReturn(null)
-            Mockito.`when`(mockIntentParser.getIntentUrl(intent))
-                .thenReturn(URL("https://maps.google.com/foo"))
+            Mockito.`when`(mockIntentTools.getIntentUrlString(intent))
+                .thenReturn("https://maps.google.com/foo")
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = ReceivedIntent(stateContext, intent)
             assertEquals(
+                ReceivedUrlString(
+                    stateContext, "https://maps.google.com/foo", null
+                ),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun receivedUriString_isGeoUri_returnsSucceededUnchanged() = runTest {
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
+        )
+        val uriString = "geo:1,2?q="
+        val mockUri = Mockito.mock(Uri::class.java)
+        Mockito.`when`(mockUri.scheme).thenReturn("geo")
+        val state = ReceivedUriString(stateContext, uriString) { mockUri }
+        assertEquals(
+            ConversionSucceeded(uriString, unchanged = true),
+            state.transition(),
+        )
+    }
+
+    @Test
+    fun receivedUriString_isNotGeoUri_returnsReceivedUrlStringWithPermissionNull() =
+        runTest {
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val uriString = "https://www.example.com/"
+            val mockUri = Mockito.mock(Uri::class.java)
+            Mockito.`when`(mockUri.scheme).thenReturn("https")
+            val state = ReceivedUriString(stateContext, uriString) { mockUri }
+            assertEquals(
+                ReceivedUrlString(stateContext, uriString, null),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun receivedUriString_isMissingScheme_returnsReceivedUrlStringWithPermissionNull() =
+        runTest {
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val uriString = "www.example.com"
+            val mockUri = Mockito.mock(Uri::class.java)
+            Mockito.`when`(mockUri.scheme).thenReturn(null)
+            val state = ReceivedUriString(stateContext, uriString) { mockUri }
+            assertEquals(
+                ReceivedUrlString(stateContext, uriString, null),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun receivedUrlString_isValidUrl_returnsReceivedUrlAndPassesPermission() =
+        runTest {
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val urlString = "https://maps.google.com/foo"
+            val permission = Permission.NEVER
+            val state = ReceivedUrlString(stateContext, urlString, permission)
+            assertEquals(
                 ReceivedUrl(
                     stateContext,
-                    URL("https://maps.google.com/foo"),
-                    null
+                    URL(urlString),
+                    permission,
+                ),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun receivedUrlString_isNotValidUrl_returnsFailed() = runTest {
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
+        )
+        val urlString = "https://www.example com/"
+        val permission = Permission.NEVER
+        val state = ReceivedUrlString(stateContext, urlString, permission)
+        assertEquals(
+            ConversionFailed(stateContext, "Invalid URL"),
+            state.transition(),
+        )
+    }
+
+    @Test
+    fun receivedUrlString_isEmpty_returnsFailed() = runTest {
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
+        )
+        val urlString = ""
+        val permission = Permission.NEVER
+        val state = ReceivedUrlString(stateContext, urlString, permission)
+        assertEquals(
+            ConversionFailed(stateContext, "Invalid URL"),
+            state.transition(),
+        )
+    }
+
+    @Test
+    fun receivedUrlString_isMissingScheme_returnsReceivedUrlWithSchemeAndPassesPermission() =
+        runTest {
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val urlString = "www.example.com/"
+            val permission = Permission.NEVER
+            val state = ReceivedUrlString(stateContext, urlString, permission)
+            assertEquals(
+                ReceivedUrl(
+                    stateContext,
+                    URL("https://$urlString"),
+                    permission,
+                ),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun receivedUrlString_isSchemeRelative_returnsReceivedUrlWithSchemeAndPassesPermission() =
+        runTest {
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val urlString = "//www.example.com/"
+            val permission = Permission.NEVER
+            val state = ReceivedUrlString(stateContext, urlString, permission)
+            assertEquals(
+                ReceivedUrl(
+                    stateContext,
+                    URL("https:$urlString"),
+                    permission,
                 ),
                 state.transition(),
             )
@@ -182,10 +389,12 @@ class ConversionStateTest {
             ).thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val permission = Permission.NEVER
             val state = ReceivedUrl(
@@ -214,12 +423,14 @@ class ConversionStateTest {
                     connectToGooglePermission
                 )
             ).thenThrow(NotImplementedError::class.java)
-            var stateContext = ConversionStateContext(
+            val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -248,10 +459,12 @@ class ConversionStateTest {
             ).thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -278,12 +491,14 @@ class ConversionStateTest {
                     connectToGooglePermission
                 )
             ).thenThrow(NotImplementedError::class.java)
-            var stateContext = ConversionStateContext(
+            val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -304,12 +519,14 @@ class ConversionStateTest {
                     connectToGooglePermission
                 )
             ).thenReturn(Permission.ALWAYS)
-            var stateContext = ConversionStateContext(
+            val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -336,12 +553,14 @@ class ConversionStateTest {
                     connectToGooglePermission
                 )
             ).thenReturn(Permission.ASK)
-            var stateContext = ConversionStateContext(
+            val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -370,10 +589,12 @@ class ConversionStateTest {
             ).thenReturn(Permission.NEVER)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -387,10 +608,12 @@ class ConversionStateTest {
     fun requestedUnshortenPermission_transition_returnsNull() = runTest {
         val stateContext = ConversionStateContext(
             googleMapsUrlConverter,
-            mockIntentParser,
+            mockIntentTools,
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
         )
         val state = RequestedUnshortenPermission(
             stateContext,
@@ -414,10 +637,12 @@ class ConversionStateTest {
             ).thenReturn(Unit)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = RequestedUnshortenPermission(
                 stateContext,
@@ -448,10 +673,12 @@ class ConversionStateTest {
             ).thenReturn(Unit)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = RequestedUnshortenPermission(
                 stateContext,
@@ -463,7 +690,7 @@ class ConversionStateTest {
             )
             verify(mockUserPreferencesRepository).setValue(
                 connectToGooglePermission,
-                Permission.ALWAYS
+                Permission.ALWAYS,
             )
         }
 
@@ -482,10 +709,12 @@ class ConversionStateTest {
             ).thenReturn(Unit)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = RequestedUnshortenPermission(
                 stateContext,
@@ -513,10 +742,12 @@ class ConversionStateTest {
             ).thenReturn(Unit)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = RequestedUnshortenPermission(
                 stateContext,
@@ -525,7 +756,7 @@ class ConversionStateTest {
             assertTrue(state.deny(true) is DeniedUnshortenPermission)
             verify(mockUserPreferencesRepository).setValue(
                 connectToGooglePermission,
-                Permission.NEVER
+                Permission.NEVER,
             )
         }
 
@@ -539,10 +770,12 @@ class ConversionStateTest {
                 .thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = GrantedUnshortenPermission(
                 stateContext,
@@ -561,10 +794,12 @@ class ConversionStateTest {
                 .thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = GrantedUnshortenPermission(
                 stateContext,
@@ -582,7 +817,16 @@ class ConversionStateTest {
 
     @Test
     fun deniedUnshortenPermission_returnsFailed() = runTest {
-        val state = DeniedUnshortenPermission()
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
+        )
+        val state = DeniedUnshortenPermission(stateContext)
         assertTrue(state.transition() is ConversionFailed)
     }
 
@@ -600,10 +844,12 @@ class ConversionStateTest {
             .thenThrow(NotImplementedError::class.java)
         val stateContext = ConversionStateContext(
             mockGoogleMapsUrlConverter,
-            mockIntentParser,
+            mockIntentTools,
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
         )
         val state = UnshortenedUrl(
             stateContext,
@@ -632,10 +878,12 @@ class ConversionStateTest {
                 .thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = UnshortenedUrl(
                 stateContext,
@@ -671,10 +919,12 @@ class ConversionStateTest {
                 .thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = UnshortenedUrl(
                 stateContext,
@@ -710,10 +960,12 @@ class ConversionStateTest {
                 .thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = UnshortenedUrl(
                 stateContext,
@@ -750,10 +1002,12 @@ class ConversionStateTest {
             ).thenReturn(Permission.ALWAYS)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertEquals(
@@ -793,10 +1047,12 @@ class ConversionStateTest {
             ).thenReturn(Permission.ASK)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertEquals(
@@ -836,10 +1092,12 @@ class ConversionStateTest {
             ).thenReturn(Permission.NEVER)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertTrue(state.transition() is DeniedParseHtmlPermission)
@@ -872,14 +1130,16 @@ class ConversionStateTest {
             ).thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertEquals(
-                ConversionSucceeded(geoUriBuilderFromUrl.toString()),
+                ConversionSucceeded(geoUriBuilderFromUrl.toString(), false),
                 state.transition(),
             )
         }
@@ -911,14 +1171,16 @@ class ConversionStateTest {
             ).thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertEquals(
-                ConversionSucceeded(geoUriBuilderFromUrl.toString()),
+                ConversionSucceeded(geoUriBuilderFromUrl.toString(), false),
                 state.transition(),
             )
         }
@@ -927,10 +1189,12 @@ class ConversionStateTest {
     fun requestedParseHtmlPermission_transition_returnsNull() = runTest {
         val stateContext = ConversionStateContext(
             googleMapsUrlConverter,
-            mockIntentParser,
+            mockIntentTools,
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
         )
         val state = RequestedParseHtmlPermission(
             stateContext,
@@ -960,10 +1224,12 @@ class ConversionStateTest {
             val geoUriFromUrl = geoUriBuilderFromUrl.toString()
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = RequestedParseHtmlPermission(
                 stateContext,
@@ -1004,10 +1270,12 @@ class ConversionStateTest {
             ).thenReturn(Unit)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = RequestedParseHtmlPermission(
                 stateContext,
@@ -1024,7 +1292,7 @@ class ConversionStateTest {
             )
             verify(mockUserPreferencesRepository).setValue(
                 connectToGooglePermission,
-                Permission.ALWAYS
+                Permission.ALWAYS,
             )
         }
 
@@ -1048,10 +1316,12 @@ class ConversionStateTest {
             ).thenReturn(Unit)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = RequestedParseHtmlPermission(
                 stateContext,
@@ -1059,8 +1329,7 @@ class ConversionStateTest {
                 geoUriFromUrl,
             )
             assertEquals(
-                DeniedParseHtmlPermission(geoUriFromUrl),
-                state.deny(false)
+                DeniedParseHtmlPermission(geoUriFromUrl), state.deny(false)
             )
             verify(mockUserPreferencesRepository, never()).setValue(
                 eq(connectToGooglePermission),
@@ -1088,10 +1357,12 @@ class ConversionStateTest {
             ).thenReturn(Unit)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = RequestedParseHtmlPermission(
                 stateContext,
@@ -1099,12 +1370,11 @@ class ConversionStateTest {
                 geoUriFromUrl,
             )
             assertEquals(
-                DeniedParseHtmlPermission(geoUriFromUrl),
-                state.deny(true)
+                DeniedParseHtmlPermission(geoUriFromUrl), state.deny(true)
             )
             verify(mockUserPreferencesRepository).setValue(
                 connectToGooglePermission,
-                Permission.NEVER
+                Permission.NEVER,
             )
         }
 
@@ -1122,10 +1392,12 @@ class ConversionStateTest {
             Mockito.`when`(mockNetworkTools.getText(url)).thenReturn(null)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = GrantedParseHtmlPermission(
                 stateContext,
@@ -1158,10 +1430,12 @@ class ConversionStateTest {
             Mockito.`when`(mockNetworkTools.getText(url)).thenReturn(html)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = GrantedParseHtmlPermission(
                 stateContext,
@@ -1169,7 +1443,7 @@ class ConversionStateTest {
                 geoUriBuilderFromUrl.toString(),
             )
             assertEquals(
-                ConversionSucceeded(geoUriBuilderFromHtml.toString()),
+                ConversionSucceeded(geoUriBuilderFromHtml.toString(), false),
                 state.transition(),
             )
         }
@@ -1195,10 +1469,12 @@ class ConversionStateTest {
             Mockito.`when`(mockNetworkTools.getText(url)).thenReturn(html)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = GrantedParseHtmlPermission(
                 stateContext,
@@ -1206,7 +1482,7 @@ class ConversionStateTest {
                 geoUriBuilderFromUrl.toString(),
             )
             assertEquals(
-                ConversionSucceeded(geoUriBuilderFromUrl.toString()),
+                ConversionSucceeded(geoUriBuilderFromUrl.toString(), false),
                 state.transition(),
             )
         }
@@ -1232,10 +1508,12 @@ class ConversionStateTest {
             Mockito.`when`(mockNetworkTools.getText(url)).thenReturn(html)
             val stateContext = ConversionStateContext(
                 mockGoogleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = GrantedParseHtmlPermission(
                 stateContext,
@@ -1263,83 +1541,66 @@ class ConversionStateTest {
                 geoUriBuilderFromUrl.toString()
             )
             assertEquals(
-                ConversionSucceeded(geoUriBuilderFromUrl.toString()),
+                ConversionSucceeded(geoUriBuilderFromUrl.toString(), false),
                 state.transition(),
             )
         }
 
     @Test
     fun conversionSucceeded_returnsNull() = runTest {
-        val state = ConversionSucceeded("geo:1,2")
+        val state = ConversionSucceeded("geo:1,2", false)
         assertNull(state.transition())
     }
 
     @Test
-    fun conversionFailed_returnsNull() = runTest {
-        val state = ConversionFailed("Fake message")
+    fun conversionFailed_callsOnMessageAndReturnsNull() = runTest {
+        val messageText = "Fake message"
+        var message: Message? = null
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            { message = it },
+        )
+        val state = ConversionFailed(stateContext, messageText)
         assertNull(state.transition())
+        assertEquals(message, Message(messageText, Message.Type.ERROR))
     }
 
     @Test
-    fun receivedGeoUri_backgroundStartActivityPermissionIsGranted_returnsGrantedSharePermission() =
+    fun acceptedSharing_backgroundStartActivityPermissionIsGranted_returnsGrantedSharePermission() =
         runTest {
             val geoUri = "geo:1,1"
             val unchanged = false
-            val fakeActivity = Activity()
             val mockXiaomiTools = Mockito.mock(XiaomiTools::class.java)
             Mockito.`when`(
                 mockXiaomiTools.isBackgroundStartActivityPermissionGranted(
-                    fakeActivity
+                    any<Context>()
                 )
             ).thenReturn(true)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
-            val state = ReceivedGeoUri(
+            val state = AcceptedSharing(
                 stateContext,
-                fakeActivity,
+                mockContext,
+                mockSettingsLauncherWrapper,
                 geoUri,
                 unchanged,
             )
             assertEquals(
-                GrantedSharePermission(geoUri, unchanged),
-                state.transition(),
-            )
-        }
-
-    @Test
-    fun receivedGeoUri_backgroundStartActivityPermissionIsNotGranted_returnsRequestedSharePermission() =
-        runTest {
-            val geoUri = "geo:1,1"
-            val unchanged = false
-            val fakeActivity = Activity()
-            val mockXiaomiTools = Mockito.mock(XiaomiTools::class.java)
-            Mockito.`when`(
-                mockXiaomiTools.isBackgroundStartActivityPermissionGranted(
-                    fakeActivity
-                )
-            ).thenReturn(false)
-            val stateContext = ConversionStateContext(
-                googleMapsUrlConverter,
-                mockIntentParser,
-                mockNetworkTools,
-                fakeUserPreferencesRepository,
-                mockXiaomiTools,
-            )
-            val state = ReceivedGeoUri(
-                stateContext,
-                fakeActivity,
-                geoUri,
-                unchanged,
-            )
-            assertEquals(
-                RequestedSharePermission(
+                GrantedSharePermission(
                     stateContext,
-                    fakeActivity,
+                    mockContext,
                     geoUri,
                     unchanged,
                 ),
@@ -1348,83 +1609,478 @@ class ConversionStateTest {
         }
 
     @Test
-    fun requestedSharePermission_backgroundStartActivityPermissionIsGranted_returnsGrantedSharePermission() =
+    fun acceptedSharing_backgroundStartActivityPermissionIsNotGranted_returnsRequestedSharePermission() =
         runTest {
             val geoUri = "geo:1,1"
             val unchanged = false
-            val fakeActivity = Activity()
             val mockXiaomiTools = Mockito.mock(XiaomiTools::class.java)
             Mockito.`when`(
                 mockXiaomiTools.isBackgroundStartActivityPermissionGranted(
-                    fakeActivity
+                    mockContext
                 )
-            ).thenReturn(true)
+            ).thenReturn(false)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
-            val state = RequestedSharePermission(
+            val state = AcceptedSharing(
                 stateContext,
-                fakeActivity,
+                mockContext,
+                mockSettingsLauncherWrapper,
                 geoUri,
                 unchanged,
             )
             assertEquals(
-                GrantedSharePermission(geoUri, unchanged),
+                RequestedSharePermission(
+                    stateContext,
+                    mockContext,
+                    mockSettingsLauncherWrapper,
+                    geoUri,
+                    unchanged,
+                ),
                 state.transition(),
             )
         }
 
     @Test
-    fun requestedSharePermission_backgroundStartActivityPermissionIsNotGranted_returnsNull() =
+    fun requestedSharePermission_grant_showPermissionEditorReturnsTrue_returnsShowedSharePermissionEditor() =
         runTest {
             val geoUri = "geo:1,1"
             val unchanged = false
-            val fakeActivity = Activity()
             val mockXiaomiTools = Mockito.mock(XiaomiTools::class.java)
             Mockito.`when`(
-                mockXiaomiTools.isBackgroundStartActivityPermissionGranted(
-                    fakeActivity
+                mockXiaomiTools.showPermissionEditor(
+                    mockContext,
+                    mockSettingsLauncherWrapper,
+                )
+            ).thenReturn(true)
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val state = RequestedSharePermission(
+                stateContext,
+                mockContext,
+                mockSettingsLauncherWrapper,
+                geoUri,
+                unchanged,
+            )
+            assertEquals(
+                ShowedSharePermissionEditor(
+                    stateContext,
+                    mockContext,
+                    mockSettingsLauncherWrapper,
+                    geoUri,
+                    unchanged,
+                ),
+                state.grant(false),
+            )
+        }
+
+    @Test
+    fun requestedSharePermission_grant_showPermissionEditorReturnsFalse_returnsSharingFailed() =
+        runTest {
+            val geoUri = "geo:1,1"
+            val unchanged = false
+            val mockXiaomiTools = Mockito.mock(XiaomiTools::class.java)
+            Mockito.`when`(
+                mockXiaomiTools.showPermissionEditor(
+                    mockContext,
+                    mockSettingsLauncherWrapper,
                 )
             ).thenReturn(false)
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
-                mockIntentParser,
+                mockIntentTools,
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
             )
             val state = RequestedSharePermission(
                 stateContext,
-                fakeActivity,
+                mockContext,
+                mockSettingsLauncherWrapper,
                 geoUri,
                 unchanged,
             )
-            assertNull(state.transition())
+            assertEquals(
+                SharingFailed(
+                    stateContext,
+                    "Failed to open permission settings",
+                ),
+                state.grant(false),
+            )
         }
 
     @Test
-    fun grantedSharePermission_returnsNull() =
+    fun requestedSharePermission_deny_returnsDismissedSharePermissionEditor() =
         runTest {
             val geoUri = "geo:1,1"
             val unchanged = false
-            val state = GrantedSharePermission(geoUri, unchanged)
-            assertNull(state.transition())
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val state = RequestedSharePermission(
+                stateContext,
+                mockContext,
+                mockSettingsLauncherWrapper,
+                geoUri,
+                unchanged,
+            )
+            assertTrue(state.deny(false) is DismissedSharePermissionEditor)
         }
 
     @Test
-    fun dismissedSharePermission_returnsNull() =
-        runTest {
-            val state = DismissedSharePermission()
-            assertNull(state.transition())
-        }
+    fun showedSharePermissionEditor_grant_returnsAcceptedSharing() = runTest {
+        val geoUri = "geo:1,1"
+        val unchanged = false
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
+        )
+        val state = ShowedSharePermissionEditor(
+            stateContext,
+            mockContext,
+            mockSettingsLauncherWrapper,
+            geoUri,
+            unchanged,
+        )
+        assertEquals(
+            AcceptedSharing(
+                stateContext,
+                mockContext,
+                mockSettingsLauncherWrapper,
+                geoUri,
+                unchanged,
+            ),
+            state.grant(false),
+        )
+    }
+
+    @Test(expected = NotImplementedError::class)
+    fun showedSharePermissionEditor_deny_throwsNotImplementedError() = runTest {
+        val geoUri = "geo:1,1"
+        val unchanged = false
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            fakeOnMessage,
+        )
+        val state = ShowedSharePermissionEditor(
+            stateContext,
+            mockContext,
+            mockSettingsLauncherWrapper,
+            geoUri,
+            unchanged,
+        )
+        state.deny(false)
+    }
 
     @Test
-    fun noop_returnsNull() = runTest {
-        val state = Noop()
+    fun dismissedSharePermissionEditor_returnsNull() = runTest {
+        val state = DismissedSharePermissionEditor()
         assertNull(state.transition())
     }
+
+    @Test
+    fun grantedSharePermission_intentToolsShareDoesNotThrow_returnsSharingSucceeded() =
+        runTest {
+            val geoUri = "geo:1,1"
+            val unchanged = false
+            val mockIntentTools = Mockito.mock(IntentTools::class.java)
+            Mockito.doNothing().`when`(mockIntentTools)
+                .share(any<Context>(), any<String>(), any<String>())
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val state = GrantedSharePermission(
+                stateContext,
+                mockContext,
+                geoUri,
+                unchanged,
+            )
+            assertEquals(
+                SharingSucceeded(stateContext, "Opened geo: link"),
+                state.transition(),
+            )
+            verify(mockIntentTools).share(
+                mockContext,
+                Intent.ACTION_VIEW,
+                geoUri,
+            )
+        }
+
+    @Test
+    fun grantedSharePermission_intentToolsShareDoesNotThrowAndUnchangedIsTrue_returnsSharingSucceededUnchanged() =
+        runTest {
+            val geoUri = "geo:1,1"
+            val unchanged = true
+            val mockIntentTools = Mockito.mock(IntentTools::class.java)
+            Mockito.doNothing().`when`(mockIntentTools)
+                .share(any<Context>(), any<String>(), any<String>())
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val state = GrantedSharePermission(
+                stateContext,
+                mockContext,
+                geoUri,
+                unchanged,
+            )
+            assertEquals(
+                SharingSucceeded(stateContext, "Opened geo: link unchanged"),
+                state.transition(),
+            )
+            verify(mockIntentTools).share(
+                mockContext,
+                Intent.ACTION_VIEW,
+                geoUri,
+            )
+        }
+
+    @Test
+    fun grantedSharePermission_intentToolsShareThrows_returnsSharingFailed() =
+        runTest {
+            val geoUri = "geo:1,1"
+            val unchanged = false
+            val mockIntentTools = Mockito.mock(IntentTools::class.java)
+            Mockito.`when`(
+                mockIntentTools.share(
+                    any<Context>(),
+                    any<String>(),
+                    any<String>(),
+                )
+            ).thenThrow(ActivityNotFoundException::class.java)
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val state = GrantedSharePermission(
+                stateContext,
+                mockContext,
+                geoUri,
+                unchanged,
+            )
+            assertEquals(
+                SharingFailed(
+                    stateContext, "No app that can open geo: links is installed"
+                ),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun sharingSucceeded_callsOnMessageAndReturnsNull() = runTest {
+        val messageText = "Fake message"
+        var message: Message? = null
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            { message = it },
+        )
+        val state = SharingSucceeded(stateContext, messageText)
+        assertNull(state.transition())
+        assertEquals(message, Message(messageText, Message.Type.SUCCESS))
+    }
+
+    @Test
+    fun sharingFailed_returnsNull() = runTest {
+        val messageText = "Fake message"
+        var message: Message? = null
+        val stateContext = ConversionStateContext(
+            googleMapsUrlConverter,
+            mockIntentTools,
+            mockNetworkTools,
+            fakeUserPreferencesRepository,
+            mockXiaomiTools,
+            fakeLog,
+            { message = it },
+        )
+        val state = SharingFailed(stateContext, "Fake message")
+        assertNull(state.transition())
+        assertEquals(message, Message(messageText, Message.Type.ERROR))
+    }
+
+    @Test
+    fun acceptedCopying_setsClipboardTextAndReturnsCopyingSucceeded() =
+        runTest {
+            val geoUri = "geo:1,1,"
+            val unchanged = false
+
+            val mockClipboardManager =
+                Mockito.mock(ClipboardManager::class.java)
+            Mockito.doNothing().`when`(mockClipboardManager)
+                .setText(any<AnnotatedString>())
+
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val state = AcceptedCopying(
+                stateContext,
+                mockClipboardManager,
+                geoUri,
+                unchanged,
+            )
+            assertEquals(
+                CopyingFinished(stateContext, unchanged),
+                state.transition(),
+            )
+            verify(mockClipboardManager).setText(AnnotatedString(geoUri))
+        }
+
+    @Test
+    fun acceptedCopying_unchangedIsTrue_setsClipboardTextAndReturnsCopyingSucceededUnchanged() =
+        runTest {
+            val geoUri = "geo:1,1,"
+            val unchanged = true
+
+            val mockClipboardManager =
+                Mockito.mock(ClipboardManager::class.java)
+            Mockito.doNothing().`when`(mockClipboardManager)
+                .setText(any<AnnotatedString>())
+
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val state = AcceptedCopying(
+                stateContext,
+                mockClipboardManager,
+                geoUri,
+                unchanged,
+            )
+            assertEquals(
+                CopyingFinished(stateContext, unchanged),
+                state.transition(),
+            )
+            verify(mockClipboardManager).setText(AnnotatedString(geoUri))
+        }
+
+    @Test
+    fun copyingSucceeded_buildVersionIsGreaterOrEqualThanTiramisu_doesNotCallOnMessageAndReturnsNull() =
+        runTest {
+            var message: Message? = null
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                { message = it },
+                { Build.VERSION_CODES.UPSIDE_DOWN_CAKE },
+            )
+            val state = CopyingFinished(stateContext, true)
+            assertNull(state.transition())
+            assertNull(message)
+        }
+
+    @Test
+    fun copyingSucceeded_buildVersionIsLessThanTiramisuAndUnchangedIsTrue_callsOnMessageAndReturnsNull() =
+        runTest {
+            var message: Message? = null
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                { message = it },
+                { Build.VERSION_CODES.R },
+            )
+            val state = CopyingFinished(stateContext, true)
+            assertNull(state.transition())
+            assertEquals(
+                message,
+                Message(
+                    "Copied geo: link to clipboard unchanged",
+                    Message.Type.SUCCESS,
+                ),
+            )
+        }
+
+    @Test
+    fun copyingSucceeded_buildVersionIsLessThanTiramisuAndUnchangedIsFalse_callsOnMessageAndReturnsNull() =
+        runTest {
+            var message: Message? = null
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                { message = it },
+                { Build.VERSION_CODES.R },
+            )
+            val state = CopyingFinished(stateContext, false)
+            assertNull(state.transition())
+            assertEquals(
+                message,
+                Message(
+                    "Copied geo: link to clipboard",
+                    Message.Type.SUCCESS,
+                ),
+            )
+        }
 }

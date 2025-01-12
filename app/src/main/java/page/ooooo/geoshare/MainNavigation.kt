@@ -1,13 +1,25 @@
 package page.ooooo.geoshare
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun MainNavigation() {
+fun MainNavigation(viewModel: ConversionViewModel) {
     val navController = rememberNavController()
+    val introShown by viewModel.introShown.collectAsState()
+
+    LaunchedEffect(introShown) {
+        if (!introShown) {
+            navController.navigate("intro") {
+                popUpTo("main") { inclusive = false }
+            }
+        }
+    }
 
     NavHost(navController = navController, startDestination = "main") {
         composable("about") {
@@ -18,20 +30,31 @@ fun MainNavigation() {
         composable("faq") {
             FaqScreen(
                 onNavigateToMainScreen = { navController.navigate("main") },
-                onNavigateToUserPreferencesScreen = { navController.navigate("user_preferences") }
+                onNavigateToUserPreferencesScreen = { navController.navigate("user_preferences") },
+            )
+        }
+        composable("intro") {
+            IntroScreen(
+                onCloseIntro = {
+                    viewModel.setIntroShown()
+                    navController.navigate("main")
+                },
             )
         }
         composable("main") {
             MainScreen(
                 onNavigateToAboutScreen = { navController.navigate("about") },
                 onNavigateToFaqScreen = { navController.navigate("faq") },
-                onNavigateToUserPreferencesScreen = { navController.navigate("user_preferences") }
+                onNavigateToIntroScreen = { navController.navigate("intro") },
+                onNavigateToUserPreferencesScreen = { navController.navigate("user_preferences") },
+                viewModel = viewModel,
             )
         }
         composable("user_preferences") {
             UserPreferencesScreen(
                 onNavigateToMainScreen = { navController.navigate("main") },
                 onNavigateToFaqScreen = { navController.navigate("faq") },
+                viewModel = viewModel,
             )
         }
     }

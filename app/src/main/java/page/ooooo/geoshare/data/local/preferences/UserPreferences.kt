@@ -1,6 +1,9 @@
 package page.ooooo.geoshare.data.local.preferences
 
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextLinkStyles
@@ -11,17 +14,56 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import page.ooooo.geoshare.R
 import page.ooooo.geoshare.components.ParagraphText
+import page.ooooo.geoshare.components.RadioButtonGroup
 import page.ooooo.geoshare.components.linkStyle
+import page.ooooo.geoshare.ui.theme.Spacing
 
 interface UserPreference<T> {
     val title: String
     val description: @Composable (onNavigateToFaqScreen: () -> Unit) -> Unit
     val key: Preferences.Key<String>
+    val loading: T
     val default: T
-    val options: List<Pair<T, String>>
 
     fun getValue(preferences: Preferences): T
-    fun setValue(preference: MutablePreferences, value: T)
+    fun setValue(preferences: MutablePreferences, value: T)
+
+    @Composable
+    fun component(value: T, onValueChange: (T) -> Unit)
+}
+
+class NullableIntUserPreference(
+    override val title: String,
+    override val description: @Composable (onNavigateToFaqScreen: () -> Unit) -> Unit,
+    override val key: Preferences.Key<String>,
+    override val default: Int?,
+    override val loading: Int?,
+) : UserPreference<Int?> {
+    override fun getValue(preferences: Preferences) =
+        fromString(preferences[key])
+
+    override fun setValue(preferences: MutablePreferences, value: Int?) {
+        preferences[key] = value.toString()
+    }
+
+    @Composable
+    override fun component(value: Int?, onValueChange: (Int?) -> Unit) {
+        var inputValue by remember { mutableStateOf(value.toString()) }
+        OutlinedTextField(
+            value = inputValue,
+            onValueChange = {
+                inputValue = it
+                onValueChange(fromString(it))
+            },
+            modifier = Modifier.padding(top = Spacing.tiny),
+        )
+    }
+
+    private fun fromString(value: String?): Int? = try {
+        value?.toInt()
+    } catch (_: NumberFormatException) {
+        null
+    } ?: default
 }
 
 class PermissionUserPreference(
@@ -29,13 +71,27 @@ class PermissionUserPreference(
     override val description: @Composable (onNavigateToFaqScreen: () -> Unit) -> Unit,
     override val key: Preferences.Key<String>,
     override val default: Permission,
-    override val options: List<Pair<Permission, String>>,
+    override val loading: Permission = default,
+    val options: List<Pair<Permission, String>>,
 ) : UserPreference<Permission> {
     override fun getValue(preferences: Preferences) =
         preferences[key]?.let(Permission::valueOf) ?: default
 
     override fun setValue(preferences: MutablePreferences, value: Permission) {
         preferences[key] = value.name
+    }
+
+    @Composable
+    override fun component(
+        value: Permission,
+        onValueChange: (Permission) -> Unit,
+    ) {
+        RadioButtonGroup(
+            options = options,
+            selectedValue = value,
+            onSelect = { onValueChange(it) },
+            modifier = Modifier.padding(top = Spacing.tiny),
+        )
     }
 }
 
@@ -74,6 +130,15 @@ val connectToGooglePermission = PermissionUserPreference(
     ),
 )
 
+val lastRunVersionCode = NullableIntUserPreference(
+    title = "Which version of the app was last run?",
+    description = {},
+    key = stringPreferencesKey("intro_shown_for_version_code"),
+    loading = null,
+    default = 0,
+)
+
 data class UserPreferencesValues(
-    var connectToGooglePermissionValue: Permission = connectToGooglePermission.default
+    var connectToGooglePermissionValue: Permission = connectToGooglePermission.loading,
+    var introShownForVersionCodeValue: Int? = lastRunVersionCode.loading,
 )

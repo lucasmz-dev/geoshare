@@ -2,38 +2,20 @@ package page.ooooo.geoshare
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withLink
+import androidx.compose.ui.text.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import page.ooooo.geoshare.components.ParagraphText
@@ -56,11 +38,6 @@ fun AboutScreen(
             }
         })
     }) { innerPadding ->
-        val context = LocalContext.current
-        val packageManager = context.packageManager
-        val packageInfo = packageManager.getPackageInfo(
-            context.applicationInfo.packageName, 0
-        )
         val uriHandler = LocalUriHandler.current
         Column(
             modifier = Modifier
@@ -80,9 +57,8 @@ fun AboutScreen(
             )
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 val appName = stringResource(R.string.app_name)
-                val appVersion = packageInfo?.versionName
                 Text(
-                    appName + if (appVersion != null) " $appVersion" else "",
+                    "$appName ${BuildConfig.VERSION_NAME}",
                     style = MaterialTheme.typography.headlineSmall,
                 )
                 ParagraphText(buildAnnotatedString {

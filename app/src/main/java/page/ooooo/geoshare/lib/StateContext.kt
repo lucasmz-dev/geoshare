@@ -1,7 +1,7 @@
 package page.ooooo.geoshare.lib
 
 abstract class StateContext<T : State> {
-    val maxIterations = 10
+    private val maxIterations = 10
 
     abstract var currentState: State
 

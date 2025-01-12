@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.map
 import page.ooooo.geoshare.data.local.preferences.UserPreference
 import page.ooooo.geoshare.data.local.preferences.UserPreferencesValues
 import page.ooooo.geoshare.data.local.preferences.connectToGooglePermission
+import page.ooooo.geoshare.data.local.preferences.lastRunVersionCode
 import java.io.IOException
 import javax.inject.Inject
 
@@ -23,7 +24,7 @@ interface UserPreferencesRepository {
 }
 
 class DefaultUserPreferencesRepository @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
 ) : UserPreferencesRepository {
     override val values: Flow<UserPreferencesValues> =
         dataStore.data.catch { exception ->
@@ -35,6 +36,9 @@ class DefaultUserPreferencesRepository @Inject constructor(
         }.map {
             UserPreferencesValues(
                 connectToGooglePermissionValue = connectToGooglePermission.getValue(
+                    it
+                ),
+                introShownForVersionCodeValue = lastRunVersionCode.getValue(
                     it
                 ),
             )

@@ -1,51 +1,64 @@
 package page.ooooo.geoshare
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.result.ActivityResult
+import androidx.compose.runtime.snapshots.Snapshot.Companion.withMutableSnapshot
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import page.ooooo.geoshare.data.UserPreferencesRepository
 import page.ooooo.geoshare.data.local.preferences.UserPreference
 import page.ooooo.geoshare.data.local.preferences.UserPreferencesValues
-import page.ooooo.geoshare.lib.GoogleMapsUrlConverter
-import page.ooooo.geoshare.lib.Initial
-import page.ooooo.geoshare.lib.IntentParser
-import page.ooooo.geoshare.lib.NetworkTools
-import page.ooooo.geoshare.lib.PermissionState
-import page.ooooo.geoshare.lib.ReceivedIntent
-import page.ooooo.geoshare.lib.ConversionStateContext
-import page.ooooo.geoshare.lib.DismissedSharePermission
-import page.ooooo.geoshare.lib.ReceivedGeoUri
-import page.ooooo.geoshare.lib.State
-import page.ooooo.geoshare.lib.XiaomiTools
+import page.ooooo.geoshare.data.local.preferences.lastRunVersionCode
+import page.ooooo.geoshare.lib.*
 import javax.inject.Inject
 
 @HiltViewModel
 class ConversionViewModel @Inject constructor(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val stateContext = ConversionStateContext(
+    val stateContext = ConversionStateContext(
         googleMapsUrlConverter = GoogleMapsUrlConverter(),
-        intentParser = IntentParser(),
+        intentTools = IntentTools(),
         networkTools = NetworkTools(),
         userPreferencesRepository = userPreferencesRepository,
         xiaomiTools = XiaomiTools(),
+        onMessage = { _message.value = it },
     )
 
-    private val _currentState =
-        MutableStateFlow<State>(Initial())
+    private val _currentState = MutableStateFlow<State>(Initial())
     val currentState: StateFlow<State> = _currentState
+
+    var inputUriString by SavableDelegate(
+        savedStateHandle,
+        "inputUriString",
+        "",
+    )
+    var resultGeoUri by SavableDelegate(
+        savedStateHandle,
+        "resultGeoUri",
+        "",
+    )
+    var resultUnchanged by SavableDelegate(
+        savedStateHandle,
+        "resultUnchanged",
+        false,
+    )
+    var resultErrorMessage by SavableDelegate(
+        savedStateHandle,
+        "resultErrorMessage",
+        "",
+    )
+
+    private val _message = MutableStateFlow<Message?>(null)
+    val message: StateFlow<Message?> = _message
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val userPreferencesValues: StateFlow<UserPreferencesValues> =
@@ -55,6 +68,19 @@ class ConversionViewModel @Inject constructor(
             UserPreferencesValues(),
         )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val introShown: StateFlow<Boolean> = userPreferencesValues.mapLatest {
+        it.introShownForVersionCodeValue != lastRunVersionCode.default
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        userPreferencesValues.value.introShownForVersionCodeValue != lastRunVersionCode.default,
+    )
+
+    fun start() {
+        transition(ReceivedUriString(stateContext, inputUriString))
+    }
+
     fun start(intent: Intent) {
         transition(ReceivedIntent(stateContext, intent))
     }
@@ -63,9 +89,7 @@ class ConversionViewModel @Inject constructor(
         viewModelScope.launch {
             assert(stateContext.currentState is PermissionState)
             transition(
-                (stateContext.currentState as PermissionState).grant(
-                    doNotAsk
-                )
+                (stateContext.currentState as PermissionState).grant(doNotAsk)
             )
         }
     }
@@ -74,38 +98,35 @@ class ConversionViewModel @Inject constructor(
         viewModelScope.launch {
             assert(stateContext.currentState is PermissionState)
             transition(
-                (stateContext.currentState as PermissionState).deny(
-                    doNotAsk
-                )
+                (stateContext.currentState as PermissionState).deny(doNotAsk)
             )
         }
     }
 
-    fun share(activity: Activity, geoUri: String, unchanged: Boolean) {
-        transition(ReceivedGeoUri(stateContext, activity, geoUri, unchanged))
-    }
-
-    fun showSharePermissionsEditor(
-        activity: Activity,
-        launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-        onError: (message: String) -> Unit,
+    fun share(
+        context: Context,
+        settingsLauncherWrapper: ManagedActivityResultLauncherWrapper,
     ) {
-        stateContext.xiaomiTools.showPermissionsEditor(
-            activity,
-            launcher,
-            onError,
+        transition(
+            AcceptedSharing(
+                stateContext,
+                context,
+                settingsLauncherWrapper,
+                resultGeoUri,
+                resultUnchanged,
+            )
         )
     }
 
-    fun retryShare() {
-        viewModelScope.launch {
-            stateContext.transition()
-            _currentState.value = stateContext.currentState
-        }
-    }
-
-    fun dismissShare() {
-        transition(DismissedSharePermission())
+    fun copy(clipboardManager: ClipboardManager) {
+        transition(
+            AcceptedCopying(
+                stateContext,
+                clipboardManager,
+                resultGeoUri,
+                resultUnchanged,
+            )
+        )
     }
 
     private fun transition(newState: State) {
@@ -113,7 +134,43 @@ class ConversionViewModel @Inject constructor(
             stateContext.currentState = newState
             stateContext.transition()
             _currentState.value = stateContext.currentState
+            when (stateContext.currentState) {
+                is ConversionSucceeded ->
+                    (stateContext.currentState as ConversionSucceeded).let {
+                        withMutableSnapshot {
+                            resultGeoUri = it.geoUri
+                            resultUnchanged = it.unchanged
+                        }
+                    }
+
+                is ConversionFailed ->
+                    (stateContext.currentState as ConversionFailed).let {
+                        withMutableSnapshot {
+                            resultErrorMessage = it.message
+                        }
+                    }
+            }
         }
+    }
+
+    fun updateInput(newUriString: String) {
+        withMutableSnapshot {
+            inputUriString = newUriString
+            resultGeoUri = ""
+            resultUnchanged = false
+            resultErrorMessage = ""
+        }
+        if (stateContext.currentState !is Initial) {
+            transition(Initial())
+        }
+    }
+
+    fun dismissMessage() {
+        _message.value = null
+    }
+
+    fun setIntroShown() {
+        setUserPreferenceValue(lastRunVersionCode, BuildConfig.VERSION_CODE)
     }
 
     fun <T> setUserPreferenceValue(
