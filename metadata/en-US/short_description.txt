@@ -1,1 +1,1 @@
-Turn Google Maps links into geo: links
+Open Google Maps in other map apps and create geo: links
