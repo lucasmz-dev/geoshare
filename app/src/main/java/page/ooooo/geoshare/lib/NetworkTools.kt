@@ -12,10 +12,10 @@ class NetworkTools(private val log: ILog = DefaultLog()) {
     private val readTimeout = 10_000
 
     // Set custom User-Agent, so that we don't receive Google Lite HTML, which
-    // doesn't contain coordinates in case of Maps or maps link in case of
-    // Search.
+    // doesn't contain coordinates in case of Google Maps or maps link in case
+    // of Google Search.
     private val userAgent =
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36"
 
     suspend fun requestLocationHeader(url: URL): URL? =
         withContext(Dispatchers.IO) {

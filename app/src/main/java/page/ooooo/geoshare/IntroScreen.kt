@@ -17,12 +17,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -36,7 +40,7 @@ import page.ooooo.geoshare.ui.theme.AppTheme
 import page.ooooo.geoshare.ui.theme.Spacing
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun IntroScreen(
     initialPage: Int = 0,
@@ -85,6 +89,7 @@ fun IntroScreen(
     }
 
     Scaffold(
+        modifier = Modifier.semantics { testTagsAsResourceId = true },
         containerColor = MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ) { innerPadding ->
@@ -110,6 +115,7 @@ fun IntroScreen(
                 when (page) {
                     0 -> IntroPage(
                         "How to View Google Maps Locations in Other Map Apps",
+                        page,
                     ) {
                         IntroFigure(
                             R.drawable.google_maps_share,
@@ -131,6 +137,7 @@ fun IntroScreen(
 
                     1 -> IntroPage(
                         "Configure Android to Offer Alternative Maps for Google Links (Optional)",
+                        page,
                     ) {
                         IntroFigure(
                             R.drawable.open_by_default_google_maps,
@@ -188,6 +195,7 @@ fun IntroScreen(
 
                     2 -> IntroPage(
                         "How to Create geo: Links",
+                        page,
                     ) {
                         IntroFigure(
                             R.drawable.google_maps_copy,
@@ -214,21 +222,24 @@ fun IntroScreen(
                     .padding(vertical = Spacing.tiny),
             ) {
                 if (page != pageCount - 1) {
-                    TextButton(onClick = { onCloseIntro() }) {
+                    TextButton({ onCloseIntro() }) {
                         Text("Close")
                     }
                 }
                 Spacer(Modifier.weight(1f))
-                Button(onClick = {
-                    if (page != pageCount - 1) {
-                        coroutineScope.launch {
-                            scrollState.scrollTo(0)
-                            page++
+                Button(
+                    {
+                        if (page != pageCount - 1) {
+                            coroutineScope.launch {
+                                scrollState.scrollTo(0)
+                                page++
+                            }
+                        } else {
+                            onCloseIntro()
                         }
-                    } else {
-                        onCloseIntro()
-                    }
-                }) {
+                    },
+                    Modifier.testTag("geoShareIntroScreenNextButton"),
+                ) {
                     Text(
                         if (page != pageCount - 1) {
                             "Next"
@@ -243,11 +254,17 @@ fun IntroScreen(
 }
 
 @Composable
-fun IntroPage(headline: String, content: @Composable () -> Unit = {}) {
+fun IntroPage(
+    headline: String,
+    page: Int,
+    content: @Composable () -> Unit = {},
+) {
     Column(Modifier.fillMaxWidth()) {
         Text(
             headline,
-            Modifier.padding(vertical = Spacing.small),
+            Modifier
+                .testTag("geoShareIntroPage${page}HeadingText")
+                .padding(vertical = Spacing.small),
             style = MaterialTheme.typography.headlineSmall,
         )
         Column(

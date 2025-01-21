@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -20,17 +21,27 @@ fun ConfirmationDialog(
     onConfirmation: () -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     AlertDialog(
         title = { Text(text = title) },
         text = { content() },
         onDismissRequest = { onDismissRequest() },
         confirmButton = {
-            TextButton(onClick = { onConfirmation() }) { Text(confirmText) }
+            TextButton(
+                { onConfirmation() },
+                Modifier.testTag("geoShareConfirmationDialogConfirmButton"),
+            ) {
+                Text(confirmText)
+            }
         },
         dismissButton = {
-            TextButton(onClick = { onDismissRequest() }) { Text(dismissText) }
+            TextButton(
+                { onDismissRequest() },
+                Modifier.testTag("geoShareConfirmationDialogDismissButton"),
+            ) {
+                Text(dismissText)
+            }
         },
         modifier = modifier,
     )

@@ -3,9 +3,12 @@ package page.ooooo.geoshare
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -15,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import page.ooooo.geoshare.components.ConfirmationDialog
 import page.ooooo.geoshare.lib.RequestedSharePermission
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ShareScreen(viewModel: ConversionViewModel = hiltViewModel()) {
     val appName = stringResource(R.string.app_name)
@@ -30,7 +34,9 @@ fun ShareScreen(viewModel: ConversionViewModel = hiltViewModel()) {
                 dismissText = "Dismiss",
                 onConfirmation = { viewModel.grant(doNotAsk = false) },
                 onDismissRequest = { viewModel.deny(doNotAsk = false) },
-                modifier = Modifier.testTag("xiaomiPermissionDialog"),
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("geoShareXiaomiPermissionDialog"),
             ) {
                 Text(buildAnnotatedString {
                     append("To share geo: links, you must allow ")

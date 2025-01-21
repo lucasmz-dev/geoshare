@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -56,7 +57,11 @@ fun PermissionDialog(
                     "Don't ask me again",
                     style = MaterialTheme.typography.labelLarge,
                 )
-                Switch(checked = doNotAsk, onCheckedChange = { doNotAsk = it })
+                Switch(
+                    checked = doNotAsk,
+                    onCheckedChange = { doNotAsk = it },
+                    modifier = Modifier.testTag("geoShareConfirmationDialogDoNotAskSwitch"),
+                )
             }
         }
     }

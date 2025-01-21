@@ -3,9 +3,12 @@ package page.ooooo.geoshare
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.LineBreak
@@ -16,6 +19,7 @@ import page.ooooo.geoshare.components.PermissionDialog
 import page.ooooo.geoshare.components.codeStyle
 import page.ooooo.geoshare.lib.*
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
     val appName = stringResource(R.string.app_name)
@@ -31,7 +35,9 @@ fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
                 dismissText = "Quit",
                 onConfirmation = { viewModel.grant(it) },
                 onDismissRequest = { viewModel.deny(it) },
-                modifier = Modifier.testTag("unshortenPermissionDialog"),
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("geoShareUnshortenPermissionDialog"),
             ) {
                 Text(
                     buildAnnotatedString {
@@ -55,7 +61,9 @@ fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
                 dismissText = "Create a search geo: link",
                 onConfirmation = { viewModel.grant(it) },
                 onDismissRequest = { viewModel.deny(it) },
-                modifier = Modifier.testTag("parseHtmlPermissionDialog")
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("geoShareParseHtmlPermissionDialog")
             ) {
                 Text(
                     buildAnnotatedString {

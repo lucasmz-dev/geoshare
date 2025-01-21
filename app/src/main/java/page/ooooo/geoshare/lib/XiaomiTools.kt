@@ -3,23 +3,23 @@ package page.ooooo.geoshare.lib
 import android.app.AppOpsManager
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.Context.APP_OPS_SERVICE
 import android.content.Intent
 import android.os.Build
 import android.os.Process
 import android.util.Log
-import java.util.*
 
 class XiaomiTools {
+
+    fun isXiaomiDevice() = Build.MANUFACTURER.lowercase().contains("xiaomi")
 
     /**
      * See [Stack Overflow](https://stackoverflow.com/a/77842542)
      */
     fun isBackgroundStartActivityPermissionGranted(context: Context): Boolean =
-        if (Build.MANUFACTURER.lowercase(Locale.ROOT) == "xiaomi") {
+        if (isXiaomiDevice()) {
             try {
                 val appOpsManager =
-                    context.getSystemService(APP_OPS_SERVICE) as AppOpsManager
+                    context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
                 val opBackgroundStartActivity = 10021
                 val checkOpNoThrow = AppOpsManager::class.java.getMethod(
                     "checkOpNoThrow",

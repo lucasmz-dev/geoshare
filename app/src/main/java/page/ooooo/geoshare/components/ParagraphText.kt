@@ -57,25 +57,6 @@ fun ParagraphText(
 fun ParagraphText(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color,
-) {
-    Text(text, modifier, color, style = paragraphStyle())
-}
-
-@Composable
-@Suppress("unused")
-fun ParagraphText(
-    text: AnnotatedString,
-    modifier: Modifier = Modifier,
-    color: Color,
-) {
-    Text(text, modifier, color, style = paragraphStyle())
-}
-
-@Composable
-fun ParagraphText(
-    text: String,
-    modifier: Modifier = Modifier,
 ) {
     Text(text, modifier, style = paragraphStyle())
 }

@@ -14,11 +14,15 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,7 +35,7 @@ import page.ooooo.geoshare.lib.ManagedActivityResultLauncherWrapper
 import page.ooooo.geoshare.ui.theme.AppTheme
 import page.ooooo.geoshare.ui.theme.Spacing
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun MainScreen(
     onNavigateToAboutScreen: () -> Unit = {},
@@ -54,6 +58,7 @@ fun MainScreen(
     ShareScreen(viewModel)
 
     Scaffold(
+        modifier = Modifier.semantics { testTagsAsResourceId = true },
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(appName) },
@@ -117,6 +122,7 @@ fun MainScreen(
                 value = viewModel.inputUriString,
                 onValueChange = { viewModel.updateInput(it) },
                 modifier = Modifier
+                    .testTag("geoShareMainInputUriStringTextField")
                     .fillMaxWidth()
                     .padding(top = Spacing.small),
                 label = {
