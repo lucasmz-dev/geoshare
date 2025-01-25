@@ -1,0 +1,13 @@
+<b>Kdy používat Geo Share</b>
+
+Když vám někdo pošle odkaz na Google Mapy, ale vy preferujete OpenStreetMap, můžete sdílet tento odkaz s Geo Share. Aplikace jej otevře ve vámi zvolené nainstalované aplikaci, třeba v OsmAnd nebo Organic Maps.
+
+Když rádi hledáte místa v Google Mapách, ale pro navigování preferujete jinou aplikaci, můžete sdílet polohu z Google Map s Geo Share. Aplikace ji otevře ve vaši oblíbené navigaci.
+
+Aplikaci můžete také použít pro kopírování odkazů na Google Mapy do schránky ve formátu geo: odkazů.
+
+<b>Jak to funguje a ochrana soukromí</b>
+
+Geo Share převádí odkazy z formátu Google Map na geo: odkazy, které lze otevřít v jiných mapových aplikacích. Pro vytvoření geo: odkazu jsou potřeba zeměpisné souřadnice, které Geo Share přečte z URL Google Map.
+
+Avšak ne všechny URL Google Map obsahují souřadnice. V takových případech se vás Geo Share zeptá, jestli se může spojit s Googlem a získat souřadnice z HTTP hlaviček nebo HTML dokumentu daného odkazu. Více informací najdete v aplikaci na obrazovce Nejčastější dotazy.
