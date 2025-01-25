@@ -1,13 +1,13 @@
-<b>When to Use Geo Share</b>
+<b>When to use Geo Share</b>
 
-If someone sends you a Google Maps link but you prefer using OpenStreetMap, you can share the link with Geo Share. The app will open it in an installed map app of your choice, such as OsmAnd or Organic Maps.
+If someone sends you a Google Maps link, but you prefer using OpenStreetMap, you can share the link with Geo Share. The app will open it in an installed map app of your choice, such as OsmAnd or Organic Maps.
 
 If you like finding places on Google Maps but prefer a different app for navigation, you can share the location from Google Maps with Geo Share. The app will open it in your favorite navigation app.
 
 You can also use the app to copy Google Maps links as geo: links to your clipboard.
 
-<b>How It Works and Privacy Considerations</b>
+<b>How it works and privacy considerations</b>
 
-Geo Share converts Google Maps links into geo: links that can be opened by other map applications. The app extracts geographic coordinates by parsing the Google Maps URL.
+Geo Share converts Google Maps links into geo: links that can be opened by other map apps. To create a geo: link, geographic coordinates are required. Geo Share parses them from the Google Maps URL.
 
 However, not all Google Maps URLs include coordinates. In such cases, Geo Share will prompt you for permission to connect to Google and retrieve the coordinates from either HTTP headers or the HTML document of the link. For more detailed information, check the app's FAQ screen.

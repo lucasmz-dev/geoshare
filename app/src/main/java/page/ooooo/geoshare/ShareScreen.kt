@@ -9,10 +9,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.style.LineBreak
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import page.ooooo.geoshare.components.ConfirmationDialog
@@ -29,26 +29,24 @@ fun ShareScreen(viewModel: ConversionViewModel = hiltViewModel()) {
     when (currentState) {
         is RequestedSharePermission -> {
             ConfirmationDialog(
-                title = "Missing permission",
-                confirmText = "Open Android settings",
-                dismissText = "Dismiss",
+                title = stringResource(R.string.conversion_permission_xiaomi_title),
+                confirmText = stringResource(R.string.conversion_permission_xiaomi_grant),
+                dismissText = stringResource(R.string.conversion_permission_xiaomi_deny),
                 onConfirmation = { viewModel.grant(doNotAsk = false) },
                 onDismissRequest = { viewModel.deny(doNotAsk = false) },
                 modifier = Modifier
                     .semantics { testTagsAsResourceId = true }
                     .testTag("geoShareXiaomiPermissionDialog"),
             ) {
-                Text(buildAnnotatedString {
-                    append("To share geo: links, you must allow ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Other permissions")
-                    }
-                    append(" > ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Display pop-up windows while running in the background")
-                    }
-                    append(" to $appName.")
-                })
+                Text(
+                    AnnotatedString.fromHtml(
+                        stringResource(
+                            R.string.conversion_permission_xiaomi_text,
+                            appName
+                        )
+                    ),
+                    style = TextStyle(lineBreak = LineBreak.Paragraph),
+                )
             }
         }
     }

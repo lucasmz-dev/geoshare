@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import page.ooooo.geoshare.R
 import page.ooooo.geoshare.data.local.preferences.Permission
 import page.ooooo.geoshare.data.local.preferences.connectToGooglePermission
 import java.net.MalformedURLException
@@ -24,14 +25,20 @@ data class ReceivedIntent(
 ) : ConversionState() {
     override suspend fun transition(): State {
         if (stateContext.intentTools.isProcessed(intent)) {
-            return ConversionFailed(stateContext, "Nothing to do")
+            return ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_nothing_to_do
+            )
         }
         val geoUri = stateContext.intentTools.getIntentGeoUri(intent)
         if (geoUri != null) {
             return ConversionSucceeded(geoUri, true)
         }
         val urlString = stateContext.intentTools.getIntentUrlString(intent)
-            ?: return ConversionFailed(stateContext, "Missing URL")
+            ?: return ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_missing_url
+            )
         return ReceivedUrlString(stateContext, urlString, null)
     }
 }
@@ -63,7 +70,10 @@ data class ReceivedUrlString(
         val url = try {
             URL(urlStringWithScheme)
         } catch (_: MalformedURLException) {
-            return ConversionFailed(stateContext, "Invalid URL")
+            return ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_invalid_url
+            )
         }
         return ReceivedUrl(stateContext, url, permission)
     }
@@ -124,7 +134,10 @@ data class GrantedUnshortenPermission(
     override suspend fun transition(): State =
         stateContext.networkTools.requestLocationHeader(url)?.let {
             UnshortenedUrl(stateContext, it, Permission.ALWAYS)
-        } ?: ConversionFailed(stateContext, "Failed to resolve short link")
+        } ?: ConversionFailed(
+            stateContext,
+            R.string.conversion_failed_unshorten_network_error
+        )
 }
 
 class DeniedUnshortenPermission(
@@ -132,7 +145,7 @@ class DeniedUnshortenPermission(
 ) : ConversionState() {
     override suspend fun transition(): State = ConversionFailed(
         stateContext,
-        "This link is not supported without connecting to Google",
+        R.string.conversion_failed_unshorten_permission_denied,
     )
 }
 
@@ -146,7 +159,7 @@ data class UnshortenedUrl(
             stateContext.googleMapsUrlConverter.parseUrl(url)
                 ?: return ConversionFailed(
                     stateContext,
-                    "Failed to create geo: link"
+                    R.string.conversion_failed_parse_url_error
                 )
         val geoUriFromUrl = geoUriBuilderFromUrl.toString()
         if (geoUriBuilderFromUrl.coords.lat == "0" && geoUriBuilderFromUrl.coords.lon == "0") {
@@ -208,7 +221,7 @@ data class GrantedParseHtmlPermission(
         val html =
             stateContext.networkTools.getText(url) ?: return ConversionFailed(
                 stateContext,
-                "Failed to fetch Google Maps page",
+                R.string.conversion_failed_parse_html_error,
             )
         val geoUriBuilderFromHtml =
             stateContext.googleMapsUrlConverter.parseHtml(html)
@@ -238,10 +251,10 @@ data class ConversionSucceeded(
 
 data class ConversionFailed(
     val stateContext: ConversionStateContext,
-    val message: String,
+    val messageResId: Int,
 ) : ConversionState() {
     override suspend fun transition(): State? {
-        stateContext.onMessage(Message(message, Message.Type.ERROR))
+        stateContext.onMessage(Message(messageResId, Message.Type.ERROR))
         return null
     }
 }
@@ -296,7 +309,10 @@ data class RequestedSharePermission(
                 unchanged,
             )
         } else {
-            SharingFailed(stateContext, "Failed to open permission settings")
+            SharingFailed(
+                stateContext,
+                R.string.sharing_failed_xiaomi_permission_show_editor_error
+            )
         }
 
     override suspend fun deny(doNotAsk: Boolean): State =
@@ -339,32 +355,32 @@ data class GrantedSharePermission(
         stateContext.intentTools.share(context, Intent.ACTION_VIEW, geoUri)
         SharingSucceeded(
             stateContext,
-            "Opened geo: link${if (unchanged) " unchanged" else ""}",
+            if (unchanged) R.string.sharing_succeeded_unchanged else R.string.sharing_succeeded
         )
     } catch (_: ActivityNotFoundException) {
         SharingFailed(
             stateContext,
-            "No app that can open geo: links is installed",
+            R.string.sharing_failed_activity_not_found,
         )
     }
 }
 
 data class SharingSucceeded(
     val stateContext: ConversionStateContext,
-    val message: String,
+    val messageResId: Int,
 ) : ConversionState() {
     override suspend fun transition(): State? {
-        stateContext.onMessage(Message(message, Message.Type.SUCCESS))
+        stateContext.onMessage(Message(messageResId, Message.Type.SUCCESS))
         return null
     }
 }
 
 data class SharingFailed(
     val stateContext: ConversionStateContext,
-    val message: String,
+    val messageResId: Int,
 ) : ConversionState() {
     override suspend fun transition(): State? {
-        stateContext.onMessage(Message(message, Message.Type.ERROR))
+        stateContext.onMessage(Message(messageResId, Message.Type.ERROR))
         return null
     }
 }
@@ -391,7 +407,7 @@ data class CopyingFinished(
         if (!systemHasClipboardEditor) {
             stateContext.onMessage(
                 Message(
-                    "Copied geo: link to clipboard${if (unchanged) " unchanged" else ""}",
+                    if (unchanged) R.string.copying_finished_unchanged else R.string.copying_finished,
                     Message.Type.SUCCESS
                 )
             )

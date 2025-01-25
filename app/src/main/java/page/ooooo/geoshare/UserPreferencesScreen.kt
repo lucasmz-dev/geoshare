@@ -10,11 +10,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import page.ooooo.geoshare.components.ParagraphHtml
 import page.ooooo.geoshare.data.di.FakeUserPreferencesRepository
 import page.ooooo.geoshare.data.local.preferences.UserPreference
 import page.ooooo.geoshare.data.local.preferences.connectToGooglePermission
@@ -26,19 +28,20 @@ import page.ooooo.geoshare.ui.theme.Spacing
 @Composable
 fun UserPreferencesScreen(
     onNavigateToMainScreen: () -> Unit = {},
-    onNavigateToFaqScreen: () -> Unit = {},
     viewModel: ConversionViewModel = hiltViewModel(),
 ) {
     val userPreferencesValues by viewModel.userPreferencesValues.collectAsStateWithLifecycle()
     Scaffold(topBar = {
-        TopAppBar(title = { Text("Preferences") }, navigationIcon = {
-            IconButton(onClick = onNavigateToMainScreen) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = "Back to main screen",
-                )
-            }
-        })
+        TopAppBar(
+            title = { Text(stringResource(R.string.user_preferences_title)) },
+            navigationIcon = {
+                IconButton(onClick = onNavigateToMainScreen) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = stringResource(R.string.nav_back_content_description),
+                    )
+                }
+            })
     }) { innerPadding ->
         Column(
             modifier = Modifier
@@ -53,7 +56,6 @@ fun UserPreferencesScreen(
                 viewModel,
                 connectToGooglePermission,
                 userPreferencesValues.connectToGooglePermissionValue,
-                onNavigateToFaqScreen,
                 Modifier.padding(top = Spacing.tiny),
             )
             if (BuildConfig.DEBUG) {
@@ -61,7 +63,6 @@ fun UserPreferencesScreen(
                     viewModel,
                     lastRunVersionCode,
                     userPreferencesValues.introShownForVersionCodeValue,
-                    onNavigateToFaqScreen,
                 )
             }
         }
@@ -73,16 +74,15 @@ fun <T> UserPreferencesItem(
     viewModel: ConversionViewModel,
     userPreference: UserPreference<T>,
     value: T,
-    onNavigateToFaqScreen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
         Text(
-            userPreference.title,
+            userPreference.title(),
             Modifier.padding(bottom = Spacing.small),
             style = MaterialTheme.typography.bodyLarge,
         )
-        userPreference.description(onNavigateToFaqScreen)
+        userPreference.description?.let { ParagraphHtml(it()) }
         userPreference.component(value) {
             viewModel.setUserPreferenceValue(userPreference, it)
         }

@@ -113,7 +113,10 @@ class ConversionStateTest {
         )
         val state = ReceivedIntent(stateContext, intent)
         assertEquals(
-            ConversionFailed(stateContext, "Nothing to do"),
+            ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_nothing_to_do
+            ),
             state.transition(),
         )
     }
@@ -162,7 +165,10 @@ class ConversionStateTest {
         )
         val state = ReceivedIntent(stateContext, intent)
         assertEquals(
-            ConversionFailed(stateContext, "Missing URL"),
+            ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_missing_url
+            ),
             state.transition(),
         )
     }
@@ -301,7 +307,10 @@ class ConversionStateTest {
         val permission = Permission.NEVER
         val state = ReceivedUrlString(stateContext, urlString, permission)
         assertEquals(
-            ConversionFailed(stateContext, "Invalid URL"),
+            ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_invalid_url
+            ),
             state.transition(),
         )
     }
@@ -321,7 +330,10 @@ class ConversionStateTest {
         val permission = Permission.NEVER
         val state = ReceivedUrlString(stateContext, urlString, permission)
         assertEquals(
-            ConversionFailed(stateContext, "Invalid URL"),
+            ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_invalid_url
+            ),
             state.transition(),
         )
     }
@@ -1554,7 +1566,7 @@ class ConversionStateTest {
 
     @Test
     fun conversionFailed_callsOnMessageAndReturnsNull() = runTest {
-        val messageText = "Fake message"
+        val messageResId = 987
         var message: Message? = null
         val stateContext = ConversionStateContext(
             googleMapsUrlConverter,
@@ -1565,9 +1577,9 @@ class ConversionStateTest {
             fakeLog,
             { message = it },
         )
-        val state = ConversionFailed(stateContext, messageText)
+        val state = ConversionFailed(stateContext, messageResId)
         assertNull(state.transition())
-        assertEquals(message, Message(messageText, Message.Type.ERROR))
+        assertEquals(message, Message(messageResId, Message.Type.ERROR))
     }
 
     @Test
@@ -1718,7 +1730,7 @@ class ConversionStateTest {
             assertEquals(
                 SharingFailed(
                     stateContext,
-                    "Failed to open permission settings",
+                    R.string.sharing_failed_xiaomi_permission_show_editor_error,
                 ),
                 state.grant(false),
             )
@@ -1833,7 +1845,7 @@ class ConversionStateTest {
                 unchanged,
             )
             assertEquals(
-                SharingSucceeded(stateContext, "Opened geo: link"),
+                SharingSucceeded(stateContext, R.string.sharing_succeeded),
                 state.transition(),
             )
             verify(mockIntentTools).share(
@@ -1867,7 +1879,10 @@ class ConversionStateTest {
                 unchanged,
             )
             assertEquals(
-                SharingSucceeded(stateContext, "Opened geo: link unchanged"),
+                SharingSucceeded(
+                    stateContext,
+                    R.string.sharing_succeeded_unchanged
+                ),
                 state.transition(),
             )
             verify(mockIntentTools).share(
@@ -1907,7 +1922,7 @@ class ConversionStateTest {
             )
             assertEquals(
                 SharingFailed(
-                    stateContext, "No app that can open geo: links is installed"
+                    stateContext, R.string.sharing_failed_activity_not_found
                 ),
                 state.transition(),
             )
@@ -1915,7 +1930,7 @@ class ConversionStateTest {
 
     @Test
     fun sharingSucceeded_callsOnMessageAndReturnsNull() = runTest {
-        val messageText = "Fake message"
+        val messageResId = 987
         var message: Message? = null
         val stateContext = ConversionStateContext(
             googleMapsUrlConverter,
@@ -1926,14 +1941,14 @@ class ConversionStateTest {
             fakeLog,
             { message = it },
         )
-        val state = SharingSucceeded(stateContext, messageText)
+        val state = SharingSucceeded(stateContext, messageResId)
         assertNull(state.transition())
-        assertEquals(message, Message(messageText, Message.Type.SUCCESS))
+        assertEquals(message, Message(messageResId, Message.Type.SUCCESS))
     }
 
     @Test
     fun sharingFailed_returnsNull() = runTest {
-        val messageText = "Fake message"
+        val messageResId = 987
         var message: Message? = null
         val stateContext = ConversionStateContext(
             googleMapsUrlConverter,
@@ -1944,9 +1959,9 @@ class ConversionStateTest {
             fakeLog,
             { message = it },
         )
-        val state = SharingFailed(stateContext, "Fake message")
+        val state = SharingFailed(stateContext, messageResId)
         assertNull(state.transition())
-        assertEquals(message, Message(messageText, Message.Type.ERROR))
+        assertEquals(message, Message(messageResId, Message.Type.ERROR))
     }
 
     @Test
@@ -2053,7 +2068,7 @@ class ConversionStateTest {
             assertEquals(
                 message,
                 Message(
-                    "Copied geo: link to clipboard unchanged",
+                    R.string.copying_finished_unchanged,
                     Message.Type.SUCCESS,
                 ),
             )
@@ -2078,7 +2093,7 @@ class ConversionStateTest {
             assertEquals(
                 message,
                 Message(
-                    "Copied geo: link to clipboard",
+                    R.string.copying_finished,
                     Message.Type.SUCCESS,
                 ),
             )

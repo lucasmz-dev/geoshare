@@ -1,15 +1,14 @@
 package page.ooooo.geoshare.components
 
+import android.content.res.Configuration
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.tooling.preview.Preview
 import page.ooooo.geoshare.ui.theme.AppTheme
 
@@ -58,12 +57,23 @@ private fun DefaultPreview() {
             onConfirmation = {},
             onDismissRequest = {},
         ) {
-            Text(buildAnnotatedString {
-                append("My text ")
-                withStyle(style = SpanStyle(fontStyle = FontStyle.Italic)) {
-                    append("in italics.")
-                }
-            })
+            Text(AnnotatedString.fromHtml("My text <i>in italics</i>."))
+        }
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun DarkPreview() {
+    AppTheme {
+        ConfirmationDialog(
+            title = "My title",
+            confirmText = "Confirm",
+            dismissText = "Dismiss",
+            onConfirmation = {},
+            onDismissRequest = {},
+        ) {
+            Text(AnnotatedString.fromHtml("My text <i>in italics</i>."))
         }
     }
 }

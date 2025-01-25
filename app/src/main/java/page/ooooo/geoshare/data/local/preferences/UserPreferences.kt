@@ -5,22 +5,17 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withLink
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import page.ooooo.geoshare.R
-import page.ooooo.geoshare.components.ParagraphText
 import page.ooooo.geoshare.components.RadioButtonGroup
-import page.ooooo.geoshare.components.linkStyle
+import page.ooooo.geoshare.components.RadioButtonOption
 import page.ooooo.geoshare.ui.theme.Spacing
 
 interface UserPreference<T> {
-    val title: String
-    val description: @Composable (onNavigateToFaqScreen: () -> Unit) -> Unit
+    val title: @Composable () -> String
+    val description: (@Composable () -> String)?
     val key: Preferences.Key<String>
     val loading: T
     val default: T
@@ -33,8 +28,8 @@ interface UserPreference<T> {
 }
 
 class NullableIntUserPreference(
-    override val title: String,
-    override val description: @Composable (onNavigateToFaqScreen: () -> Unit) -> Unit,
+    override val title: @Composable () -> String,
+    override val description: (@Composable () -> String)?,
     override val key: Preferences.Key<String>,
     override val default: Int?,
     override val loading: Int?,
@@ -67,12 +62,12 @@ class NullableIntUserPreference(
 }
 
 class PermissionUserPreference(
-    override val title: String,
-    override val description: @Composable (onNavigateToFaqScreen: () -> Unit) -> Unit,
+    override val title: @Composable () -> String,
+    override val description: (@Composable () -> String)?,
     override val key: Preferences.Key<String>,
     override val default: Permission,
     override val loading: Permission = default,
-    val options: List<Pair<Permission, String>>,
+    val options: List<RadioButtonOption<Permission>>,
 ) : UserPreference<Permission> {
     override fun getValue(preferences: Preferences) =
         preferences[key]?.let(Permission::valueOf) ?: default
@@ -86,7 +81,7 @@ class PermissionUserPreference(
         value: Permission,
         onValueChange: (Permission) -> Unit,
     ) {
-        RadioButtonGroup(
+        RadioButtonGroup<Permission>(
             options = options,
             selectedValue = value,
             onSelect = { onValueChange(it) },
@@ -96,43 +91,44 @@ class PermissionUserPreference(
 }
 
 val connectToGooglePermission = PermissionUserPreference(
-    title = "Allow connecting to Google?",
-    description = { onNavigateToFaqScreen ->
-        val appName = stringResource(R.string.app_name)
-        ParagraphText(buildAnnotatedString {
-            append("$appName can connect to Google to support short Google Maps links, and to get coordinates from the Google Maps page when the link doesn't contain them. For more information, see the ")
-            withLink(
-                LinkAnnotation.Clickable(
-                    "faq",
-                    TextLinkStyles(linkStyle()),
-                ) { onNavigateToFaqScreen() }
-            ) {
-                append("FAQ")
-            }
-            append(".")
-        })
+    title = @Composable {
+        stringResource(R.string.user_preferences_connect_to_google_title)
+    },
+    description = @Composable {
+        stringResource(
+            R.string.user_preferences_connect_to_google_description,
+            stringResource(R.string.app_name)
+        )
     },
     key = stringPreferencesKey("connect_to_google_permission"),
     default = Permission.ASK,
     options = listOf(
-        Pair(
+        RadioButtonOption(
             Permission.ALWAYS,
-            "Yes"
+            @Composable {
+                stringResource(R.string.user_preferences_connect_to_google_option_always)
+            }
         ),
-        Pair(
+        RadioButtonOption(
             Permission.ASK,
-            "Ask before connecting"
+            @Composable {
+                stringResource(R.string.user_preferences_connect_to_google_option_ask)
+            }
         ),
-        Pair(
+        RadioButtonOption(
             Permission.NEVER,
-            "No"
+            @Composable {
+                stringResource(R.string.user_preferences_connect_to_google_option_never)
+            }
         ),
     ),
 )
 
 val lastRunVersionCode = NullableIntUserPreference(
-    title = "Which version of the app was last run?",
-    description = {},
+    title = @Composable {
+        stringResource(R.string.user_preferences_last_run_version_code_title)
+    },
+    description = null,
     key = stringPreferencesKey("intro_shown_for_version_code"),
     loading = null,
     default = 0,

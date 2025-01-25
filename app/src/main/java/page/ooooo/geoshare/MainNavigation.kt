@@ -30,7 +30,6 @@ fun MainNavigation(viewModel: ConversionViewModel) {
         composable("faq") {
             FaqScreen(
                 onNavigateToMainScreen = { navController.navigate("main") },
-                onNavigateToUserPreferencesScreen = { navController.navigate("user_preferences") },
             )
         }
         composable("intro") {
@@ -53,7 +52,6 @@ fun MainNavigation(viewModel: ConversionViewModel) {
         composable("user_preferences") {
             UserPreferencesScreen(
                 onNavigateToMainScreen = { navController.navigate("main") },
-                onNavigateToFaqScreen = { navController.navigate("faq") },
                 viewModel = viewModel,
             )
         }

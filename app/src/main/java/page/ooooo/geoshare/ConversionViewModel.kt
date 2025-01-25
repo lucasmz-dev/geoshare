@@ -51,10 +51,10 @@ class ConversionViewModel @Inject constructor(
         "resultUnchanged",
         false,
     )
-    var resultErrorMessage by SavableDelegate(
+    var resultErrorMessageResId by SavableDelegate<Int?>(
         savedStateHandle,
         "resultErrorMessage",
-        "",
+        null,
     )
 
     private val _message = MutableStateFlow<Message?>(null)
@@ -146,7 +146,7 @@ class ConversionViewModel @Inject constructor(
                 is ConversionFailed ->
                     (stateContext.currentState as ConversionFailed).let {
                         withMutableSnapshot {
-                            resultErrorMessage = it.message
+                            resultErrorMessageResId = it.messageResId
                         }
                     }
             }
@@ -158,7 +158,7 @@ class ConversionViewModel @Inject constructor(
             inputUriString = newUriString
             resultGeoUri = ""
             resultUnchanged = false
-            resultErrorMessage = ""
+            resultErrorMessageResId = null
         }
         if (stateContext.currentState !is Initial) {
             transition(Initial())

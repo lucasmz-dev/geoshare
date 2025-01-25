@@ -9,15 +9,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.LineBreak
-import androidx.compose.ui.text.withStyle
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import page.ooooo.geoshare.components.PermissionDialog
-import page.ooooo.geoshare.components.codeStyle
-import page.ooooo.geoshare.lib.*
+import page.ooooo.geoshare.lib.RequestedParseHtmlPermission
+import page.ooooo.geoshare.lib.RequestedUnshortenPermission
+import page.ooooo.geoshare.lib.truncateMiddle
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -30,9 +31,9 @@ fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
             val requestedUnshortenPermission =
                 currentState as RequestedUnshortenPermission
             PermissionDialog(
-                title = "Connect to Google?",
-                confirmText = "Allow",
-                dismissText = "Quit",
+                title = stringResource(R.string.conversion_permission_unshorten_title),
+                confirmText = stringResource(R.string.conversion_permission_unshorten_grant),
+                dismissText = stringResource(R.string.conversion_permission_unshorten_deny),
                 onConfirmation = { viewModel.grant(it) },
                 onDismissRequest = { viewModel.deny(it) },
                 modifier = Modifier
@@ -40,13 +41,13 @@ fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
                     .testTag("geoShareUnshortenPermissionDialog"),
             ) {
                 Text(
-                    buildAnnotatedString {
-                        append("The link ")
-                        withStyle(codeStyle()) {
-                            append(requestedUnshortenPermission.url.toString())
-                        }
-                        append(" doesn't contain coordinates or place name. $appName must connect to Google to get the information.")
-                    },
+                    AnnotatedString.fromHtml(
+                        stringResource(
+                            R.string.conversion_permission_unshorten_text,
+                            requestedUnshortenPermission.url.toString(),
+                            appName
+                        )
+                    ),
                     style = TextStyle(lineBreak = LineBreak.Paragraph),
                 )
             }
@@ -56,9 +57,9 @@ fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
             val requestedParseHtmlPermission =
                 currentState as RequestedParseHtmlPermission
             PermissionDialog(
-                title = "Connect to Google?",
-                confirmText = "Allow",
-                dismissText = "Create a search geo: link",
+                title = stringResource(R.string.conversion_permission_parse_html_title),
+                confirmText = stringResource(R.string.conversion_permission_parse_html_grant),
+                dismissText = stringResource(R.string.conversion_permission_parse_html_deny),
                 onConfirmation = { viewModel.grant(it) },
                 onDismissRequest = { viewModel.deny(it) },
                 modifier = Modifier
@@ -66,13 +67,13 @@ fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
                     .testTag("geoShareParseHtmlPermissionDialog")
             ) {
                 Text(
-                    buildAnnotatedString {
-                        append("The link ")
-                        withStyle(codeStyle()) {
-                            append(truncateMiddle(requestedParseHtmlPermission.url.toString()))
-                        }
-                        append(" doesn't contain coordinates. $appName can connect to Google to get them, or it can create a geo: link with a search term instead.")
-                    },
+                    AnnotatedString.fromHtml(
+                        stringResource(
+                            R.string.conversion_permission_parse_html_text,
+                            truncateMiddle(requestedParseHtmlPermission.url.toString()),
+                            appName
+                        )
+                    ),
                     style = TextStyle(lineBreak = LineBreak.Paragraph),
                 )
             }

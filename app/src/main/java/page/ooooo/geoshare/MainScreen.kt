@@ -23,7 +23,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -70,35 +73,35 @@ fun MainScreen(
                         ) {
                             Icon(
                                 Icons.Default.MoreVert,
-                                contentDescription = "Menu",
+                                contentDescription = stringResource(R.string.nav_menu_content_description),
                             )
                         }
                         DropdownMenu(
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false }) {
                             DropdownMenuItem(
-                                text = { Text("Preferences") },
+                                text = { Text(stringResource(R.string.user_preferences_title)) },
                                 onClick = {
                                     menuExpanded = false
                                     onNavigateToUserPreferencesScreen()
                                 },
                             )
                             DropdownMenuItem(
-                                text = { Text("FAQ") },
+                                text = { Text(stringResource(R.string.faq_title)) },
                                 onClick = {
                                     menuExpanded = false
                                     onNavigateToFaqScreen()
                                 },
                             )
                             DropdownMenuItem(
-                                text = { Text("Intro") },
+                                text = { Text(stringResource(R.string.intro_title)) },
                                 onClick = {
                                     menuExpanded = false
                                     onNavigateToIntroScreen()
                                 },
                             )
                             DropdownMenuItem(
-                                text = { Text("About") },
+                                text = { Text(stringResource(R.string.about_title)) },
                                 onClick = {
                                     menuExpanded = false
                                     onNavigateToAboutScreen()
@@ -127,7 +130,7 @@ fun MainScreen(
                     .padding(top = Spacing.small),
                 label = {
                     Text(
-                        "Paste a Google Maps link here",
+                        stringResource(R.string.main_input_uri_label),
                     )
                 },
                 trailingIcon = if (viewModel.inputUriString.isNotEmpty()) {
@@ -135,7 +138,7 @@ fun MainScreen(
                         IconButton({ viewModel.updateInput("") }) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
-                                contentDescription = "Clear",
+                                contentDescription = stringResource(R.string.main_input_uri_clear_content_description),
                             )
                         }
                     }
@@ -144,14 +147,13 @@ fun MainScreen(
                 },
                 supportingText = {
                     Text(
-                        if (viewModel.resultErrorMessage.isEmpty()) {
-                            "Like https://google.com/maps/\u2026 or maps.app.goo.gl/\u2026"
-                        } else {
-                            viewModel.resultErrorMessage
-                        }
+                        stringResource(
+                            viewModel.resultErrorMessageResId
+                                ?: R.string.main_input_uri_supporting_text
+                        )
                     )
                 },
-                isError = viewModel.resultErrorMessage.isNotEmpty(),
+                isError = viewModel.resultErrorMessageResId != null,
             )
             if (viewModel.resultGeoUri.isNotEmpty()) {
                 Card(
@@ -184,7 +186,7 @@ fun MainScreen(
                         IconButton({ viewModel.copy(clipboardManager) }) {
                             Icon(
                                 painterResource(R.drawable.content_copy_24px),
-                                contentDescription = "Copy"
+                                contentDescription = stringResource(R.string.main_result_geo_uri_copy_content_description)
                             )
                         }
                         IconButton({
@@ -197,7 +199,7 @@ fun MainScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Share"
+                                contentDescription = stringResource(R.string.main_result_geo_uri_share_content_description)
                             )
                         }
                     }
@@ -209,13 +211,13 @@ fun MainScreen(
                     .fillMaxWidth()
                     .padding(top = Spacing.small),
             ) {
-                Text("Create geo: link")
+                Text(stringResource(R.string.main_create_geo_uri))
             }
             TextButton(
                 { onNavigateToIntroScreen() },
                 Modifier.fillMaxWidth(),
             ) {
-                Text("Learn more ways how to use $appName")
+                Text(stringResource(R.string.main_navigate_to_intro, appName))
             }
             Card(
                 Modifier.padding(top = Spacing.medium),
@@ -232,22 +234,12 @@ fun MainScreen(
                 ) {
                     Icon(painterResource(R.drawable.lightbulb_24px), null)
                     Text(
-                        buildAnnotatedString {
-                            append("$appName supports many Google Maps URL formats. Still, if you find a link that doesn't work, please report an ")
-                            withLink(
-                                LinkAnnotation.Url(
-                                    "https://github.com/jakubvalenta/geoshare/issues",
-                                    TextLinkStyles(
-                                        style = SpanStyle(
-                                            textDecoration = TextDecoration.Underline
-                                        )
-                                    )
-                                )
-                            ) {
-                                append("issue")
-                            }
-                            append(".")
-                        },
+                        AnnotatedString.fromHtml(
+                            stringResource(R.string.main_info_box, appName),
+                            linkStyles = TextLinkStyles(
+                                SpanStyle(textDecoration = TextDecoration.Underline)
+                            ),
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }

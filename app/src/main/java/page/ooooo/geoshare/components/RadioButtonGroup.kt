@@ -17,14 +17,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import page.ooooo.geoshare.ui.theme.AppTheme
 import page.ooooo.geoshare.ui.theme.Spacing
 
+data class RadioButtonOption<T>(
+    val value: T,
+    val text: @Composable () -> String,
+)
+
 @Composable
 fun <T> RadioButtonGroup(
-    options: List<Pair<T, String>>,
+    options: List<RadioButtonOption<T>>,
     selectedValue: T,
     onSelect: (value: T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Note that Modifier.selectableGroup() is essential to ensure correct accessibility behavior
+    // Note that Modifier.selectableGroup() is essential to ensure correct
+    // accessibility behavior
     Column(modifier.selectableGroup()) {
         options.forEach { (value, text) ->
             Row(
@@ -40,10 +46,11 @@ fun <T> RadioButtonGroup(
             ) {
                 RadioButton(
                     selected = (value == selectedValue),
-                    onClick = null // null recommended for accessibility with screenreaders
+                    // Null recommended for accessibility with screen readers
+                    onClick = null
                 )
                 Text(
-                    text = text,
+                    text = text(),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = Spacing.small)
                 )
@@ -60,10 +67,13 @@ private fun DefaultPreview() {
     AppTheme {
         RadioButtonGroup(
             options = listOf(
-                Pair(1, "Foo bar"),
-                Pair(
+                RadioButtonOption(
+                    1,
+                    { "Foo bar" },
+                ),
+                RadioButtonOption(
                     2,
-                    "Kotlin is a modern but already mature programming language designed to make developers happier."
+                    { "Kotlin is a modern but already mature programming language designed to make developers happier." },
                 ),
             ),
             selectedValue = 2,

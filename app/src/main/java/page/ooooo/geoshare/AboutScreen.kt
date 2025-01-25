@@ -15,11 +15,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import page.ooooo.geoshare.components.ParagraphText
-import page.ooooo.geoshare.components.linkStyle
+import page.ooooo.geoshare.components.ParagraphHtml
 import page.ooooo.geoshare.ui.theme.AppTheme
 import page.ooooo.geoshare.ui.theme.Spacing
 
@@ -29,14 +28,17 @@ fun AboutScreen(
     onNavigateToMainScreen: () -> Unit = {},
 ) {
     Scaffold(topBar = {
-        TopAppBar(title = { Text("About") }, navigationIcon = {
-            IconButton(onClick = onNavigateToMainScreen) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = "Back to main screen"
-                )
-            }
-        })
+        TopAppBar(
+            title = { Text(stringResource(R.string.about_title)) },
+            navigationIcon = {
+                IconButton(onClick = onNavigateToMainScreen) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = stringResource(R.string.nav_back_content_description)
+                    )
+                }
+            },
+        )
     }) { innerPadding ->
         val uriHandler = LocalUriHandler.current
         Column(
@@ -49,81 +51,32 @@ fun AboutScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Application icon",
+                contentDescription = stringResource(R.string.about_app_icon_content_description),
                 modifier = Modifier
                     .size(144.dp)
                     .align(Alignment.CenterHorizontally),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                val appName = stringResource(R.string.app_name)
-                Text(
-                    "$appName ${BuildConfig.VERSION_NAME}",
-                    style = MaterialTheme.typography.headlineSmall,
+            val appName = stringResource(R.string.app_name)
+            Text(
+                stringResource(
+                    R.string.about_app_name_and_version,
+                    appName,
+                    BuildConfig.VERSION_NAME
+                ),
+                Modifier.padding(bottom = Spacing.medium),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            ParagraphHtml(stringResource(R.string.about_text, appName))
+            Button(
+                { uriHandler.openUri("https://ko-fi.com/jakubvalenta") },
+                Modifier.padding(bottom = Spacing.small),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                 )
-                ParagraphText(buildAnnotatedString {
-                    append("$appName is a free and open-source app distributed under the ")
-                    withLink(
-                        LinkAnnotation.Url(
-                            "https://www.gnu.org/licenses/gpl-3.0.txt",
-                            TextLinkStyles(linkStyle())
-                        )
-                    ) {
-                        append("GPL 3.0")
-                    }
-                    append(" or later license.")
-                })
-                ParagraphText(buildAnnotatedString {
-                    append("You can find the code at ")
-                    withLink(
-                        LinkAnnotation.Url(
-                            "https://github.com/jakubvalenta/geoshare",
-                            TextLinkStyles(linkStyle())
-                        )
-                    ) {
-                        append("GitHub")
-                    }
-                    append(", where you can also report ")
-                    withLink(
-                        LinkAnnotation.Url(
-                            "https://github.com/jakubvalenta/geoshare/issues",
-                            TextLinkStyles(linkStyle())
-                        )
-                    ) {
-                        append("issues")
-                    }
-                    append(".")
-                })
-                ParagraphText(buildAnnotatedString {
-                    append("Your feedback is welcome. You can reach me at ")
-                    withLink(
-                        LinkAnnotation.Url(
-                            "mailto:jakub@jakubvalenta.cz",
-                            TextLinkStyles(linkStyle())
-                        )
-                    ) {
-                        append("jakub@jakubvalenta.cz")
-                    }
-                    append(".")
-                })
-                ParagraphText(
-                    "If you enjoy using $appName, please donate to my Ko-Fi account. Your donations keep me motivated to work on the project."
-                )
-                Button(
-                    { uriHandler.openUri("https://ko-fi.com/jakubvalenta") },
-                    Modifier.padding(bottom = Spacing.small),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                    )
-                ) {
-                    Text("donate ")
-                    Icon(
-                        painterResource(R.drawable.open_in_new_24px),
-                        contentDescription = "External link",
-                        modifier = Modifier.size(16.dp),
-                    )
-                }
+            ) {
+                Text(stringResource(R.string.about_donate))
             }
         }
     }

@@ -27,15 +27,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
-import page.ooooo.geoshare.components.ParagraphText
-import page.ooooo.geoshare.components.codeStyle
+import page.ooooo.geoshare.components.ParagraphHtml
 import page.ooooo.geoshare.ui.theme.AppTheme
 import page.ooooo.geoshare.ui.theme.Spacing
 import java.util.*
@@ -81,7 +75,7 @@ fun IntroScreen(
         } catch (_: ActivityNotFoundException) {
             Toast.makeText(
                 context,
-                "Failed to open settings",
+                R.string.intro_settings_activity_not_found,
                 Toast.LENGTH_LONG,
             )
                 .show()
@@ -114,104 +108,93 @@ fun IntroScreen(
             ) {
                 when (page) {
                     0 -> IntroPage(
-                        "How to View Google Maps Locations in Other Map Apps",
+                        stringResource(R.string.intro_how_to_share_headline),
                         page,
                     ) {
                         IntroFigure(
                             R.drawable.google_maps_share,
-                            "Screenshot of Google Maps' share screen",
-                            AnnotatedString("Share a location from Google Maps app or from your web browser.")
+                            stringResource(R.string.intro_how_to_share_google_maps_content_description),
+                            stringResource(R.string.intro_how_to_share_google_maps_caption),
                         )
                         IntroFigure(
                             R.drawable.geo_share_open,
-                            "Screenshot of $appName's share screen",
-                            buildAnnotatedString {
-                                append("Choose ")
-                                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                                    append("Share geo:")
-                                }
-                                append(" and Geo Share will let you open the location in any installed map app.")
-                            }
+                            stringResource(
+                                R.string.intro_how_to_share_app_content_description,
+                                appName
+                            ),
+                            stringResource(
+                                R.string.intro_how_to_share_app_caption,
+                                stringResource(R.string.share_activity),
+                                appName
+                            ),
                         )
                     }
 
                     1 -> IntroPage(
-                        "Configure Android to Offer Alternative Maps for Google Links (Optional)",
+                        stringResource(R.string.intro_open_by_default_headline),
                         page,
                     ) {
                         IntroFigure(
                             R.drawable.open_by_default_google_maps,
-                            "Screenshot of Google Maps' Open By default settings",
-                            buildAnnotatedString {
-                                append("First, go to Settings > Apps > Maps > ")
-                                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                                    append("Open by default")
-                                }
-                                append(" and disable Maps from opening links automatically.")
-                            },
+                            stringResource(R.string.intro_open_by_default_google_maps_content_description),
+                            stringResource(R.string.intro_open_by_default_google_maps_caption),
                         ) {
                             OutlinedButton({
                                 showOpenByDefaultSettings("com.google.android.apps.maps")
                             }) {
-                                Text("Open Google Maps settings")
+                                Text(stringResource(R.string.intro_open_by_default_google_maps_button))
                             }
                         }
                         IntroFigure(
                             R.drawable.open_by_default_geo_share,
-                            "Screenshot of $appName's Open By default settings",
-                            buildAnnotatedString {
-                                append("Then go to Settings > Apps > $appName > ")
-                                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                                    append("Open by default")
-                                }
-                                append(" > ")
-                                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                                    append("Add links")
-                                }
-                                append(" and enable $appName to handle its supported links.")
-                            },
+                            stringResource(
+                                R.string.intro_open_by_default_app_content_description,
+                                appName
+                            ),
+                            stringResource(
+                                R.string.intro_open_by_default_app_caption,
+                                appName
+                            ),
                         ) {
                             OutlinedButton({
                                 showOpenByDefaultSettings(context.packageName)
                             }) {
-                                Text("Open $appName settings")
+                                Text(
+                                    stringResource(
+                                        R.string.intro_open_by_default_app_button,
+                                        appName
+                                    )
+                                )
                             }
-                            ParagraphText(
-                                buildAnnotatedString {
-                                    append("Make sure to select at least ")
-                                    withStyle(codeStyle()) {
-                                        append("maps.google.com")
-                                    }
-                                    append(" and ")
-                                    withStyle(codeStyle()) {
-                                        append("maps.app.goo.gl")
-                                    }
-                                    append(". If some links are grayed out, other Google apps may be set as their default handlers. You can locate these apps and adjust their settings as we did with Google Maps.")
-                                },
+                            ParagraphHtml(
+                                stringResource(R.string.intro_open_by_default_app_note),
                                 Modifier.fillMaxWidth(),
                             )
                         }
                     }
 
                     2 -> IntroPage(
-                        "How to Create geo: Links",
+                        stringResource(R.string.intro_geo_links_headline),
                         page,
                     ) {
                         IntroFigure(
                             R.drawable.google_maps_copy,
-                            "Screenshot of Google Maps' share screen",
-                            buildAnnotatedString {
-                                append("Select ")
-                                withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                                    append("Copy geo:")
-                                }
-                                append(" when sharing from Google Maps.")
-                            },
+                            stringResource(R.string.intro_geo_links_copy_content_description),
+                            stringResource(
+                                R.string.intro_geo_links_copy_caption,
+                                stringResource(R.string.copy_activity)
+                            ),
                         )
                         IntroFigure(
                             R.drawable.geo_share_main,
-                            "Screenshot $appName's geo: link conversion form",
-                            AnnotatedString("Or simply open $appName and paste your Google Maps link."),
+                            stringResource(
+                                R.string.intro_geo_links_form_content_description,
+                                appName
+                            ),
+                            stringResource(
+                                R.string.intro_geo_links_form_caption,
+                                appName
+                            ),
                         )
                     }
                 }
@@ -223,7 +206,7 @@ fun IntroScreen(
             ) {
                 if (page != pageCount - 1) {
                     TextButton({ onCloseIntro() }) {
-                        Text("Close")
+                        Text(stringResource(R.string.intro_nav_close))
                     }
                 }
                 Spacer(Modifier.weight(1f))
@@ -241,11 +224,13 @@ fun IntroScreen(
                     Modifier.testTag("geoShareIntroScreenNextButton"),
                 ) {
                     Text(
-                        if (page != pageCount - 1) {
-                            "Next"
-                        } else {
-                            "Get started"
-                        },
+                        stringResource(
+                            if (page != pageCount - 1) {
+                                R.string.intro_nav_next
+                            } else {
+                                R.string.intro_nav_finish
+                            }
+                        )
                     )
                 }
             }
@@ -280,7 +265,7 @@ fun IntroPage(
 fun IntroFigure(
     drawableId: Int,
     contentDescription: String,
-    caption: AnnotatedString,
+    captionHtml: String,
     content: @Composable () -> Unit = {},
 ) {
     Column(
@@ -288,7 +273,7 @@ fun IntroFigure(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.tiny),
     ) {
-        ParagraphText(caption, Modifier.fillMaxWidth())
+        ParagraphHtml(captionHtml, Modifier.fillMaxWidth())
         Image(
             painter = painterResource(drawableId),
             contentDescription = contentDescription,
