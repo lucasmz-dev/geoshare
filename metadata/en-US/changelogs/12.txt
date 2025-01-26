@@ -1,1 +1,2 @@
 - Add Czech language version.
+- Fix unresponsive Google Maps after Xiaomi permission denied.

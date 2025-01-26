@@ -73,6 +73,7 @@
     <string name="conversion_failed_unshorten_network_error">Nepodařilo se analyzovat krátký odkaz</string>
     <string name="conversion_failed_parse_url_error">Nepodařilo se vytvořit geo: odkaz</string>
     <string name="sharing_failed_xiaomi_permission_show_editor_error">Nepodařilo se otevřít nastavení oprávnění</string>
+    <string name="sharing_failed_xiaomi_permission_denied">geo: odkaz nelze sdílet bez oprávnění</string>
     <string name="sharing_succeeded_unchanged">geo: odkaz otevřen beze změny</string>
     <string name="sharing_succeeded">geo: odkaz otevřen</string>
     <string name="sharing_failed_activity_not_found">Není nainstalovaná žádná aplikace, která umí otevřít geo: odkazy</string>

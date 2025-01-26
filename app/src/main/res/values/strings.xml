@@ -73,6 +73,7 @@
     <string name="conversion_failed_unshorten_network_error">Failed to resolve short link</string>
     <string name="conversion_failed_parse_url_error">Failed to create geo: link</string>
     <string name="sharing_failed_xiaomi_permission_show_editor_error">Failed to open permission settings</string>
+    <string name="sharing_failed_xiaomi_permission_denied">Can\'t share geo: link without permission</string>
     <string name="sharing_succeeded_unchanged">Opened geo: link unchanged</string>
     <string name="sharing_succeeded">Opened geo: link</string>
     <string name="sharing_failed_activity_not_found">No app that can open geo: links is installed</string>

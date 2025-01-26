@@ -316,7 +316,10 @@ data class RequestedSharePermission(
         }
 
     override suspend fun deny(doNotAsk: Boolean): State =
-        DismissedSharePermissionEditor()
+        SharingFailed(
+            stateContext,
+            R.string.sharing_failed_xiaomi_permission_denied
+        )
 }
 
 data class ShowedSharePermissionEditor(
@@ -342,8 +345,6 @@ data class ShowedSharePermissionEditor(
         throw NotImplementedError("It is not possible to deny sharing again after the permission editor has been closed")
     }
 }
-
-class DismissedSharePermissionEditor : ConversionState()
 
 data class GrantedSharePermission(
     val stateContext: ConversionStateContext,

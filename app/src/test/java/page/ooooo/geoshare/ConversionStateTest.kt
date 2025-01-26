@@ -1757,7 +1757,13 @@ class ConversionStateTest {
                 geoUri,
                 unchanged,
             )
-            assertTrue(state.deny(false) is DismissedSharePermissionEditor)
+            assertEquals(
+                SharingFailed(
+                    stateContext,
+                    R.string.sharing_failed_xiaomi_permission_denied,
+                ),
+                state.deny(false),
+            )
         }
 
     @Test
@@ -1813,12 +1819,6 @@ class ConversionStateTest {
             unchanged,
         )
         state.deny(false)
-    }
-
-    @Test
-    fun dismissedSharePermissionEditor_returnsNull() = runTest {
-        val state = DismissedSharePermissionEditor()
-        assertNull(state.transition())
     }
 
     @Test

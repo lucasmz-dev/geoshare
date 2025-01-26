@@ -1,1 +1,2 @@
 - Přidána česká jazyková verze.
+- Opravena chyba, kdy Google Mapy nereagovaly po odmítnutí oprávnění na Xiaomi.
