@@ -188,7 +188,7 @@ Droid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1
 ## Development
 
 Open this repo in Android Studio to build and run the app, and to run unit tests
-and integrated tests.
+and instrumented tests.
 
 ### Generating a signed release APK
 
