@@ -139,7 +139,7 @@ open class BaseActivityBehaviorTest {
 
     protected fun waitAndAssertGoogleMapsTextExists(textValue: String) {
         // Grant Xiaomi permission
-        if (xiaomiTools.isXiaomiDevice()) {
+        if (xiaomiTools.isMiuiDevice()) {
             val xiaomiPermissionDialogSelector =
                 By.res("geoShareXiaomiPermissionDialog")
             if (waitForObject(xiaomiPermissionDialogSelector, 1000L)) {
