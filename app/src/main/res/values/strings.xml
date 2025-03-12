@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">Geo Share</string>
+    <string name="app_name" translatable="false">Geo Share</string>
     <string name="copy_activity">Copy geo:</string>
     <string name="share_activity">Share geo:</string>
     <string name="nav_menu_content_description">Menu</string>
