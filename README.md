@@ -248,15 +248,17 @@ adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/pla
 
 ## Contributing
 
-Your contributions are welcome! To show that you'd like to work on a bug,
-feature request or translation, please comment on the relevant [GitHub
+Your contributions are welcome! To show that you'd like to work on a bug, or feature request, please comment on the relevant [GitHub
 issue](https://github.com/jakubvalenta/geoshare/issues) or create a new one.
 
-You can add translations by adding a `values-<lang>/strings.xml` file to
-[app/src/main/res](./app/src/main/res) and a `<locale>` directory to
-[metadata](./metadata). Examples:
-[app/src/main/res/values-cs/strings.xml](./app/src/main/res/values-cs/strings.xml)
-and [metadata/cs-CZ](./metadata/cs-CZ).
+### Translating
+
+Geo Share is [available under Weblate](https://hosted.weblate.org/engage/geoshare/) thanks to their libre tier!
+More instructions can be found under *Info* in it.
+
+<a href="https://hosted.weblate.org/engage/geoshare/">
+<img src="https://hosted.weblate.org/widget/geoshare/multi-auto.svg" alt="Translation status" />
+</a>
 
 __Feel free to remix this project__ under the terms of the GNU General Public
 License version 3 or later. See [COPYING](./COPYING) and [NOTICE](./NOTICE).
