@@ -59,6 +59,9 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+    lint {
+        disable += "MissingTranslation" // Translation is crowd-sourced, so this isn't viable
+    }
 }
 
 dependencies {
