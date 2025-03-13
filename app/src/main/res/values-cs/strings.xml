@@ -34,12 +34,10 @@
     <string name="main_create_geo_uri">Vytvořit geo: odkaz</string>
     <string name="main_navigate_to_intro">Objevte další funkce aplikace</string>
     <string name="main_info_box"><![CDATA[%1s podporuje řadu formátů URL Google Map. Pokud přesto narazíte na odkaz, který nefunguje, <a href="https://github.com/jakubvalenta/geoshare/issues">nahlaste prosím problém</a>.]]></string>
-    <string name="conversion_permission_unshorten_title">Spojit se s Googlem?</string>
-    <string name="conversion_permission_unshorten_grant">OK</string>
+    <string name="conversion_permission_common_title">Spojit se s Googlem?</string>
+    <string name="conversion_permission_common_grant">OK</string>
     <string name="conversion_permission_unshorten_deny">Zrušit</string>
     <string name="conversion_permission_unshorten_text"><![CDATA[Odkaz <tt>%1$s</tt> neobsahuje souřadnice ani název místa. %2$s se potřebuje spojit s Googlem, aby tyto informace získal.]]></string>
-    <string name="conversion_permission_parse_html_title">Spojit se s Googlem?</string>
-    <string name="conversion_permission_parse_html_grant">OK</string>
     <string name="conversion_permission_parse_html_deny">Vytvořit hledací geo: odkaz</string>
     <string name="conversion_permission_parse_html_text"><![CDATA[Odkaz <tt>%1$s</tt> neobsahuje souřadnice. %2$s se může spojit s Google, aby je získal, nebo může místo toho vytvořit geo: odkaz vedoucí na vyhledávání místa podle názvu.]]></string>
     <string name="conversion_permission_xiaomi_title">Chybí oprávnění</string>

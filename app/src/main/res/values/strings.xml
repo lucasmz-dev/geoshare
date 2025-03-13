@@ -35,12 +35,10 @@
     <string name="main_create_geo_uri">Create geo: link</string>
     <string name="main_navigate_to_intro">Discover more app features</string>
     <string name="main_info_box"><![CDATA[%1s supports many Google Maps URL formats. If you still find a link that doesn’t work, please <a href="https://github.com/jakubvalenta/geoshare/issues">report an issue</a>.]]></string>
-    <string name="conversion_permission_unshorten_title">Connect to Google?</string>
-    <string name="conversion_permission_unshorten_grant">OK</string>
+    <string name="conversion_permission_common_title">Connect to Google?</string>
+    <string name="conversion_permission_common_grant">OK</string>
     <string name="conversion_permission_unshorten_deny">Cancel</string>
     <string name="conversion_permission_unshorten_text"><![CDATA[The link <tt>%1$s</tt> doesn’t contain coordinates or place name. %2$s needs to connect to Google to get the information.]]></string>
-    <string name="conversion_permission_parse_html_title">Connect to Google?</string>
-    <string name="conversion_permission_parse_html_grant">OK</string>
     <string name="conversion_permission_parse_html_deny">Create a search geo: link</string>
     <string name="conversion_permission_parse_html_text"><![CDATA[The link <tt>%1$s</tt> doesn’t contain coordinates. %2$s can connect to Google to get them, or it can instead create a geo: link leading to a search by place name.]]></string>
     <string name="conversion_permission_xiaomi_title">Missing permission</string>

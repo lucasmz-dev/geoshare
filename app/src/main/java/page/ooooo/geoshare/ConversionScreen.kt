@@ -31,8 +31,8 @@ fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
             val requestedUnshortenPermission =
                 currentState as RequestedUnshortenPermission
             PermissionDialog(
-                title = stringResource(R.string.conversion_permission_unshorten_title),
-                confirmText = stringResource(R.string.conversion_permission_unshorten_grant),
+                title = stringResource(R.string.conversion_permission_common_title),
+                confirmText = stringResource(R.string.conversion_permission_common_grant),
                 dismissText = stringResource(R.string.conversion_permission_unshorten_deny),
                 onConfirmation = { viewModel.grant(it) },
                 onDismissRequest = { viewModel.deny(it) },
@@ -57,8 +57,8 @@ fun ConversionScreen(viewModel: ConversionViewModel = hiltViewModel()) {
             val requestedParseHtmlPermission =
                 currentState as RequestedParseHtmlPermission
             PermissionDialog(
-                title = stringResource(R.string.conversion_permission_parse_html_title),
-                confirmText = stringResource(R.string.conversion_permission_parse_html_grant),
+                title = stringResource(R.string.conversion_permission_common_title),
+                confirmText = stringResource(R.string.conversion_permission_common_grant),
                 dismissText = stringResource(R.string.conversion_permission_parse_html_deny),
                 onConfirmation = { viewModel.grant(it) },
                 onDismissRequest = { viewModel.deny(it) },
