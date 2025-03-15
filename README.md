@@ -11,6 +11,8 @@ height="80">](https://f-droid.org/packages/page.ooooo.geoshare/)
 alt="Get it on Izzy on Droid"
 height="80">](https://apt.izzysoft.de/packages/page.ooooo.geoshare)
 
+[![Translation status](https://hosted.weblate.org/widget/geoshare/svg-badge.svg)](https://hosted.weblate.org/engage/geoshare/)
+
 ## When to use Geo Share
 
 If someone sends you a Google Maps link, but you prefer using OpenStreetMap, you
@@ -256,9 +258,7 @@ issue](https://github.com/jakubvalenta/geoshare/issues) or create a new one.
 Geo Share is [available under Weblate](https://hosted.weblate.org/engage/geoshare/) thanks to their libre tier!
 More instructions can be found under *Info* in it.
 
-<a href="https://hosted.weblate.org/engage/geoshare/">
-<img src="https://hosted.weblate.org/widget/geoshare/multi-auto.svg" alt="Translation status" />
-</a>
+[![Translation status](https://hosted.weblate.org/widget/geoshare/multi-auto.svg)](https://hosted.weblate.org/engage/geoshare/)
 
 __Feel free to remix this project__ under the terms of the GNU General Public
 License version 3 or later. See [COPYING](./COPYING) and [NOTICE](./NOTICE).
