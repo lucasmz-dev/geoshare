@@ -1,35 +1,46 @@
-output_dir := app/build/outputs/apk/release
-unsigned_apk_filename := app-release-unsigned.apk
-unsigned_aligned_apk_filename := app-release-unsigned-aligned.apk
-signed_apk_filename := app-release.apk
-
-build: $(output_dir)/$(unsigned_apk_filename)  ## Build an unsigned APK
-
-$(output_dir)/$(unsigned_apk_filename):
+.PHONY: build
+build: | check-env
+	-rm -r app/build
 	./gradlew assembleRelease
+	zipalign -v -p 4 \
+		app/build/outputs/apk/release/app-release-unsigned.apk \
+		app/build/outputs/apk/release/app-release-unsigned-aligned.apk
+	apksigner sign \
+		--ks "$(STORE_FILE)" \
+		--ks-pass env:STORE_PASSWORD \
+		--ks-key-alias "$(KEY_ALIAS)" \
+		--key-pass env:KEY_PASSWORD \
+		--out \
+		app/build/outputs/apk/release/app-release.apk \
+		app/build/outputs/apk/release/app-release-unsigned-aligned.apk
 
-align: $(output_dir)/$(unsigned_aligned_apk_filename)  ## Align the unsigned APK
+.PHONY: bundle
+bundle: | check-env
+	./gradlew bundleRelease \
+		-Pandroid.injected.signing.store.file="$(STORE_FILE)" \
+		-Pandroid.injected.signing.store.password="$(STORE_PASSWORD)" \
+		-Pandroid.injected.signing.key.alias="$(KEY_ALIAS)" \
+		-Pandroid.injected.signing.key.password="$(KEY_PASSWORD)"
 
-$(output_dir)/$(unsigned_aligned_apk_filename): $(output_dir)/$(unsigned_apk_filename)
-	zipalign -v -p 4 "$<" "$@"
-
-sign: $(output_dir)/$(signed_apk_filename)  ## Sign the aligned unsigned APK. Example: make sign keystore_path=/path/to/your/keystore.jks
-
-$(output_dir)/$(signed_apk_filename): $(output_dir)/$(unsigned_aligned_apk_filename)
-ifeq ($(keystore_path),)
-	@echo "You must set the variable 'keystore_path'."
+.PHONY: check-env
+check-env:
+ifeq ($(STORE_FILE),)
+	@echo "Variable STORE_FILE is not set."
+	@echo "Example: STORE_FILE=path/to/keystore.js"
 	exit 1
 endif
-	apksigner sign --ks "$(keystore_path)" --out "$@" "$<"
-
-.PHONY: install
-install: $(output_dir)/$(signed_apk_filename)  ## Install the signed APK using adb
-	adb -d install "$<"
-
-.PHONY: clean
-clean:
-	-rm -r app/build
-
-.PHONY: help
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'
+ifeq ($(STORE_PASSWORD),)
+	@echo "Variable STORE_PASSWORD is not set."
+	@echo "Example: STORE_PASSWORD=mypassword"
+	exit 1
+endif
+ifeq ($(KEY_ALIAS),)
+	@echo "Variable KEY_ALIAS is not set."
+	@echo "Example: KEY_ALIAS=com.example.android"
+	exit 1
+endif
+ifeq ($(KEY_PASSWORD),)
+	@echo "Variable KEY_PASSWORD is not set."
+	@echo "Example: KEY_PASSWORD=mypassword"
+	exit 1
+endif
