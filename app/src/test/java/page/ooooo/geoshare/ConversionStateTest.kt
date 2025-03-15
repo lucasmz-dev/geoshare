@@ -303,7 +303,7 @@ class ConversionStateTest {
             fakeLog,
             fakeOnMessage,
         )
-        val urlString = "https://www.example com/"
+        val urlString = "https://[invalid:ipv6]/"
         val permission = Permission.NEVER
         val state = ReceivedUrlString(stateContext, urlString, permission)
         assertEquals(
