@@ -364,7 +364,7 @@ class ConversionStateTest {
         }
 
     @Test
-    fun receivedUrlString_isSchemeRelative_returnsReceivedUrlWithSchemeAndPassesPermission() =
+    fun receivedUrlString_isRelativeScheme_returnsReceivedUrlWithHttpsSchemeAndPassesPermission() =
         runTest {
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
@@ -382,6 +382,31 @@ class ConversionStateTest {
                 ReceivedUrl(
                     stateContext,
                     URL("https:$urlString"),
+                    permission,
+                ),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun receivedUrlString_isNotHttpsScheme_returnsReceivedUrlWithHttpsSchemeAndPassesPermission() =
+        runTest {
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                fakeLog,
+                fakeOnMessage,
+            )
+            val urlString = "ftp://www.example.com/"
+            val permission = Permission.NEVER
+            val state = ReceivedUrlString(stateContext, urlString, permission)
+            assertEquals(
+                ReceivedUrl(
+                    stateContext,
+                    URL("https://www.example.com/"),
                     permission,
                 ),
                 state.transition(),

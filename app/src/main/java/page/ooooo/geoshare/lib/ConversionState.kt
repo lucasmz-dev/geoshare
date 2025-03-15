@@ -63,12 +63,12 @@ data class ReceivedUrlString(
     val permission: Permission?,
 ) : ConversionState() {
     override suspend fun transition(): State {
-        val urlStringWithScheme = urlString.replace(
-            "^(https:)?(//)?(.)".toRegex(),
+        val urlStringWithHttpsScheme = urlString.replace(
+            "^([a-z]+:)?(//)?(.)".toRegex(),
             "https://$3",
         )
         val url = try {
-            URL(urlStringWithScheme)
+            URL(urlStringWithHttpsScheme)
         } catch (_: MalformedURLException) {
             return ConversionFailed(
                 stateContext,
