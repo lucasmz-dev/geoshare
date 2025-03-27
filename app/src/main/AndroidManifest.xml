@@ -13,7 +13,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/MainTheme"
-        android:windowSoftInputMode="adjustResize"
         tools:targetApi="35">
         <activity
             android:name="page.ooooo.geoshare.CopyActivity"
@@ -198,7 +197,8 @@
         <activity
             android:name="page.ooooo.geoshare.MainActivity"
             android:exported="true"
-            android:theme="@style/MainTheme">
+            android:theme="@style/MainTheme"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

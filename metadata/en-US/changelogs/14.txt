@@ -1,1 +1,2 @@
+- Don't hide conversion form behind keyboard.
 - Add Polish translation.
