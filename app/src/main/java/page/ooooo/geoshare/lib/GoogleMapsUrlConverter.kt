@@ -6,19 +6,19 @@ import java.net.URL
 
 class GoogleMapsUrlConverter(
     private val log: ILog = DefaultLog(),
-    private val uriQuote: UriQuote = DefaultUriQuote()
+    private val uriQuote: UriQuote = DefaultUriQuote(),
 ) {
 
-    val hostPattern =
+    val hostPattern: Pattern =
         Pattern.compile("""^((www|maps)\.)?google(\.[a-z]{2,3})?\.[a-z]{2,3}$""")
     val coordRegex =
         """\+?(?P<lat>-?\d{1,2}(\.\d{1,15})?),[+\s]?(?P<lon>-?\d{1,3}(\.\d{1,15})?)"""
-    val coordPattern = Pattern.compile(coordRegex)
+    val coordPattern: Pattern = Pattern.compile(coordRegex)
     val dataCoordRegex =
         """!3d(?P<lat>-?\d{1,2}(\.\d{1,15})?)!4d(?P<lon>-?\d{1,3}(\.\d{1,15})?)"""
     val zoomRegex = """(?P<z>\d{1,2}(\.\d{1,15})?)"""
-    val zoomPattern = Pattern.compile(zoomRegex)
-    val queryPattern = Pattern.compile("""(?P<q>.+)""")
+    val zoomPattern: Pattern = Pattern.compile(zoomRegex)
+    val queryPattern: Pattern = Pattern.compile("""(?P<q>.+)""")
     val placeRegex = """(?P<q>[^/]+)"""
 
     @Suppress("SpellCheckingInspection")
@@ -59,9 +59,9 @@ class GoogleMapsUrlConverter(
         Pattern.compile("""/@$coordRegex"""),
         Pattern.compile("""\[null,null,$coordRegex\]"""),
     )
-    val googleSearchHtmlPattern =
+    val googleSearchHtmlPattern: Pattern =
         Pattern.compile("""data-url="(?P<url>[^"]+)""")
-    val shortUrlPattern =
+    val shortUrlPattern: Pattern =
         Pattern.compile("""^https?://(maps\.app\.goo\.gl/|(app\.)?goo\.gl/maps/|g.co/kgs/).+$""")
 
     fun isShortUrl(url: URL): Boolean =
@@ -97,7 +97,7 @@ class GoogleMapsUrlConverter(
                 val paramParts = rawParam.split('=')
                 val paramName = paramParts.firstOrNull() ?: continue
                 val rawParamValue = paramParts.drop(1).firstOrNull() ?: continue
-                val patterns = queryPatterns.get(paramName) ?: continue
+                val patterns = queryPatterns[paramName] ?: continue
                 val paramValue = uriQuote.decode(rawParamValue)
                 val m = patterns.firstNotNullOfOrNull {
                     val m = it.matcher(paramValue)
