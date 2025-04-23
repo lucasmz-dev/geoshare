@@ -300,6 +300,15 @@ class GoogleMapsUrlConverterTest {
     }
 
     @Test
+    fun parseUrl_qParameterCoordinatesWithTrailingSlash() {
+        assertEquals(
+            "geo:48.857832,2.295226",
+            googleMapsUrlConverter.parseUrl(URL("https://www.google.com/maps/?q=48.857832%2C2.295226"))
+                .toString()
+        )
+    }
+
+    @Test
     fun parseUrl_qParameterCoordinatesWithEmptyPath() {
         assertEquals(
             "geo:39.797573,18.370173",

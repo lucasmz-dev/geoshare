@@ -43,8 +43,8 @@ class GoogleMapsUrlConverter(
         Pattern.compile("""^/maps/dir/.*/$coordRegex$"""),
         Pattern.compile("""^/maps/dir/.*/$placeRegex$"""),
         Pattern.compile("""^/maps/dir/$"""),
-        Pattern.compile("""^/maps$"""),
-        Pattern.compile("""^/search$"""),
+        Pattern.compile("""^/maps/?$"""),
+        Pattern.compile("""^/search/?$"""),
         Pattern.compile("""^/?$"""),
     )
     val queryPatterns = hashMapOf<String, List<Pattern>>(
