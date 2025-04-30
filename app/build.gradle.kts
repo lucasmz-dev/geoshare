@@ -26,6 +26,8 @@ android {
         testInstrumentationRunnerArguments += mapOf(
             "clearPackageData" to "true",
         )
+
+        resourceConfigurations += listOf("bg", "cs", "en", "pl", "pt-rBR")
     }
 
     @Suppress("UnstableApiUsage")
@@ -56,9 +58,6 @@ android {
     buildFeatures {
         buildConfig = true
         compose = true
-    }
-    androidResources {
-        generateLocaleConfig = true
     }
     lint {
         disable += "MissingTranslation" // Translation is crowd-sourced, so this isn't viable
