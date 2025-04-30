@@ -68,16 +68,6 @@ fun AboutScreen(
                 style = MaterialTheme.typography.headlineSmall,
             )
             ParagraphHtml(stringResource(R.string.about_text, appName))
-            Button(
-                { uriHandler.openUri("https://ko-fi.com/jakubvalenta") },
-                Modifier.padding(bottom = Spacing.small),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                )
-            ) {
-                Text(stringResource(R.string.about_donate))
-            }
         }
     }
 }
