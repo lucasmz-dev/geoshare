@@ -8,7 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,7 +28,7 @@ class CopyActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
-            val clipboardManager = LocalClipboardManager.current
+            val clipboard = LocalClipboard.current
             val currentState by viewModel.currentState.collectAsStateWithLifecycle()
             val message by viewModel.message.collectAsStateWithLifecycle()
 
@@ -59,7 +59,7 @@ class CopyActivity : ComponentActivity() {
 
             when (currentState) {
                 is ConversionSucceeded -> {
-                    viewModel.copy(clipboardManager)
+                    viewModel.copy(clipboard)
                 }
 
                 is ConversionFailed -> {

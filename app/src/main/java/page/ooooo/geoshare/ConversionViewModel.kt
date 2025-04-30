@@ -3,7 +3,7 @@ package page.ooooo.geoshare
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.snapshots.Snapshot.Companion.withMutableSnapshot
-import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.Clipboard
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -118,11 +118,11 @@ class ConversionViewModel @Inject constructor(
         )
     }
 
-    fun copy(clipboardManager: ClipboardManager) {
+    fun copy(clipboard: Clipboard) {
         transition(
             AcceptedCopying(
                 stateContext,
-                clipboardManager,
+                clipboard,
                 resultGeoUri,
                 resultUnchanged,
             )

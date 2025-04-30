@@ -16,7 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -49,7 +49,7 @@ fun MainScreen(
 ) {
     val appName = stringResource(R.string.app_name)
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     var menuExpanded by remember { mutableStateOf(false) }
     val settingsLauncher = rememberLauncherForActivityResult(
@@ -184,7 +184,7 @@ fun MainScreen(
                                 )
                             }
                         }
-                        IconButton({ viewModel.copy(clipboardManager) }) {
+                        IconButton({ viewModel.copy(clipboard) }) {
                             Icon(
                                 painterResource(R.drawable.content_copy_24px),
                                 contentDescription = stringResource(R.string.main_result_geo_uri_copy_content_description)

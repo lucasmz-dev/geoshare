@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -29,6 +29,7 @@ class ConversionStateTest {
     private lateinit var fakeOnMessage: (message: Message) -> Unit
     private lateinit var fakeUriQuote: FakeUriQuote
     private lateinit var googleMapsUrlConverter: GoogleMapsUrlConverter
+    private lateinit var mockClipboard: Clipboard
     private lateinit var mockContext: Context
     private lateinit var mockIntentTools: IntentTools
     private lateinit var mockNetworkTools: NetworkTools
@@ -42,6 +43,10 @@ class ConversionStateTest {
         fakeOnMessage = {}
         fakeUriQuote = FakeUriQuote()
         googleMapsUrlConverter = GoogleMapsUrlConverter(fakeLog, fakeUriQuote)
+
+        mockClipboard = Mockito.mock(Clipboard::class.java)
+        Mockito.`when`(mockClipboard.setClipEntry(any<ClipEntry>()))
+            .thenThrow(NotImplementedError::class.java)
 
         mockContext = Mockito.mock(Context::class.java)
         Mockito.`when`(mockContext.packageName)
@@ -108,8 +113,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val state = ReceivedIntent(stateContext, intent)
         assertEquals(
@@ -136,8 +141,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = ReceivedIntent(stateContext, intent)
             assertEquals(
@@ -160,8 +165,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val state = ReceivedIntent(stateContext, intent)
         assertEquals(
@@ -190,8 +195,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = ReceivedIntent(stateContext, intent)
             assertEquals(
@@ -210,8 +215,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val uriString = "geo:1,2?q="
         val mockUri = Mockito.mock(Uri::class.java)
@@ -232,8 +237,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val uriString = "https://www.example.com/"
             val mockUri = Mockito.mock(Uri::class.java)
@@ -254,8 +259,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val uriString = "www.example.com"
             val mockUri = Mockito.mock(Uri::class.java)
@@ -276,8 +281,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val urlString = "https://maps.google.com/foo"
             val permission = Permission.NEVER
@@ -300,8 +305,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val urlString = "https://[invalid:ipv6]/"
         val permission = Permission.NEVER
@@ -323,8 +328,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val urlString = ""
         val permission = Permission.NEVER
@@ -347,8 +352,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val urlString = "www.example.com/"
             val permission = Permission.NEVER
@@ -372,8 +377,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val urlString = "//www.example.com/"
             val permission = Permission.NEVER
@@ -397,8 +402,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val urlString = "ftp://www.example.com/"
             val permission = Permission.NEVER
@@ -430,8 +435,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val permission = Permission.NEVER
             val state = ReceivedUrl(
@@ -466,8 +471,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -500,8 +505,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -534,8 +539,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -562,8 +567,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -596,8 +601,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -630,8 +635,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = ReceivedUrl(
                 stateContext,
@@ -649,8 +654,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val state = RequestedUnshortenPermission(
             stateContext,
@@ -678,8 +683,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedUnshortenPermission(
                 stateContext,
@@ -714,8 +719,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedUnshortenPermission(
                 stateContext,
@@ -750,8 +755,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedUnshortenPermission(
                 stateContext,
@@ -783,8 +788,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedUnshortenPermission(
                 stateContext,
@@ -811,8 +816,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = GrantedUnshortenPermission(
                 stateContext,
@@ -835,8 +840,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = GrantedUnshortenPermission(
                 stateContext,
@@ -860,8 +865,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val state = DeniedUnshortenPermission(stateContext)
         assertTrue(state.transition() is ConversionFailed)
@@ -885,8 +890,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val state = UnshortenedUrl(
             stateContext,
@@ -919,8 +924,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = UnshortenedUrl(
                 stateContext,
@@ -960,8 +965,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = UnshortenedUrl(
                 stateContext,
@@ -1001,8 +1006,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = UnshortenedUrl(
                 stateContext,
@@ -1043,8 +1048,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertEquals(
@@ -1088,8 +1093,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertEquals(
@@ -1133,8 +1138,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertTrue(state.transition() is DeniedParseHtmlPermission)
@@ -1171,8 +1176,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertEquals(
@@ -1212,8 +1217,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
             assertEquals(
@@ -1230,8 +1235,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val state = RequestedParseHtmlPermission(
             stateContext,
@@ -1265,8 +1270,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedParseHtmlPermission(
                 stateContext,
@@ -1311,8 +1316,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedParseHtmlPermission(
                 stateContext,
@@ -1357,8 +1362,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedParseHtmlPermission(
                 stateContext,
@@ -1398,8 +1403,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 mockUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedParseHtmlPermission(
                 stateContext,
@@ -1433,8 +1438,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = GrantedParseHtmlPermission(
                 stateContext,
@@ -1471,8 +1476,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = GrantedParseHtmlPermission(
                 stateContext,
@@ -1510,8 +1515,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = GrantedParseHtmlPermission(
                 stateContext,
@@ -1549,8 +1554,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = GrantedParseHtmlPermission(
                 stateContext,
@@ -1599,8 +1604,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            { message = it },
+            log = fakeLog,
+            onMessage = { message = it },
         )
         val state = ConversionFailed(stateContext, messageResId)
         assertNull(state.transition())
@@ -1624,8 +1629,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = AcceptedSharing(
                 stateContext,
@@ -1662,8 +1667,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = AcceptedSharing(
                 stateContext,
@@ -1702,8 +1707,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedSharePermission(
                 stateContext,
@@ -1742,8 +1747,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedSharePermission(
                 stateContext,
@@ -1772,8 +1777,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = RequestedSharePermission(
                 stateContext,
@@ -1801,8 +1806,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val state = ShowedSharePermissionEditor(
             stateContext,
@@ -1833,8 +1838,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            fakeOnMessage,
+            log = fakeLog,
+            onMessage = fakeOnMessage,
         )
         val state = ShowedSharePermissionEditor(
             stateContext,
@@ -1860,8 +1865,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = GrantedSharePermission(
                 stateContext,
@@ -1894,8 +1899,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = GrantedSharePermission(
                 stateContext,
@@ -1936,8 +1941,8 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = GrantedSharePermission(
                 stateContext,
@@ -1963,8 +1968,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            { message = it },
+            log = fakeLog,
+            onMessage = { message = it },
         )
         val state = SharingSucceeded(stateContext, messageResId)
         assertNull(state.transition())
@@ -1981,8 +1986,8 @@ class ConversionStateTest {
             mockNetworkTools,
             fakeUserPreferencesRepository,
             mockXiaomiTools,
-            fakeLog,
-            { message = it },
+            log = fakeLog,
+            onMessage = { message = it },
         )
         val state = SharingFailed(stateContext, messageResId)
         assertNull(state.transition())
@@ -1995,10 +2000,14 @@ class ConversionStateTest {
             val geoUri = "geo:1,1,"
             val unchanged = false
 
-            val mockClipboardManager =
-                Mockito.mock(ClipboardManager::class.java)
-            Mockito.doNothing().`when`(mockClipboardManager)
-                .setText(any<AnnotatedString>())
+            val mockClipboardTools = Mockito.mock(ClipboardTools::class.java)
+            Mockito.`when`(
+                mockClipboardTools.setPlainText(
+                    any<Clipboard>(),
+                    any<String>(),
+                    any<String>(),
+                )
+            ).thenReturn(Unit)
 
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
@@ -2006,12 +2015,13 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                clipboardTools = mockClipboardTools,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = AcceptedCopying(
                 stateContext,
-                mockClipboardManager,
+                mockClipboard,
                 geoUri,
                 unchanged,
             )
@@ -2019,7 +2029,11 @@ class ConversionStateTest {
                 CopyingFinished(stateContext, unchanged),
                 state.transition(),
             )
-            verify(mockClipboardManager).setText(AnnotatedString(geoUri))
+            verify(mockClipboardTools).setPlainText(
+                mockClipboard,
+                "geo: URI",
+                geoUri,
+            )
         }
 
     @Test
@@ -2028,10 +2042,14 @@ class ConversionStateTest {
             val geoUri = "geo:1,1,"
             val unchanged = true
 
-            val mockClipboardManager =
-                Mockito.mock(ClipboardManager::class.java)
-            Mockito.doNothing().`when`(mockClipboardManager)
-                .setText(any<AnnotatedString>())
+            val mockClipboardTools = Mockito.mock(ClipboardTools::class.java)
+            Mockito.`when`(
+                mockClipboardTools.setPlainText(
+                    any<Clipboard>(),
+                    any<String>(),
+                    any<String>(),
+                )
+            ).thenReturn(Unit)
 
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
@@ -2039,12 +2057,13 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                fakeOnMessage,
+                clipboardTools = mockClipboardTools,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
             )
             val state = AcceptedCopying(
                 stateContext,
-                mockClipboardManager,
+                mockClipboard,
                 geoUri,
                 unchanged,
             )
@@ -2052,7 +2071,11 @@ class ConversionStateTest {
                 CopyingFinished(stateContext, unchanged),
                 state.transition(),
             )
-            verify(mockClipboardManager).setText(AnnotatedString(geoUri))
+            verify(mockClipboardTools).setPlainText(
+                mockClipboard,
+                "geo: URI",
+                geoUri,
+            )
         }
 
     @Test
@@ -2065,9 +2088,9 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                { message = it },
-                { Build.VERSION_CODES.UPSIDE_DOWN_CAKE },
+                log = fakeLog,
+                onMessage = { message = it },
+                getBuildVersionSdkInt = { Build.VERSION_CODES.UPSIDE_DOWN_CAKE },
             )
             val state = CopyingFinished(stateContext, true)
             assertNull(state.transition())
@@ -2084,9 +2107,9 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                { message = it },
-                { Build.VERSION_CODES.R },
+                log = fakeLog,
+                onMessage = { message = it },
+                getBuildVersionSdkInt = { Build.VERSION_CODES.R },
             )
             val state = CopyingFinished(stateContext, true)
             assertNull(state.transition())
@@ -2109,9 +2132,9 @@ class ConversionStateTest {
                 mockNetworkTools,
                 fakeUserPreferencesRepository,
                 mockXiaomiTools,
-                fakeLog,
-                { message = it },
-                { Build.VERSION_CODES.R },
+                log = fakeLog,
+                onMessage = { message = it },
+                getBuildVersionSdkInt = { Build.VERSION_CODES.R },
             )
             val state = CopyingFinished(stateContext, false)
             assertNull(state.transition())

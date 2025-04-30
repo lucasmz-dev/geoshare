@@ -5,8 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.Clipboard
 import page.ooooo.geoshare.R
 import page.ooooo.geoshare.data.local.preferences.Permission
 import page.ooooo.geoshare.data.local.preferences.connectToGooglePermission
@@ -388,12 +387,12 @@ data class SharingFailed(
 
 data class AcceptedCopying(
     val stateContext: ConversionStateContext,
-    val clipboardManager: ClipboardManager,
+    val clipboard: Clipboard,
     val geoUri: String,
     val unchanged: Boolean,
 ) : ConversionState() {
     override suspend fun transition(): State {
-        clipboardManager.setText(AnnotatedString(geoUri))
+        stateContext.clipboardTools.setPlainText(clipboard, "geo: URI", geoUri)
         return CopyingFinished(stateContext, unchanged)
     }
 }
