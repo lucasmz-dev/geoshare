@@ -11,7 +11,7 @@ data class ConversionStateContext(
     val xiaomiTools: XiaomiTools,
     val log: ILog = DefaultLog(),
     val onMessage: (message: Message) -> Unit,
-    val getBuildVersionSdkInt: () -> Int = { Build.VERSION.SDK_INT }
-) : StateContext<ConversionState>() {
+    val getBuildVersionSdkInt: () -> Int = { Build.VERSION.SDK_INT },
+) : StateContext() {
     override var currentState: State = Initial()
 }

@@ -10,8 +10,8 @@ interface UriQuote {
 }
 
 class DefaultUriQuote : UriQuote {
-    override fun encode(s: String) = Uri.encode(s)
-    override fun decode(s: String) = Uri.decode(s)
+    override fun encode(s: String): String = Uri.encode(s)
+    override fun decode(s: String): String = Uri.decode(s)
 }
 
 class FakeUriQuote : UriQuote {
