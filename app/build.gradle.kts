@@ -27,7 +27,15 @@ android {
             "clearPackageData" to "true",
         )
 
-        resourceConfigurations += listOf("bg", "cs", "en", "it", "pl", "pt-rBR")
+        resourceConfigurations += listOf(
+            "bg",
+            "cs",
+            "en",
+            "it",
+            "pl",
+            "pt-rBR",
+            "uk",
+        )
     }
 
     @Suppress("UnstableApiUsage")
