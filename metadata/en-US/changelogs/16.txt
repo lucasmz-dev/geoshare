@@ -1,2 +1,3 @@
+- Added Arabic translation.
 - Added Italian translation.
 - Added Ukrainian translation.

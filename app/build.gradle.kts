@@ -28,6 +28,7 @@ android {
         )
 
         resourceConfigurations += listOf(
+            "ar",
             "bg",
             "cs",
             "en",
