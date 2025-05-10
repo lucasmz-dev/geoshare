@@ -40,7 +40,6 @@ fun AboutScreen(
             },
         )
     }) { innerPadding ->
-        val uriHandler = LocalUriHandler.current
         Column(
             modifier = Modifier
                 .padding(innerPadding)
