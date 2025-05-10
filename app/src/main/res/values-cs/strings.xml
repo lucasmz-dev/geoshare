@@ -66,7 +66,7 @@
     <string name="conversion_failed_nothing_to_do">Není, co by se dalo dělat</string>
     <string name="conversion_failed_missing_url">Chybí URL</string>
     <string name="conversion_failed_invalid_url">Neplatné URL</string>
-    <string name="conversion_failed_unshorten_network_error">Nepodařilo se analyzovat krátký odkaz</string>
+    <string name="conversion_failed_unshorten_error">Nepodařilo se analyzovat krátký odkaz</string>
     <string name="conversion_failed_parse_url_error">Nepodařilo se vytvořit geo: odkaz</string>
     <string name="sharing_failed_xiaomi_permission_show_editor_error">Nepodařilo se otevřít nastavení oprávnění</string>
     <string name="sharing_failed_xiaomi_permission_denied">geo: odkaz nelze sdílet bez oprávnění</string>

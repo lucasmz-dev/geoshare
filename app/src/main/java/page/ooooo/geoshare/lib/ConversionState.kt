@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.Clipboard
 import page.ooooo.geoshare.R
 import page.ooooo.geoshare.data.local.preferences.Permission
 import page.ooooo.geoshare.data.local.preferences.connectToGooglePermission
+import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -130,13 +131,29 @@ data class GrantedUnshortenPermission(
     val stateContext: ConversionStateContext,
     val url: URL,
 ) : ConversionState() {
-    override suspend fun transition(): State =
-        stateContext.networkTools.requestLocationHeader(url)?.let {
-            UnshortenedUrl(stateContext, it, Permission.ALWAYS)
-        } ?: ConversionFailed(
-            stateContext,
-            R.string.conversion_failed_unshorten_network_error
-        )
+    override suspend fun transition(): State {
+        val header = try {
+            stateContext.networkTools.requestLocationHeader(url)
+        } catch (_: MalformedURLException) {
+            return ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_unshorten_error
+            )
+        } catch (_: IOException) {
+            // Catches SocketTimeoutException too.
+            return ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_unshorten_connection_error
+            )
+        } catch (_: Exception) {
+            // Catches UnexpectedResponseCodeException too.
+            return ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_unshorten_error
+            )
+        }
+        return UnshortenedUrl(stateContext, header, Permission.ALWAYS)
+    }
 }
 
 class DeniedUnshortenPermission(
@@ -217,11 +234,21 @@ data class GrantedParseHtmlPermission(
     val geoUriFromUrl: String,
 ) : ConversionState() {
     override suspend fun transition(): State {
-        val html =
-            stateContext.networkTools.getText(url) ?: return ConversionFailed(
+        val html = try {
+            stateContext.networkTools.getText(url)
+        } catch (_: IOException) {
+            // Catches SocketTimeoutException too.
+            return ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_parse_html_connection_error,
+            )
+        } catch (_: Exception) {
+            // Catches UnexpectedResponseCodeException too.
+            return ConversionFailed(
                 stateContext,
                 R.string.conversion_failed_parse_html_error,
             )
+        }
         val geoUriBuilderFromHtml =
             stateContext.googleMapsUrlConverter.parseHtml(html)
         if (geoUriBuilderFromHtml != null) {

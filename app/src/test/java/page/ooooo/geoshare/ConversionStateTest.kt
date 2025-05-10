@@ -21,6 +21,8 @@ import page.ooooo.geoshare.data.di.FakeUserPreferencesRepository
 import page.ooooo.geoshare.data.local.preferences.Permission
 import page.ooooo.geoshare.data.local.preferences.connectToGooglePermission
 import page.ooooo.geoshare.lib.*
+import java.net.MalformedURLException
+import java.net.SocketTimeoutException
 import java.net.URL
 
 class ConversionStateTest {
@@ -803,11 +805,11 @@ class ConversionStateTest {
         }
 
     @Test
-    fun grantedUnshortenPermission_gettingLocationHeaderFails_returnsUnshortenedUrl() =
+    fun grantedUnshortenPermission_gettingLocationHeaderThrowsSocketTimeoutException_returnsConversionFailedWithConnectionErrorMessage() =
         runTest {
             val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
             Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
-                .thenReturn(null)
+                .thenThrow(SocketTimeoutException::class.java)
             Mockito.`when`(mockNetworkTools.getText(any<URL>()))
                 .thenThrow(NotImplementedError::class.java)
             val stateContext = ConversionStateContext(
@@ -823,7 +825,73 @@ class ConversionStateTest {
                 stateContext,
                 URL("https://maps.app.goo.gl/foo"),
             )
-            assertTrue(state.transition() is ConversionFailed)
+            assertEquals(
+                ConversionFailed(
+                    stateContext,
+                    R.string.conversion_failed_unshorten_connection_error,
+                ),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun grantedUnshortenPermission_gettingLocationHeaderThrowsMalformedURLException_returnsConversionFailedWithGeneralErrorMessage() =
+        runTest {
+            val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
+            Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
+                .thenThrow(MalformedURLException::class.java)
+            Mockito.`when`(mockNetworkTools.getText(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
+            )
+            val state = GrantedUnshortenPermission(
+                stateContext,
+                URL("https://maps.app.goo.gl/foo"),
+            )
+            assertEquals(
+                ConversionFailed(
+                    stateContext,
+                    R.string.conversion_failed_unshorten_error,
+                ),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun grantedUnshortenPermission_gettingLocationHeaderThrowsUnexpectedResponseCodeException_returnsConversionFailedWithGeneralErrorMessage() =
+        runTest {
+            val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
+            Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
+                .thenThrow(UnexpectedResponseCodeException::class.java)
+            Mockito.`when`(mockNetworkTools.getText(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
+            )
+            val state = GrantedUnshortenPermission(
+                stateContext,
+                URL("https://maps.app.goo.gl/foo"),
+            )
+            assertEquals(
+                ConversionFailed(
+                    stateContext,
+                    R.string.conversion_failed_unshorten_error,
+                ),
+                state.transition(),
+            )
         }
 
     @Test
@@ -869,7 +937,13 @@ class ConversionStateTest {
             onMessage = fakeOnMessage,
         )
         val state = DeniedUnshortenPermission(stateContext)
-        assertTrue(state.transition() is ConversionFailed)
+        assertEquals(
+            ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_unshorten_permission_denied,
+            ),
+            state.transition(),
+        )
     }
 
     @Test
@@ -898,7 +972,13 @@ class ConversionStateTest {
             url,
             Permission.ALWAYS,
         )
-        assertTrue(state.transition() is ConversionFailed)
+        assertEquals(
+            ConversionFailed(
+                stateContext,
+                R.string.conversion_failed_parse_url_error,
+            ),
+            state.transition(),
+        )
     }
 
     @Test
@@ -1014,7 +1094,10 @@ class ConversionStateTest {
                 url,
                 Permission.NEVER,
             )
-            assertTrue(state.transition() is DeniedParseHtmlPermission)
+            assertEquals(
+                DeniedParseHtmlPermission(geoUriBuilderFromUrl.toString()),
+                state.transition(),
+            )
         }
 
     @Test
@@ -1142,7 +1225,10 @@ class ConversionStateTest {
                 onMessage = fakeOnMessage,
             )
             val state = UnshortenedUrl(stateContext, url, null)
-            assertTrue(state.transition() is DeniedParseHtmlPermission)
+            assertEquals(
+                DeniedParseHtmlPermission(geoUriBuilderFromUrl.toString()),
+                state.transition(),
+            )
         }
 
     @Test
@@ -1421,7 +1507,7 @@ class ConversionStateTest {
         }
 
     @Test
-    fun grantedParseHtmlPermission_downloadingHtmlFails_returnsFailed() =
+    fun grantedParseHtmlPermission_downloadingHtmlThrowsSocketTimeoutException_returnsConversionFailedWithConnectionErrorMessage() =
         runTest {
             val url = URL("https://maps.google.com/foo")
             val geoUriBuilderFromUrl = GeoUriBuilder(fakeUriQuote)
@@ -1431,7 +1517,9 @@ class ConversionStateTest {
             val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
             Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
                 .thenThrow(NotImplementedError::class.java)
-            Mockito.`when`(mockNetworkTools.getText(url)).thenReturn(null)
+            Mockito.`when`(mockNetworkTools.getText(url)).thenThrow(
+                SocketTimeoutException::class.java
+            )
             val stateContext = ConversionStateContext(
                 googleMapsUrlConverter,
                 mockIntentTools,
@@ -1446,7 +1534,50 @@ class ConversionStateTest {
                 url,
                 geoUriBuilderFromUrl.toString(),
             )
-            assertTrue(state.transition() is ConversionFailed)
+            assertEquals(
+                ConversionFailed(
+                    stateContext,
+                    R.string.conversion_failed_parse_html_connection_error,
+                ),
+                state.transition(),
+            )
+        }
+
+    @Test
+    fun grantedParseHtmlPermission_downloadingHtmlThrowsUnexpectedResponseCodeException_returnsConversionFailedWithGeneralErrorMessage() =
+        runTest {
+            val url = URL("https://maps.google.com/foo")
+            val geoUriBuilderFromUrl = GeoUriBuilder(fakeUriQuote)
+            geoUriBuilderFromUrl.coords = GeoUriCoords("0", "0")
+            geoUriBuilderFromUrl.params =
+                GeoUriParams(q = "fromUrl", uriQuote = fakeUriQuote)
+            val mockNetworkTools = Mockito.mock(NetworkTools::class.java)
+            Mockito.`when`(mockNetworkTools.requestLocationHeader(any<URL>()))
+                .thenThrow(NotImplementedError::class.java)
+            Mockito.`when`(mockNetworkTools.getText(url)).thenThrow(
+                UnexpectedResponseCodeException::class.java
+            )
+            val stateContext = ConversionStateContext(
+                googleMapsUrlConverter,
+                mockIntentTools,
+                mockNetworkTools,
+                fakeUserPreferencesRepository,
+                mockXiaomiTools,
+                log = fakeLog,
+                onMessage = fakeOnMessage,
+            )
+            val state = GrantedParseHtmlPermission(
+                stateContext,
+                url,
+                geoUriBuilderFromUrl.toString(),
+            )
+            assertEquals(
+                ConversionFailed(
+                    stateContext,
+                    R.string.conversion_failed_parse_html_error,
+                ),
+                state.transition(),
+            )
         }
 
     @Test

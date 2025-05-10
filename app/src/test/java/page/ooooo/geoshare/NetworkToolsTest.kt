@@ -2,12 +2,17 @@ package page.ooooo.geoshare
 
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
 import page.ooooo.geoshare.lib.FakeLog
 import page.ooooo.geoshare.lib.NetworkTools
+import page.ooooo.geoshare.lib.UnexpectedResponseCodeException
+import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.MalformedURLException
+import java.net.SocketTimeoutException
 import java.net.URL
 
 class NetworkToolsTest {
@@ -41,7 +46,13 @@ class NetworkToolsTest {
         Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
         Mockito.`when`(mockConnection.getResponseCode())
             .thenReturn(HttpURLConnection.HTTP_MOVED_TEMP)
-        assertEquals(null, networkTools.requestLocationHeader(mockUrl))
+        var threw = false
+        try {
+            networkTools.requestLocationHeader(mockUrl)
+        } catch (_: MalformedURLException) {
+            threw = true
+        }
+        assertTrue(threw)
         Mockito.verify(mockConnection).setRequestMethod("HEAD")
         Mockito.verify(mockConnection).setInstanceFollowRedirects(false)
     }
@@ -55,7 +66,13 @@ class NetworkToolsTest {
             .thenReturn(HttpURLConnection.HTTP_OK)
         Mockito.`when`(mockConnection.getHeaderField("Location"))
             .thenReturn("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd")
-        assertEquals(null, networkTools.requestLocationHeader(mockUrl))
+        var threw = false
+        try {
+            networkTools.requestLocationHeader(mockUrl)
+        } catch (_: UnexpectedResponseCodeException) {
+            threw = true
+        }
+        assertTrue(threw)
         Mockito.verify(mockConnection).setRequestMethod("HEAD")
         Mockito.verify(mockConnection).setInstanceFollowRedirects(false)
     }
@@ -69,7 +86,13 @@ class NetworkToolsTest {
             .thenReturn(HttpURLConnection.HTTP_INTERNAL_ERROR)
         Mockito.`when`(mockConnection.getHeaderField("Location"))
             .thenReturn("https://www.google.com/maps/place/Pozna%C5%84+Old+Town,+61-001+Pozna%C5%84,+Poland/data=12345?utm_source=mstt_1&entry=gps&coh=12345&g_ep=abcd")
-        assertEquals(null, networkTools.requestLocationHeader(mockUrl))
+        var threw = false
+        try {
+            networkTools.requestLocationHeader(mockUrl)
+        } catch (_: UnexpectedResponseCodeException) {
+            threw = true
+        }
+        assertTrue(threw)
         Mockito.verify(mockConnection).setRequestMethod("HEAD")
         Mockito.verify(mockConnection).setInstanceFollowRedirects(false)
     }
@@ -83,7 +106,119 @@ class NetworkToolsTest {
             .thenReturn(HttpURLConnection.HTTP_MOVED_TEMP)
         Mockito.`when`(mockConnection.getHeaderField("Location"))
             .thenReturn("spam")
-        assertEquals(null, networkTools.requestLocationHeader(mockUrl))
+        var threw = false
+        try {
+            networkTools.requestLocationHeader(mockUrl)
+        } catch (_: MalformedURLException) {
+            threw = true
+        }
+        assertTrue(threw)
     }
 
+    @Test
+    fun requestLocationHeader_ioException() = runTest {
+        val mockUrl = Mockito.mock(URL::class.java)
+        val mockConnection = Mockito.mock(HttpURLConnection::class.java)
+        Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
+        Mockito.`when`(mockConnection.connect())
+            .thenThrow(IOException::class.java)
+        var threw = false
+        try {
+            networkTools.requestLocationHeader(mockUrl)
+        } catch (_: SocketTimeoutException) {
+            // This empty SocketTimeoutException catch block prevents the
+            // IOException catch block from catching SocketTimeoutException too.
+        } catch (_: IOException) {
+            threw = true
+        }
+        assertTrue(threw)
+    }
+
+    @Test
+    fun requestLocationHeader_socketTimeoutException() = runTest {
+        val mockUrl = Mockito.mock(URL::class.java)
+        val mockConnection = Mockito.mock(HttpURLConnection::class.java)
+        Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
+        Mockito.`when`(mockConnection.connect())
+            .thenThrow(SocketTimeoutException::class.java)
+        var threw = false
+        try {
+            networkTools.requestLocationHeader(mockUrl)
+        } catch (_: SocketTimeoutException) {
+            threw = true
+        }
+        assertTrue(threw)
+    }
+
+    @Test
+    fun getText_200Response() = runTest {
+        val mockUrl = Mockito.mock(URL::class.java)
+        val mockConnection = Mockito.mock(HttpURLConnection::class.java)
+        Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
+        Mockito.`when`(mockConnection.getResponseCode())
+            .thenReturn(HttpURLConnection.HTTP_OK)
+        Mockito.`when`(mockConnection.getInputStream())
+            .thenReturn("test stream content".byteInputStream())
+        assertEquals(
+            "test stream content",
+            networkTools.getText(mockUrl),
+        )
+        Mockito.verify(mockConnection).setRequestMethod("GET")
+        Mockito.verify(mockConnection).setInstanceFollowRedirects(true)
+    }
+
+    @Test
+    fun getText_500Response() = runTest {
+        val mockUrl = Mockito.mock(URL::class.java)
+        val mockConnection = Mockito.mock(HttpURLConnection::class.java)
+        Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
+        Mockito.`when`(mockConnection.getResponseCode())
+            .thenReturn(HttpURLConnection.HTTP_INTERNAL_ERROR)
+        Mockito.`when`(mockConnection.getInputStream())
+            .thenReturn("test stream content".byteInputStream())
+        var threw = false
+        try {
+            networkTools.getText(mockUrl)
+        } catch (_: UnexpectedResponseCodeException) {
+            threw = true
+        }
+        assertTrue(threw)
+        Mockito.verify(mockConnection).setRequestMethod("GET")
+        Mockito.verify(mockConnection).setInstanceFollowRedirects(true)
+    }
+
+    @Test
+    fun getText_ioException() = runTest {
+        val mockUrl = Mockito.mock(URL::class.java)
+        val mockConnection = Mockito.mock(HttpURLConnection::class.java)
+        Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
+        Mockito.`when`(mockConnection.connect())
+            .thenThrow(IOException::class.java)
+        var threw = false
+        try {
+            networkTools.getText(mockUrl)
+        } catch (_: SocketTimeoutException) {
+            // This empty SocketTimeoutException catch block prevents the
+            // IOException catch block from catching SocketTimeoutException too.
+        } catch (_: IOException) {
+            threw = true
+        }
+        assertTrue(threw)
+    }
+
+    @Test
+    fun getText_socketTimeoutException() = runTest {
+        val mockUrl = Mockito.mock(URL::class.java)
+        val mockConnection = Mockito.mock(HttpURLConnection::class.java)
+        Mockito.`when`(mockUrl.openConnection()).thenReturn(mockConnection)
+        Mockito.`when`(mockConnection.connect())
+            .thenThrow(SocketTimeoutException::class.java)
+        var threw = false
+        try {
+            networkTools.getText(mockUrl)
+        } catch (_: SocketTimeoutException) {
+            threw = true
+        }
+        assertTrue(threw)
+    }
 }

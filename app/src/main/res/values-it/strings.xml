@@ -37,7 +37,7 @@
     <string name="conversion_failed_missing_url">URL mancante</string>
     <string name="conversion_failed_parse_url_error">Errore nella creazione del link geo:</string>
     <string name="sharing_failed_xiaomi_permission_show_editor_error">Impossibile aprire le impostazioni dei permessi</string>
-    <string name="conversion_failed_unshorten_network_error">Impossibile risolvere il collegamento abbreviato</string>
+    <string name="conversion_failed_unshorten_error">Impossibile risolvere il collegamento abbreviato</string>
     <string name="sharing_succeeded_unchanged">Link geo: aperto invariato</string>
     <string name="copying_finished">Link geo: copiato</string>
     <string name="copying_finished_unchanged">Link geo: copiato invariato</string>
