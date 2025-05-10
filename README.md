@@ -1,6 +1,4 @@
-<img align="left" width="80" height="80" src="./metadata/en-US/images/icon.png" alt="Geo Share app icon">
-
-# Geo Share
+# ![](./docs/icon-54.png) Geo Share
 
 An Android app to open Google Maps in other map apps and to create geo: links.
 
@@ -250,12 +248,15 @@ adb -s emulator-5554 shell am start -W -a android.intent.action.SEND -t text/pla
 
 ## Contributing
 
-Your contributions are welcome! To show that you'd like to work on a bug, or feature request, please comment on the relevant [GitHub
+Your contributions are welcome! To show that you'd like to work on a bug, or
+feature request, please comment on the relevant [GitHub
 issue](https://github.com/jakubvalenta/geoshare/issues) or create a new one.
 
 ### Translating
 
-Geo Share is [available under Weblate](https://hosted.weblate.org/engage/geoshare/) thanks to their libre tier!
+Geo Share
+is [available under Weblate](https://hosted.weblate.org/engage/geoshare/) thanks
+to their libre tier!
 More instructions can be found under *Info* in it.
 
 [![Translation status](https://hosted.weblate.org/widget/geoshare/multi-auto.svg)](https://hosted.weblate.org/engage/geoshare/)
