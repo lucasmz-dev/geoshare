@@ -14,7 +14,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         shareUri("https://www.google.com/maps/@52.5067296,13.2599309,11z")
 
         // Google Maps shows precise location
-        waitAndAssertGoogleMapsTextExists("Search here")
+        waitAndAssertGoogleMapsTextExists("Search here|Try gas stations, ATMs".toPattern())
     }
 
     @Test
@@ -30,7 +30,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         )
 
         // Google Maps shows precise location
-        waitAndAssertGoogleMapsTextExists("Search here")
+        waitAndAssertGoogleMapsTextExists("Search here|Try gas stations, ATMs".toPattern())
 
         // Return to the home screen
         device.pressHome()
@@ -54,7 +54,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         )
 
         // Google Maps shows precise location
-        waitAndAssertGoogleMapsTextExists("Search here")
+        waitAndAssertGoogleMapsTextExists("Search here|Try gas stations, ATMs".toPattern())
 
         // Return to the home screen
         device.pressHome()
@@ -63,7 +63,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         shareUri("https://maps.app.goo.gl/eukZjpeYrrvX3tDw6")
 
         // Google Maps shows precise location again
-        waitAndAssertGoogleMapsTextExists("Search here")
+        waitAndAssertGoogleMapsTextExists("Search here|Try gas stations, ATMs".toPattern())
     }
 
     @Test
@@ -125,7 +125,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         )
 
         // Google Maps shows precise location
-        waitAndAssertGoogleMapsTextExists("Search here")
+        waitAndAssertGoogleMapsTextExists("Search here|Try gas stations, ATMs".toPattern())
 
         // Return to the home screen
         device.pressHome()
@@ -149,7 +149,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         )
 
         // Google Maps shows precise location
-        waitAndAssertGoogleMapsTextExists("Search here")
+        waitAndAssertGoogleMapsTextExists("Search here|Try gas stations, ATMs".toPattern())
 
         // Return to the home screen
         device.pressHome()
@@ -158,7 +158,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         shareUri("https://www.google.com/maps/place/Hermannstr.+21,+Berlin/")
 
         // Google Maps shows precise location again
-        waitAndAssertGoogleMapsTextExists("Search here")
+        waitAndAssertGoogleMapsTextExists("Search here|Try gas stations, ATMs".toPattern())
     }
 
     @Test
@@ -174,7 +174,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         )
 
         // Google Maps shows location search
-        waitAndAssertGoogleMapsTextExists("Hermannstr. 30, Berlin")
+        waitAndAssertGoogleMapsTextExists("""Hermannstr\. 30, Berlin""".toPattern())
 
         // Share a Google Maps link with the app again
         shareUri("https://www.google.com/maps/place/Hermannstr.+31,+Berlin/")
@@ -195,13 +195,13 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         )
 
         // Google Maps shows location search
-        waitAndAssertGoogleMapsTextExists("Hermannstr. 40, Berlin")
+        waitAndAssertGoogleMapsTextExists("""Hermannstr\. 40, Berlin""".toPattern())
 
         // Share a Google Maps link with the app again
         shareUri("https://www.google.com/maps/place/Hermannstr.+41,+Berlin/")
 
         // Google Maps shows location search
-        waitAndAssertGoogleMapsTextExists("Hermannstr. 41, Berlin")
+        waitAndAssertGoogleMapsTextExists("""Hermannstr\. 41, Berlin""".toPattern())
     }
 
     @Test
@@ -215,7 +215,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         )
 
         // Google Maps shows precise location
-        waitAndAssertGoogleMapsTextExists("Search here")
+        waitAndAssertGoogleMapsTextExists("Search here|Try gas stations, ATMs".toPattern())
     }
 
     @Test
@@ -229,7 +229,7 @@ class ShareActivityBehaviorTest : BaseActivityBehaviorTest() {
         )
 
         // Google Maps shows precise location
-        waitAndAssertGoogleMapsTextExists("Search here")
+        waitAndAssertGoogleMapsTextExists("Search here|Try gas stations, ATMs".toPattern())
     }
 
     private fun shareUri(unsafeUriString: String) {

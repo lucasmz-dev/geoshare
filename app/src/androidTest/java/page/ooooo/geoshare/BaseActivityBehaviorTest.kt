@@ -137,7 +137,7 @@ open class BaseActivityBehaviorTest {
         }
     }
 
-    protected fun waitAndAssertGoogleMapsTextExists(textValue: String) {
+    protected fun waitAndAssertGoogleMapsTextExists(textValue: Pattern) {
         // Grant Xiaomi permission
         if (xiaomiTools.isMiuiDevice()) {
             val xiaomiPermissionDialogSelector =
