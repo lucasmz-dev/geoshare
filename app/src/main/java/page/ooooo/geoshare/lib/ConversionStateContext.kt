@@ -1,7 +1,6 @@
 package page.ooooo.geoshare.lib
 
 import android.os.Build
-import androidx.compose.ui.platform.Clipboard
 import page.ooooo.geoshare.data.UserPreferencesRepository
 
 data class ConversionStateContext(
