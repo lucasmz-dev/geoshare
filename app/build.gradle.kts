@@ -36,6 +36,7 @@ android {
             "pl",
             "pt-rBR",
             "uk",
+            "zh-rCN",
         )
     }
 
